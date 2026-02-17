@@ -151,9 +151,9 @@ type Region struct {
 
 | 區域 | 代號 | 伺服器地址 |
 |------|------|-----------|
-| 北美 | `NA` | `na.actual.battle.net` |
+| 美洲 | `NA` | `us.actual.battle.net` |
 | 歐洲 | `EU` | `eu.actual.battle.net` |
-| 韓國 | `KR` | `kr.actual.battle.net` |
+| 亞洲 | `Asia` | `kr.actual.battle.net` |
 
 ---
 
@@ -167,7 +167,7 @@ type Account struct {
     Email       string // Battle.net 登入信箱
     Password    string // 加密後的密碼字串（CSV 中以 "ENC:" 前綴標記）
     DisplayName string // 顯示名稱（用於視窗標題）
-    Region      string // 預設區域（NA/EU/KR）
+    Region      string // 預設區域（NA/EU/Asia）
 }
 ```
 
@@ -306,7 +306,7 @@ func LaunchD2R(d2rPath string, username string, password string, address string)
 
 **啟動指令格式**：
 ```
-D2R.exe -username account@email.com -password secretpass -address na.actual.battle.net
+D2R.exe -username account@email.com -password secretpass -address us.actual.battle.net
 ```
 
 使用 `os/exec.Command` 執行，啟動後回傳 PID。
@@ -386,49 +386,48 @@ func RenameWindow(pid uint32, newTitle string) error
 
 ### Phase 1: 基礎架構與常數定義
 
-- [ ] 1.1 清理 [main.go](main.go) 中的 GoLand 範本程式碼
-- [ ] 1.2 建立 `internal/d2r/constants.go`
+- [x] 1.1 清理 [main.go](main.go) 中的 GoLand 範本程式碼
+- [x] 1.2 建立 `internal/d2r/constants.go`
   - D2R.exe 進程名、Event Handle 名稱、視窗類別名稱
-  - Battle.net 伺服器區域列表（NA/EU/KR）
-- [ ] 1.3 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md) 加入專案背景
+  - Battle.net 伺服器區域列表（NA/EU/Asia）
+- [x] 1.3 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md) 加入專案背景
 
 ### Phase 2: Windows Handle 操作
 
-- [ ] 2.1 建立 `internal/handle/winapi.go`
+- [x] 2.1 建立 `internal/handle/winapi.go`
   - `ntdll.dll` 載入與 proc 定義
   - `NtQuerySystemInformation` / `NtQueryObject` / `NtDuplicateObject` 函式封裝
   - `SystemHandleTableEntryInfoEx` 等結構體
   - `UnicodeString` 轉 Go string 輔助函式
-- [ ] 2.2 建立 `internal/handle/enumerator.go`
+- [x] 2.2 建立 `internal/handle/enumerator.go`
   - `findHandlesByName(processID, targetName)` - 列舉並搜尋指定 handle
   - 動態 buffer 擴展機制
   - 僅對 `Event` 類型查詢名稱（安全防護）
-- [ ] 2.3 建立 `internal/handle/closer.go`
+- [x] 2.3 建立 `internal/handle/closer.go`
   - `closeRemoteHandle(processID, handle)` - 關閉單一遠端 handle
   - `CloseHandlesByName(processID, handleName)` - 公開 API
 
 ### Phase 3: 進程管理
 
-- [ ] 3.1 建立 `internal/process/finder.go`
+- [x] 3.1 建立 `internal/process/finder.go`
   - `ProcessInfo` struct（PID, Name）
   - `FindProcessesByName(name)` - 使用 `CreateToolhelp32Snapshot`
   - `IsProcessRunning(name)` - 快速檢查
-  - `GetProcessExecutablePath(pid)` - 取得完整路徑（選用）
-- [ ] 3.2 建立 `internal/process/launcher.go`
+- [x] 3.2 建立 `internal/process/launcher.go`
   - `LaunchD2R(d2rPath, username, password, address)` - 帶參數啟動
   - 回傳 PID 供後續 handle 關閉與視窗重命名使用
-- [ ] 3.3 建立 `internal/process/window.go`
+- [x] 3.3 建立 `internal/process/window.go`
   - `EnumWindows` callback 實作
   - `RenameWindow(pid, newTitle)` - 找到 PID 對應的視窗並重命名
 
 ### Phase 4: 帳號管理
 
-- [ ] 4.1 建立 `internal/account/account.go`
+- [x] 4.1 建立 `internal/account/account.go`
   - `Account` struct 定義
   - `LoadAccounts(path)` - CSV 讀取（支援 header row）
   - `SaveAccounts(path, accounts)` - CSV 寫入
   - `IsPasswordEncrypted(password)` - 檢查 `ENC:` 前綴
-- [ ] 4.2 建立 `internal/account/crypto.go`
+- [x] 4.2 建立 `internal/account/crypto.go`
   - `EncryptPassword(plaintext)` - DPAPI 加密 + Base64 + 前綴
   - `DecryptPassword(encrypted)` - 前綴移除 + Base64 + DPAPI 解密
   - `crypt32.dll` 的 `CryptProtectData` / `CryptUnprotectData` 封裝
@@ -436,29 +435,30 @@ func RenameWindow(pid uint32, newTitle string) error
 
 ### Phase 5: CLI 主程式整合
 
-- [ ] 5.1 實作 CLI 互動主選單
+- [x] 5.1 實作 CLI 互動主選單
   - 讀取並顯示帳號列表
   - 顯示各帳號啟動狀態（比對 D2R.exe 進程）
   - 輸入處理（數字選帳號、`a` 全開、`r` 重整、`q` 退出）
   - 區域選擇子選單
-- [ ] 5.2 實作啟動流程串接
+- [x] 5.2 實作啟動流程串接
   - 完整流程：讀帳號 → 解密 → 啟動 → delay → 關 handle → 改視窗名
   - 首次執行時自動加密明文密碼並回寫 CSV
   - 錯誤處理與使用者提示
-- [ ] 5.3 實作背景 Handle 監控（goroutine）
+- [x] 5.3 實作背景 Handle 監控（goroutine）
   - 每 2 秒掃描 D2R.exe 進程
   - 記錄已處理的 PID 避免重複操作
   - 自動關閉新出現的 Event Handle
 
 ### Phase 6: 驗證與文件
 
-- [ ] 6.1 建立測試
+- [x] 6.1 建立測試（9 tests passed）
   - 帳號 CSV 讀寫測試（`account_test.go`）
-  - 密碼加密/解密測試（`crypto_test.go`）
-- [ ] 6.2 `go build` 驗證編譯成功
-- [ ] 6.3 撰寫 [README.md](README.md)
+  - 密碼加密/解密測試（`account_test.go`）
+  - 區域查詢測試（`constants_test.go`）
+- [x] 6.2 `go build` 驗證編譯成功
+- [x] 6.3 撰寫 [README.md](README.md)
   - 功能說明、安裝步驟、使用方式、CSV 格式範例
-- [ ] 6.4 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md)
+- [x] 6.4 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md)
 
 ---
 
@@ -493,7 +493,7 @@ D2R.exe -username <email> -password <password> -address <server>
 |------|------|------|
 | `-username` | Battle.net 帳號信箱 | `player@email.com` |
 | `-password` | Battle.net 帳號密碼 | `mypassword` |
-| `-address` | 遊戲伺服器地址 | `na.actual.battle.net` |
+| `-address` | 遊戲伺服器地址 | `us.actual.battle.net` |
 
 ### 視窗重命名技術
 
