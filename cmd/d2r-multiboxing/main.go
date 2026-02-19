@@ -15,9 +15,12 @@ import (
 	"d2r-multiboxing/internal/process"
 )
 
+// version is set at build time via -ldflags "-X main.version=x.y.z".
+var version = "dev"
+
 func main() {
 	fmt.Println("============================================")
-	fmt.Println("  D2R Multiboxing Launcher")
+	fmt.Printf("  D2R Multiboxing Launcher  v%s\n", version)
 	fmt.Println("============================================")
 	fmt.Println()
 
@@ -114,7 +117,7 @@ func printMenu(accounts []account.Account) {
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
-	fmt.Println("  a       啟動所有帳號")
+	fmt.Println("  a       啟動所有帳號（只啟動未啟動的）")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
 	fmt.Println("--------------------------------------------")

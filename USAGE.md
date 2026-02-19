@@ -49,8 +49,11 @@
 # 1. 進入專案目錄
 cd C:\Users\User\GolandProjects\d2r-multiboxing
 
-# 2. 編譯
+# 2. 編譯（開發版，版號顯示為 dev）
 go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+
+# 2. 編譯（指定版號）
+go build -ldflags "-X main.version=1.0.0" -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
 
 # 3. 確認產出
 Get-Item .\d2r-multiboxing.exe
