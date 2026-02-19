@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"d2r-multiboxing/internal/account"
@@ -15,12 +14,6 @@ import (
 	"d2r-multiboxing/internal/handle"
 	"d2r-multiboxing/internal/process"
 )
-
-// launchedPIDs tracks PIDs launched by this session for window renaming.
-var launchedPIDs = struct {
-	sync.Mutex
-	m map[uint32]string // PID -> DisplayName
-}{m: make(map[uint32]string)}
 
 func main() {
 	fmt.Println("============================================")
@@ -109,25 +102,12 @@ func main() {
 }
 
 func printMenu(accounts []account.Account) {
-	d2rProcesses, _ := process.FindProcessesByName(d2r.ProcessName)
-	runningPIDs := make(map[uint32]bool)
-	for _, p := range d2rProcesses {
-		runningPIDs[p.PID] = true
-	}
-
 	fmt.Println("  帳號列表：")
 	for i, acc := range accounts {
 		status := "未啟動"
-		// 檢查此帳號是否已透過本工具啟動
-		launchedPIDs.Lock()
-		for pid, name := range launchedPIDs.m {
-			if name == acc.DisplayName && runningPIDs[pid] {
-				status = fmt.Sprintf("已啟動 (PID: %d)", pid)
-				break
-			}
+		if process.FindWindowByTitle(d2r.WindowTitle(acc.DisplayName)) {
+			status = "已啟動"
 		}
-		launchedPIDs.Unlock()
-
 		fmt.Printf("  [%d] %-15s (%s)  [%s]\n",
 			i+1, acc.DisplayName, acc.Email, status)
 	}
@@ -169,11 +149,6 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 	}
 	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
 
-	// 記錄 PID
-	launchedPIDs.Lock()
-	launchedPIDs.m[pid] = acc.DisplayName
-	launchedPIDs.Unlock()
-
 	// 等待進程初始化後關閉 Handle
 	time.Sleep(2 * time.Second)
 	closed, err := handle.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
@@ -185,11 +160,11 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 
 	// 重命名視窗
 	go func() {
-		err := process.RenameWindow(pid, acc.DisplayName, 15, 2*time.Second)
+		err := process.RenameWindow(pid, d2r.WindowTitle(acc.DisplayName), 15, 2*time.Second)
 		if err != nil {
 			fmt.Printf("  ⚠ 視窗重命名失敗 (%s)：%v\n", acc.DisplayName, err)
 		} else {
-			fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", acc.DisplayName)
+			fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(acc.DisplayName))
 		}
 	}()
 
@@ -208,11 +183,18 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 	}
 
 	for i := range accounts {
+		acc := &accounts[i]
+
+		// 已有視窗存在則跳過
+		if process.FindWindowByTitle(d2r.WindowTitle(acc.DisplayName)) {
+			fmt.Printf("  ⏭ %s 已在執行中，跳過\n", acc.DisplayName)
+			continue
+		}
+
 		if i > 0 && launchDelay > 0 {
 			fmt.Printf("  等待 %d 秒...\n", launchDelay)
 			time.Sleep(time.Duration(launchDelay) * time.Second)
 		}
-		acc := &accounts[i]
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 密碼解密失敗：%v\n", acc.DisplayName, err)
@@ -227,10 +209,6 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		}
 		fmt.Printf("  ✔ %s 已啟動 (PID: %d)\n", acc.DisplayName, pid)
 
-		launchedPIDs.Lock()
-		launchedPIDs.m[pid] = acc.DisplayName
-		launchedPIDs.Unlock()
-
 		// 等待並關閉 Handle
 		time.Sleep(3 * time.Second)
 		closed, err := handle.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
@@ -243,9 +221,9 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		// 背景重命名視窗
 		displayName := acc.DisplayName
 		go func() {
-			err := process.RenameWindow(pid, displayName, 15, 2*time.Second)
+			err := process.RenameWindow(pid, d2r.WindowTitle(displayName), 15, 2*time.Second)
 			if err == nil {
-				fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", displayName)
+				fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(displayName))
 			}
 		}()
 	}

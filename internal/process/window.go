@@ -13,11 +13,33 @@ var (
 	user32                    = windows.NewLazySystemDLL("user32.dll")
 	procEnumWindows           = user32.NewProc("EnumWindows")
 	procGetWindowThreadProcID = user32.NewProc("GetWindowThreadProcessId")
+	procGetWindowTextW        = user32.NewProc("GetWindowTextW")
 	procSetWindowTextW        = user32.NewProc("SetWindowTextW")
 	procIsWindowVisible       = user32.NewProc("IsWindowVisible")
 )
 
-// RenameWindow finds the window belonging to the given PID and renames it.
+// FindWindowByTitle returns true if a visible top-level window with the exact title exists.
+func FindWindowByTitle(title string) bool {
+	found := false
+	buf := make([]uint16, 512)
+
+	cb := syscall.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
+		visible, _, _ := procIsWindowVisible.Call(hwnd)
+		if visible == 0 {
+			return 1
+		}
+		n, _, _ := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+		if n > 0 && syscall.UTF16ToString(buf[:n]) == title {
+			found = true
+			return 0
+		}
+		return 1
+	})
+
+	procEnumWindows.Call(cb, 0)
+	return found
+}
+
 // It retries up to maxRetries times with retryInterval between attempts,
 // because D2R window may not be immediately available after launch.
 func RenameWindow(pid uint32, newTitle string, maxRetries int, retryInterval time.Duration) error {

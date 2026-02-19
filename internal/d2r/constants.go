@@ -17,7 +17,15 @@ const (
 
 	// DefaultGamePath is the default installation path of D2R.
 	DefaultGamePath = `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`
+
+	// WindowTitlePrefix is prepended to the DisplayName when renaming a D2R window.
+	WindowTitlePrefix = "D2R-"
 )
+
+// WindowTitle returns the full window title for a given display name.
+func WindowTitle(displayName string) string {
+	return WindowTitlePrefix + displayName
+}
 
 // Region represents a Battle.net server region.
 type Region struct {
