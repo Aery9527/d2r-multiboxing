@@ -36,7 +36,8 @@ func main() {
 	}
 	cfgDir, _ := config.Dir()
 	fmt.Printf("  資料目錄：%s\n", cfgDir)
-	fmt.Printf("  D2R 路徑：%s\n\n", cfg.D2RPath)
+	fmt.Printf("  D2R 路徑：%s\n", cfg.D2RPath)
+	fmt.Printf("  啟動間隔：%d 秒\n\n", cfg.LaunchDelay)
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {
@@ -46,8 +47,8 @@ func main() {
 
 	if !fileExists(accountsFile) {
 		fmt.Printf("  找不到 %s，請先建立帳號設定檔。\n", accountsFile)
-		fmt.Println("  CSV 格式：ID,Email,Password,DisplayName,Region")
-		fmt.Println("  範例：1,account@email.com,password123,主帳號,NA")
+		fmt.Println("  CSV 格式：Email,Password,DisplayName")
+		fmt.Println("  範例：account@email.com,password123,主帳號")
 		return
 	}
 
@@ -75,7 +76,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		printMenu(accounts)
-		fmt.Print("  請選擇：")
+		fmt.Print("  > 請選擇：")
 		if !scanner.Scan() {
 			break
 		}
@@ -93,19 +94,15 @@ func main() {
 			}
 			continue
 		case "a":
-			launchAll(accounts, cfg.D2RPath, scanner)
+			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
 			continue
 		default:
 			id, err := strconv.Atoi(input)
-			if err != nil {
+			if err != nil || id < 1 || id > len(accounts) {
 				fmt.Println("  無效輸入，請重試。")
 				continue
 			}
-			acc := findAccountByID(accounts, id)
-			if acc == nil {
-				fmt.Printf("  找不到帳號 ID %d。\n", id)
-				continue
-			}
+			acc := &accounts[id-1]
 			launchAccount(acc, cfg.D2RPath, scanner)
 		}
 	}
@@ -119,7 +116,7 @@ func printMenu(accounts []account.Account) {
 	}
 
 	fmt.Println("  帳號列表：")
-	for _, acc := range accounts {
+	for i, acc := range accounts {
 		status := "未啟動"
 		// 檢查此帳號是否已透過本工具啟動
 		launchedPIDs.Lock()
@@ -131,8 +128,8 @@ func printMenu(accounts []account.Account) {
 		}
 		launchedPIDs.Unlock()
 
-		fmt.Printf("  [%d] %-15s (%s)  %s  [%s]\n",
-			acc.ID, acc.DisplayName, acc.Email, acc.Region, status)
+		fmt.Printf("  [%d] %-15s (%s)  [%s]\n",
+			i+1, acc.DisplayName, acc.Email, status)
 	}
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
@@ -144,9 +141,14 @@ func printMenu(accounts []account.Account) {
 }
 
 func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner) {
-	// 決定區域
-	region := resolveRegion(acc, scanner)
+	// 選擇區域
+	fmt.Print("  > 選擇區域 (1=NA, 2=EU, 3=Asia)：")
+	if !scanner.Scan() {
+		return
+	}
+	region := parseRegionInput(scanner.Text())
 	if region == nil {
+		fmt.Println("  無效的區域選擇。")
 		return
 	}
 
@@ -194,8 +196,8 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 	fmt.Println()
 }
 
-func launchAll(accounts []account.Account, d2rPath string, scanner *bufio.Scanner) {
-	fmt.Print("  選擇區域 (1=NA, 2=EU, 3=Asia)：")
+func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scanner *bufio.Scanner) {
+	fmt.Print("  > 選擇區域 (1=NA, 2=EU, 3=Asia)：")
 	if !scanner.Scan() {
 		return
 	}
@@ -206,6 +208,10 @@ func launchAll(accounts []account.Account, d2rPath string, scanner *bufio.Scanne
 	}
 
 	for i := range accounts {
+		if i > 0 && launchDelay > 0 {
+			fmt.Printf("  等待 %d 秒...\n", launchDelay)
+			time.Sleep(time.Duration(launchDelay) * time.Second)
+		}
 		acc := &accounts[i]
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
@@ -280,24 +286,6 @@ func handleMonitor() {
 	}
 }
 
-func resolveRegion(acc *account.Account, scanner *bufio.Scanner) *d2r.Region {
-	if acc.Region != "" {
-		r := d2r.FindRegion(acc.Region)
-		if r != nil {
-			return r
-		}
-	}
-	fmt.Print("  選擇區域 (1=NA, 2=EU, 3=Asia)：")
-	if !scanner.Scan() {
-		return nil
-	}
-	region := parseRegionInput(scanner.Text())
-	if region == nil {
-		fmt.Println("  無效的區域選擇。")
-	}
-	return region
-}
-
 func parseRegionInput(input string) *d2r.Region {
 	input = strings.TrimSpace(strings.ToUpper(input))
 	switch input {
@@ -310,15 +298,6 @@ func parseRegionInput(input string) *d2r.Region {
 	default:
 		return d2r.FindRegion(input)
 	}
-}
-
-func findAccountByID(accounts []account.Account, id int) *account.Account {
-	for i := range accounts {
-		if accounts[i].ID == id {
-			return &accounts[i]
-		}
-	}
-	return nil
 }
 
 func fileExists(path string) bool {

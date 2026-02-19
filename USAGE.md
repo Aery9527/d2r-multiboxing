@@ -23,6 +23,7 @@
   - [重新整理狀態](#重新整理狀態)
 - [完整操作範例](#完整操作範例)
 - [背景 Handle 監控](#背景-handle-監控)
+- [視窗模式設定](#視窗模式設定)
 - [常見問題 FAQ](#常見問題-faq)
 - [注意事項](#注意事項)
 
@@ -36,6 +37,7 @@
 | Go 版本 | 1.26 以上（僅編譯時需要） |
 | 權限 | 必須以 **管理員權限** 執行 |
 | 遊戲版本 | Battle.net 版 D2R（不支援 Steam 版） |
+| 視窗模式 | 請先手動進入遊戲 **選項 → 畫面 → 視窗模式** 設定為「視窗化」 |
 
 ---
 
@@ -48,7 +50,7 @@
 cd C:\Users\User\GolandProjects\d2r-multiboxing
 
 # 2. 編譯
-go build -o d2r-multiboxing.exe .
+go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
 
 # 3. 確認產出
 Get-Item .\d2r-multiboxing.exe
@@ -67,7 +69,7 @@ Get-Item .\d2r-multiboxing.exe
 1. 在資料目錄 `~/.d2r-multiboxing/` 下建立 `accounts.csv`（可複製範本）：
 
    ```powershell
-   Copy-Item .\accounts.sample.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+   Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
    ```
 
 2. 用文字編輯器（記事本、VS Code 等）打開 `accounts.csv`，填入你的帳號資訊：
@@ -77,9 +79,9 @@ Get-Item .\d2r-multiboxing.exe
    ```
 
    ```csv
-   ID,Email,Password,DisplayName,Region
-   1,player1@gmail.com,mypassword123,主帳號-法師,NA
-   2,player2@gmail.com,anotherpass456,副帳號-野蠻人,NA
+   Email,Password,DisplayName
+   player1@gmail.com,mypassword123,主帳號-法師
+   player2@gmail.com,anotherpass456,副帳號-野蠻人
    ```
 
 > ⚠️ **重要**：密碼欄位首次填入明文密碼即可，工具啟動後會自動加密。
@@ -88,11 +90,9 @@ Get-Item .\d2r-multiboxing.exe
 
 | 欄位 | 必填 | 說明 | 範例 |
 |------|------|------|------|
-| `ID` | ✅ | 帳號序號，從 1 開始遞增 | `1` |
 | `Email` | ✅ | Battle.net 登入信箱 | `player@gmail.com` |
 | `Password` | ✅ | 帳號密碼（首次執行後自動加密） | `mypassword123` |
 | `DisplayName` | ✅ | 顯示名稱，用於視窗標題與選單 | `主帳號-法師` |
-| `Region` | ✅ | 預設連線區域 | `NA` / `EU` / `Asia` |
 
 **可用區域**：
 
@@ -112,14 +112,14 @@ Get-Item .\d2r-multiboxing.exe
 
 **加密前的 CSV**：
 ```csv
-ID,Email,Password,DisplayName,Region
-1,player1@gmail.com,mypassword123,主帳號-法師,NA
+Email,Password,DisplayName
+player1@gmail.com,mypassword123,主帳號-法師
 ```
 
 **加密後的 CSV**：
 ```csv
-ID,Email,Password,DisplayName,Region
-1,player1@gmail.com,ENC:AQAAANCMnd8BFd...（Base64 字串）,主帳號-法師,NA
+Email,Password,DisplayName
+player1@gmail.com,ENC:AQAAANCMnd8BFd...（Base64 字串）,主帳號-法師
 ```
 
 > 💡 加密綁定當前 Windows 使用者帳戶，換電腦或換 Windows 使用者後需重新輸入明文密碼。
@@ -200,8 +200,8 @@ cd C:\path\to\d2r-multiboxing
   D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
 
   帳號列表：
-  [1] 主帳號-法師      (player1@gmail.com)  NA  [未啟動]
-  [2] 副帳號-野蠻人    (player2@gmail.com)  NA  [未啟動]
+  [1] 主帳號-法師      (player1@gmail.com)  [未啟動]
+  [2] 副帳號-野蠻人    (player2@gmail.com)  [未啟動]
 
 --------------------------------------------
   <數字>  啟動指定帳號
@@ -214,20 +214,15 @@ cd C:\path\to\d2r-multiboxing
 
 ### 啟動單一帳號
 
-輸入帳號的 **ID 數字** 即可啟動該帳號：
+輸入帳號的 **ID 數字** 即可啟動該帳號，接著選擇連線區域：
 
 ```
   請選擇：1
+  > 選擇區域 (1=NA, 2=EU, 3=Asia)：1
   正在啟動 主帳號-法師 (NA)...
   ✔ D2R 已啟動 (PID: 12345)
   ✔ 已關閉 1 個 Event Handle
   ✔ 視窗已重命名為 "主帳號-法師"
-```
-
-若帳號未設定預設區域（`Region` 欄位為空），會提示選擇：
-
-```
-  選擇區域 (1=NA, 2=EU, 3=Asia)：1
 ```
 
 ### 啟動所有帳號
@@ -260,10 +255,10 @@ cd C:\path\to\d2r-multiboxing
 ```powershell
 # Step 1: 編譯工具
 cd C:\Users\User\GolandProjects\d2r-multiboxing
-go build -o d2r-multiboxing.exe .
+go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
 
-# Step 2: 建立帳號設定檔
-Copy-Item .\accounts.sample.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+# Step 2:建立帳號設定檔
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 # 用編輯器填入帳號資訊
 notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
@@ -298,7 +293,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
 **A**: 請確認 `accounts.csv` 已放在資料目錄下（預設 `~/.d2r-multiboxing/`）。可以複製範本檔案：
 ```powershell
-Copy-Item .\accounts.sample.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 ```
 
 ### Q: 啟動後提示「啟動失敗」或「系統找不到指定的檔案」
@@ -334,6 +329,20 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
 ### Q: 我可以在工具運行時修改 accounts.csv 嗎？
 
 **A**: 可以。修改後在選單中按 `r` 重新整理即可載入最新設定。
+
+---
+
+## 視窗模式設定
+
+本工具 **不會** 自動修改 D2R 的顯示模式。若需要以視窗模式多開，請先手動設定：
+
+1. 正常啟動 D2R（單開即可）
+2. 進入 **選項 → 畫面 → 視窗模式**，選擇「**視窗化**」或「**無邊框視窗**」
+3. 儲存設定並關閉遊戲
+
+D2R 會將設定寫入 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`，後續透過本工具啟動的所有帳號都會套用該設定。
+
+> 💡 此設定只需操作一次，除非你想切換回全螢幕模式。
 
 ---
 

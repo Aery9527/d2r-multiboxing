@@ -30,12 +30,16 @@ const (
 type Config struct {
 	// D2RPath is the path to D2R.exe.
 	D2RPath string `json:"d2r_path"`
+
+	// LaunchDelay is the delay in seconds between launching each account.
+	LaunchDelay int `json:"launch_delay"`
 }
 
 // DefaultConfig returns a Config with default values.
 func DefaultConfig() Config {
 	return Config{
-		D2RPath: d2r.DefaultGamePath,
+		D2RPath:     d2r.DefaultGamePath,
+		LaunchDelay: 5,
 	}
 }
 

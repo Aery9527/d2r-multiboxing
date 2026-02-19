@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -14,11 +13,9 @@ const encryptedPrefix = "ENC:"
 
 // Account represents a Battle.net account for D2R.
 type Account struct {
-	ID          int
 	Email       string
 	Password    string // 加密後以 "ENC:" 前綴標記
 	DisplayName string
-	Region      string
 }
 
 // IsPasswordEncrypted checks if the password is already encrypted.
@@ -27,7 +24,7 @@ func IsPasswordEncrypted(password string) bool {
 }
 
 // LoadAccounts reads accounts from a CSV file.
-// CSV format: ID,Email,Password,DisplayName,Region (first row is header).
+// CSV format: Email,Password,DisplayName (first row is header).
 func LoadAccounts(path string) ([]Account, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -47,21 +44,14 @@ func LoadAccounts(path string) ([]Account, error) {
 
 	var accounts []Account
 	for i, record := range records[1:] { // 跳過 header
-		if len(record) < 5 {
-			return nil, fmt.Errorf("invalid record at line %d: expected 5 fields, got %d", i+2, len(record))
-		}
-
-		id, err := strconv.Atoi(strings.TrimSpace(record[0]))
-		if err != nil {
-			return nil, fmt.Errorf("invalid ID at line %d: %w", i+2, err)
+		if len(record) < 3 {
+			return nil, fmt.Errorf("invalid record at line %d: expected 3 fields, got %d", i+2, len(record))
 		}
 
 		accounts = append(accounts, Account{
-			ID:          id,
-			Email:       strings.TrimSpace(record[1]),
-			Password:    strings.TrimSpace(record[2]),
-			DisplayName: strings.TrimSpace(record[3]),
-			Region:      strings.TrimSpace(record[4]),
+			Email:       strings.TrimSpace(record[0]),
+			Password:    strings.TrimSpace(record[1]),
+			DisplayName: strings.TrimSpace(record[2]),
 		})
 	}
 
@@ -80,20 +70,18 @@ func SaveAccounts(path string, accounts []Account) error {
 	defer writer.Flush()
 
 	// header
-	if err := writer.Write([]string{"ID", "Email", "Password", "DisplayName", "Region"}); err != nil {
+	if err := writer.Write([]string{"Email", "Password", "DisplayName"}); err != nil {
 		return fmt.Errorf("failed to write header: %w", err)
 	}
 
-	for _, acc := range accounts {
+	for i, acc := range accounts {
 		record := []string{
-			strconv.Itoa(acc.ID),
 			acc.Email,
 			acc.Password,
 			acc.DisplayName,
-			acc.Region,
 		}
 		if err := writer.Write(record); err != nil {
-			return fmt.Errorf("failed to write account %d: %w", acc.ID, err)
+			return fmt.Errorf("failed to write account #%d: %w", i+1, err)
 		}
 	}
 
@@ -110,7 +98,7 @@ func EncryptPlaintextPasswords(path string, accounts []Account) (bool, error) {
 		}
 		encrypted, err := EncryptPassword(accounts[i].Password)
 		if err != nil {
-			return false, fmt.Errorf("failed to encrypt password for account %d: %w", accounts[i].ID, err)
+			return false, fmt.Errorf("failed to encrypt password for account #%d: %w", i+1, err)
 		}
 		accounts[i].Password = encrypted
 		changed = true

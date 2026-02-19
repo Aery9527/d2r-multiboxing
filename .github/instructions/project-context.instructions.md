@@ -13,7 +13,7 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 
 ## 專案架構
 
-- [main.go](../../main.go) - CLI 互動主迴圈
+- [cmd/d2r-multiboxing/main.go](../../cmd/d2r-multiboxing/main.go) - CLI 互動主迴圈
 - [internal/config/](../../internal/config/) - 設定檔管理（`~/.d2r-multiboxing/config.json` 讀寫）
 - [internal/d2r/](../../internal/d2r/) - D2R 相關常數（進程名、handle 名稱、伺服器區域）
 - [internal/handle/](../../internal/handle/) - Windows Handle 操作（NT API 封裝、列舉、關閉）

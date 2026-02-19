@@ -22,7 +22,7 @@
 ### 編譯
 
 ```powershell
-go build -o d2r-multiboxing.exe .
+go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
 ```
 
 ## 使用方式
@@ -32,7 +32,7 @@ go build -o d2r-multiboxing.exe .
 在資料目錄 `~/.d2r-multiboxing/` 下建立 `accounts.csv`：
 
 ```powershell
-Copy-Item .\accounts.sample.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 ```
 
 ```csv
@@ -103,7 +103,9 @@ D2R 啟動時會建立名為 `DiabloII Check For Other Instances` 的 Windows Ev
 ## 專案結構
 
 ```
-├── main.go                    # CLI 互動主迴圈
+├── cmd/
+│   └── d2r-multiboxing/
+│       └── main.go                # CLI 互動主迴圈
 ├── internal/
 │   ├── config/
 │   │   └── config.go          # 設定檔讀寫 (~/.d2r-multiboxing/config.json)

@@ -97,10 +97,11 @@ D2R.exe 啟動
 
 ```
 d2r-multiboxing/
-├── [main.go](main.go)                            # 程式進入點，CLI 互動主迴圈
+├── cmd/
+│   └── d2r-multiboxing/
+│       └── [main.go](cmd/d2r-multiboxing/main.go)   # 程式進入點，CLI 互動主迴圈
 ├── [go.mod](go.mod)
 ├── go.sum
-├── accounts.csv                                   # 帳號設定檔（使用者建立/工具自動更新）
 │
 ├── internal/
 │   ├── d2r/
@@ -331,7 +332,7 @@ func RenameWindow(pid uint32, newTitle string) error
 
 ---
 
-### `main.go` - CLI 主程式
+### `cmd/d2r-multiboxing/main.go` - CLI 主程式
 
 **互動式選單設計**：
 
@@ -386,7 +387,7 @@ func RenameWindow(pid uint32, newTitle string) error
 
 ### Phase 1: 基礎架構與常數定義
 
-- [x] 1.1 清理 [main.go](main.go) 中的 GoLand 範本程式碼
+- [x] 1.1 清理 [main.go](cmd/d2r-multiboxing/main.go) 中的 GoLand 範本程式碼
 - [x] 1.2 建立 `internal/d2r/constants.go`
   - D2R.exe 進程名、Event Handle 名稱、視窗類別名稱
   - Battle.net 伺服器區域列表（NA/EU/Asia）

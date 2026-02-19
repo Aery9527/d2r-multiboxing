@@ -14,8 +14,8 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 
 	// 建立測試 CSV
 	accounts := []Account{
-		{ID: 1, Email: "test1@email.com", Password: "pass1", DisplayName: "Account1", Region: "NA"},
-		{ID: 2, Email: "test2@email.com", Password: "pass2", DisplayName: "Account2", Region: "EU"},
+		{Email: "test1@email.com", Password: "pass1", DisplayName: "Account1"},
+		{Email: "test2@email.com", Password: "pass2", DisplayName: "Account2"},
 	}
 
 	err := SaveAccounts(csvPath, accounts)
@@ -26,15 +26,12 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, loaded, 2)
 
-	assert.Equal(t, 1, loaded[0].ID)
 	assert.Equal(t, "test1@email.com", loaded[0].Email)
 	assert.Equal(t, "pass1", loaded[0].Password)
 	assert.Equal(t, "Account1", loaded[0].DisplayName)
-	assert.Equal(t, "NA", loaded[0].Region)
 
-	assert.Equal(t, 2, loaded[1].ID)
 	assert.Equal(t, "test2@email.com", loaded[1].Email)
-	assert.Equal(t, "EU", loaded[1].Region)
+	assert.Equal(t, "Account2", loaded[1].DisplayName)
 }
 
 func TestLoadAccounts_FileNotFound(t *testing.T) {
@@ -46,7 +43,7 @@ func TestLoadAccounts_EmptyFile(t *testing.T) {
 	dir := t.TempDir()
 	csvPath := filepath.Join(dir, "accounts.csv")
 
-	err := os.WriteFile(csvPath, []byte("ID,Email,Password,DisplayName,Region\n"), 0644)
+	err := os.WriteFile(csvPath, []byte("Email,Password,DisplayName\n"), 0644)
 	assert.NoError(t, err)
 
 	_, err = LoadAccounts(csvPath)
@@ -84,8 +81,8 @@ func TestEncryptPlaintextPasswords(t *testing.T) {
 	csvPath := filepath.Join(dir, "accounts.csv")
 
 	accounts := []Account{
-		{ID: 1, Email: "a@b.com", Password: "plain1", DisplayName: "A", Region: "NA"},
-		{ID: 2, Email: "c@d.com", Password: "ENC:already", DisplayName: "B", Region: "EU"},
+		{Email: "a@b.com", Password: "plain1", DisplayName: "A"},
+		{Email: "c@d.com", Password: "ENC:already", DisplayName: "B"},
 	}
 
 	err := SaveAccounts(csvPath, accounts)
