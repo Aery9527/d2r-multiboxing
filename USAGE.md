@@ -285,7 +285,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
 ## 視窗切換功能
 
-多開後可透過快捷鍵或滑鼠側鍵在 D2R 視窗之間快速切換焦點。
+多開後可透過快捷鍵、滑鼠側鍵或搖桿按鈕在 D2R 視窗之間快速切換焦點。
 
 ### 設定切換按鍵
 
@@ -301,7 +301,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
   > 請選擇：1
 
   請按下想用來切換視窗的按鍵組合...
-  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵）
+  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）
   （按 Esc 取消）
 
   偵測到：Ctrl+Tab（Tab 鍵）
@@ -316,6 +316,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 |------|------|------|
 | 鍵盤快捷鍵 | `Ctrl+Tab`、`Alt+F1` | 任意鍵 + 修飾鍵組合 |
 | 滑鼠側鍵 | `XButton1`、`XButton2` | 滑鼠前側鍵 / 後側鍵 |
+| 搖桿按鈕 | `Gamepad_A`、`Gamepad_LB` | XInput 搖桿任意按鈕（自動偵測搖桿編號） |
 
 > 💡 設定只需操作一次，會自動存入 `config.json`，後續啟動自動載入。
 
@@ -343,7 +344,8 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 |------|------|------|
 | `switcher.enabled` | `bool` | 是否啟用視窗切換 |
 | `switcher.modifiers` | `[]string` | 修飾鍵：`"ctrl"`、`"alt"`、`"shift"` |
-| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`、`"F1"`、`"XButton1"`） |
+| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`、`"F1"`、`"XButton1"`、`"Gamepad_A"`） |
+| `switcher.gamepad_index` | `int` | 搖桿編號（0-3），僅搖桿觸發時使用 |
 
 > ⚠️ 若快捷鍵與其他程式衝突，註冊會失敗並提示。請換一組按鍵組合。
 

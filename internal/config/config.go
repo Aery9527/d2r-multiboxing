@@ -34,8 +34,11 @@ type SwitcherConfig struct {
 	// Modifiers is the list of modifier keys (e.g., "ctrl", "alt", "shift").
 	Modifiers []string `json:"modifiers,omitempty"`
 
-	// Key is the trigger key name (e.g., "Tab", "F1", "XButton1").
+	// Key is the trigger key name (e.g., "Tab", "F1", "XButton1", "Gamepad_A").
 	Key string `json:"key"`
+
+	// GamepadIndex is the XInput controller index (0-3), used when Key is a gamepad button.
+	GamepadIndex int `json:"gamepad_index,omitempty"`
 }
 
 // Config represents the application configuration.

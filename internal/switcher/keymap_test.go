@@ -90,3 +90,32 @@ func TestIsModifierKey(t *testing.T) {
 	assert.False(t, isModifierKey(vkTab))
 	assert.False(t, isModifierKey(0x41)) // A
 }
+
+func TestIsGamepadButton(t *testing.T) {
+	assert.True(t, IsGamepadButton("Gamepad_A"))
+	assert.True(t, IsGamepadButton("Gamepad_LT"))
+	assert.True(t, IsGamepadButton("Gamepad_DPadUp"))
+	assert.False(t, IsGamepadButton("XButton1"))
+	assert.False(t, IsGamepadButton("Tab"))
+	assert.False(t, IsGamepadButton("A"))
+}
+
+func TestFormatSwitcherDisplay(t *testing.T) {
+	// 鍵盤：委派給 FormatHotkey
+	assert.Equal(t, "Ctrl+Tab（Tab 鍵）", FormatSwitcherDisplay([]string{"ctrl"}, "Tab", 0))
+	assert.Equal(t, "XButton1（滑鼠側鍵：後）", FormatSwitcherDisplay(nil, "XButton1", 0))
+
+	// 搖桿
+	assert.Equal(t, "搖桿 #1 A 按鈕", FormatSwitcherDisplay(nil, "Gamepad_A", 0))
+	assert.Equal(t, "搖桿 #2 LB（左肩鍵）", FormatSwitcherDisplay(nil, "Gamepad_LB", 1))
+	assert.Equal(t, "搖桿 #3 LT（左扳機）", FormatSwitcherDisplay(nil, "Gamepad_LT", 2))
+	assert.Equal(t, "搖桿 #1 十字鍵 ↑", FormatSwitcherDisplay(nil, "Gamepad_DPadUp", 0))
+}
+
+func TestGamepadButtonMask(t *testing.T) {
+	assert.Equal(t, uint16(0x1000), GamepadButtonMask("Gamepad_A"))
+	assert.Equal(t, uint16(0x2000), GamepadButtonMask("Gamepad_B"))
+	assert.Equal(t, uint16(0x0100), GamepadButtonMask("Gamepad_LB"))
+	assert.Equal(t, uint16(0), GamepadButtonMask("Unknown"))
+	assert.Equal(t, uint16(0), GamepadButtonMask("Gamepad_LT")) // 扳機不在 button mask 中
+}

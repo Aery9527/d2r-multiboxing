@@ -19,7 +19,7 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 - [internal/handle/](../../internal/handle/) - Windows Handle 操作（NT API 封裝、列舉、關閉）
 - [internal/process/](../../internal/process/) - 進程管理（搜尋、啟動 D2R、視窗重命名、視窗切換）
 - [internal/account/](../../internal/account/) - 帳號管理（CSV 讀寫、DPAPI 密碼加密）
-- [internal/switcher/](../../internal/switcher/) - 視窗切換（快捷鍵/滑鼠側鍵觸發、按鍵偵測）
+- [internal/switcher/](../../internal/switcher/) - 視窗切換（快捷鍵/滑鼠側鍵/搖桿觸發、按鍵偵測、XInput）
 
 ## 功能
 
@@ -29,7 +29,7 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 4. 自動關閉單實例 Event Handle
 5. 視窗標題重命名為帳號暱稱（D2R- 前綴）
 6. 背景持續監控並關閉新出現的 Handle
-7. 快捷鍵/滑鼠側鍵切換 D2R 視窗焦點
+7. 快捷鍵/滑鼠側鍵/搖桿按鈕切換 D2R 視窗焦點
 
 ## 技術參考
 

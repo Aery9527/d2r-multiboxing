@@ -1,7 +1,10 @@
 // Package switcher provides window switching functionality for D2R multiboxing.
 package switcher
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Windows virtual key codes
 const (
@@ -132,6 +135,11 @@ func IsMouseButton(key string) bool {
 	return key == "XButton1" || key == "XButton2"
 }
 
+// IsGamepadButton returns true if the key name represents a gamepad button.
+func IsGamepadButton(key string) bool {
+	return strings.HasPrefix(key, "Gamepad_")
+}
+
 // MouseButtonID returns the XBUTTON ID for a mouse button key name.
 func MouseButtonID(key string) uint16 {
 	switch key {
@@ -169,6 +177,18 @@ func FormatHotkey(modifiers []string, key string) string {
 	return combo
 }
 
+// FormatSwitcherDisplay formats a full switcher display string, including gamepad controller index.
+func FormatSwitcherDisplay(modifiers []string, key string, gamepadIndex int) string {
+	if IsGamepadButton(key) {
+		desc := keyDescription(key)
+		if desc == "" {
+			desc = key
+		}
+		return fmt.Sprintf("搖桿 #%d %s", gamepadIndex+1, desc)
+	}
+	return FormatHotkey(modifiers, key)
+}
+
 // keyDisplayName maps key names to user-friendly Chinese descriptions.
 var keyDisplayName = map[string]string{
 	"XButton1":  "滑鼠側鍵：後",
@@ -204,6 +224,24 @@ var keyDisplayName = map[string]string{
 	"Num-":      "數字鍵盤 -",
 	"Num.":      "數字鍵盤 .",
 	"Num/":      "數字鍵盤 /",
+
+	// 搖桿按鈕
+	"Gamepad_A":         "A 按鈕",
+	"Gamepad_B":         "B 按鈕",
+	"Gamepad_X":         "X 按鈕",
+	"Gamepad_Y":         "Y 按鈕",
+	"Gamepad_LB":        "LB（左肩鍵）",
+	"Gamepad_RB":        "RB（右肩鍵）",
+	"Gamepad_LT":        "LT（左扳機）",
+	"Gamepad_RT":        "RT（右扳機）",
+	"Gamepad_Back":      "Back 按鈕",
+	"Gamepad_Start":     "Start 按鈕",
+	"Gamepad_LS":        "LS（左搖桿按下）",
+	"Gamepad_RS":        "RS（右搖桿按下）",
+	"Gamepad_DPadUp":    "十字鍵 ↑",
+	"Gamepad_DPadDown":  "十字鍵 ↓",
+	"Gamepad_DPadLeft":  "十字鍵 ←",
+	"Gamepad_DPadRight": "十字鍵 →",
 }
 
 // keyDescription returns a friendly description for a key, or empty string if self-explanatory.

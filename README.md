@@ -10,7 +10,7 @@
 - **自動多開** — 自動偵測並關閉 D2R 的單實例鎖定 Event Handle
 - **視窗辨識** — 將各 D2R 視窗標題重命名為帳號暱稱（D2R- 前綴）
 - **背景監控** — 持續監控新啟動的 D2R 進程，自動解除多開限制
-- **視窗切換** — 透過快捷鍵或滑鼠側鍵在 D2R 視窗之間快速切換焦點
+- **視窗切換** — 透過快捷鍵、滑鼠側鍵或搖桿按鈕在 D2R 視窗之間快速切換焦點
 
 ## 安裝
 
@@ -118,7 +118,7 @@ account2@email.com,anotherpass,副帳號-野蠻人
   ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
-支援鍵盤快捷鍵（如 `Ctrl+Tab`、`Alt+F1`）與滑鼠側鍵（`XButton1`、`XButton2`）。
+支援鍵盤快捷鍵（如 `Ctrl+Tab`、`Alt+F1`）、滑鼠側鍵（`XButton1`、`XButton2`）與搖桿按鈕（XInput）。
 設定存入 `config.json` 後自動載入。
 
 ## 技術原理
@@ -152,7 +152,8 @@ D2R 啟動時會建立名為 `DiabloII Check For Other Instances` 的 Windows Ev
 │       ├── hotkey.go            # RegisterHotKey 鍵盤快捷鍵
 │       ├── mousehook.go         # WH_MOUSE_LL 滑鼠側鍵
 │       ├── detect.go            # CLI 設定用按鍵偵測
-│       └── keymap.go            # VK code 映射表
+│       ├── keymap.go            # VK code 映射表
+│       └── gamepad.go           # XInput 搖桿偵測與輪詢
 ├── USAGE.md                     # 完整使用說明
 ├── PLAN-v1-multiboxing.md       # Phase 1 實作計畫（已完成）
 ├── PLAN-v2-switcher.md          # Phase 2 實作計畫（已完成）

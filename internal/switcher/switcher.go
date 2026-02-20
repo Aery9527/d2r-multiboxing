@@ -92,6 +92,10 @@ func Start(cfg *config.SwitcherConfig) error {
 		return startMouseHook(buttonID, switchToNext)
 	}
 
+	if IsGamepadButton(cfg.Key) {
+		return startGamepadPoll(cfg.GamepadIndex, cfg.Key, switchToNext)
+	}
+
 	vk, ok := KeyToVK(cfg.Key)
 	if !ok {
 		return fmt.Errorf("unknown key: %s", cfg.Key)

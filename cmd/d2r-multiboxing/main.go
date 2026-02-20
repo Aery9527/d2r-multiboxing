@@ -41,7 +41,7 @@ func main() {
 		if err := switcher.Start(cfg.Switcher); err != nil {
 			fmt.Printf("  ⚠ 視窗切換啟動失敗：%v\n", err)
 		} else {
-			fmt.Printf("  ✔ 視窗切換已啟用：%s\n", switcher.FormatHotkey(cfg.Switcher.Modifiers, cfg.Switcher.Key))
+			fmt.Printf("  ✔ 視窗切換已啟用：%s\n", switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex))
 		}
 	}
 	fmt.Println()
@@ -307,7 +307,7 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 	fmt.Println("  === 視窗切換設定 ===")
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
-		fmt.Printf("  目前設定：%s\n", switcher.FormatHotkey(cfg.Switcher.Modifiers, cfg.Switcher.Key))
+		fmt.Printf("  目前設定：%s\n", switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex))
 	} else {
 		fmt.Println("  目前狀態：未啟用")
 	}
@@ -331,11 +331,11 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 
 		fmt.Println()
 		fmt.Println("  請按下想用來切換視窗的按鍵組合...")
-		fmt.Println("  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵）")
+		fmt.Println("  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）")
 		fmt.Println("  （按 Esc 取消）")
 		fmt.Println()
 
-		modifiers, key, err := switcher.DetectKeyPress()
+		modifiers, key, gamepadIndex, err := switcher.DetectKeyPress()
 		if err != nil {
 			fmt.Printf("  ⚠ 偵測失敗：%v\n", err)
 			restartSwitcherIfNeeded(cfg, wasRunning)
@@ -347,7 +347,7 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 			return
 		}
 
-		display := switcher.FormatHotkey(modifiers, key)
+		display := switcher.FormatSwitcherDisplay(modifiers, key, gamepadIndex)
 		fmt.Printf("  偵測到：%s\n", display)
 		fmt.Print("  確認使用此組合？(Y/n)：")
 
@@ -362,9 +362,10 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 		}
 
 		cfg.Switcher = &config.SwitcherConfig{
-			Enabled:   true,
-			Modifiers: modifiers,
-			Key:       key,
+			Enabled:      true,
+			Modifiers:    modifiers,
+			Key:          key,
+			GamepadIndex: gamepadIndex,
 		}
 		if err := config.Save(cfg); err != nil {
 			fmt.Printf("  ⚠ 設定儲存失敗：%v\n", err)

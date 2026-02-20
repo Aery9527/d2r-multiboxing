@@ -3,29 +3,34 @@ package switcher
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"syscall"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
 
-// DetectKeyPress waits for the user to press a key combination (keyboard or mouse side button).
-// Returns the modifiers and key name. If the user presses Escape, returns empty key (cancellation).
-func DetectKeyPress() (modifiers []string, key string, err error) {
+// DetectKeyPress waits for the user to press a key combination (keyboard, mouse side button, or gamepad button).
+// Returns the modifiers, key name, and gamepad controller index.
+// If the user presses Escape, returns empty key (cancellation).
+func DetectKeyPress() (modifiers []string, key string, gamepadIndex int, err error) {
 	type result struct {
-		modifiers []string
-		key       string
+		modifiers    []string
+		key          string
+		gamepadIndex int
 	}
 
 	resultCh := make(chan result, 1)
 	errCh := make(chan error, 1)
+	stopGamepad := make(chan struct{})
+	var once sync.Once
+	var hookThreadID uint32
 
 	go func() {
 		runtime.LockOSThread()
 		defer runtime.UnlockOSThread()
 
-		threadID := windows.GetCurrentThreadId()
-		var detected result
+		hookThreadID = windows.GetCurrentThreadId()
 
 		// Keyboard hook callback
 		kbCallback := syscall.NewCallback(func(nCode uintptr, wParam uintptr, lParam uintptr) uintptr {
@@ -35,30 +40,33 @@ func DetectKeyPress() (modifiers []string, key string, err error) {
 
 				// Escape cancels detection
 				if vk == vkEscape {
-					procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
+					once.Do(func() { resultCh <- result{} })
+					procPostThreadMessageW.Call(uintptr(hookThreadID), wmQuit, 0, 0)
 					ret, _, _ := procCallNextHookEx.Call(0, nCode, wParam, lParam)
 					return ret
 				}
 
 				// Skip modifier-only keys
 				if !isModifierKey(vk) {
+					var r result
 					if isKeyPressed(vkControl) {
-						detected.modifiers = append(detected.modifiers, "ctrl")
+						r.modifiers = append(r.modifiers, "ctrl")
 					}
 					if isKeyPressed(vkShift) {
-						detected.modifiers = append(detected.modifiers, "shift")
+						r.modifiers = append(r.modifiers, "shift")
 					}
 					if isKeyPressed(vkMenu) {
-						detected.modifiers = append(detected.modifiers, "alt")
+						r.modifiers = append(r.modifiers, "alt")
 					}
 
 					if name, ok := VKToKeyName(vk); ok {
-						detected.key = name
+						r.key = name
 					} else {
-						detected.key = fmt.Sprintf("VK_0x%02X", vk)
+						r.key = fmt.Sprintf("VK_0x%02X", vk)
 					}
 
-					procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
+					once.Do(func() { resultCh <- r })
+					procPostThreadMessageW.Call(uintptr(hookThreadID), wmQuit, 0, 0)
 					// 吞掉該按鍵，避免字元殘留到 stdin
 					return 1
 				}
@@ -72,12 +80,15 @@ func DetectKeyPress() (modifiers []string, key string, err error) {
 			if int32(nCode) >= 0 && wParam == wmXButtonDown {
 				data := (*msllHookStruct)(unsafe.Pointer(lParam))
 				button := uint16(data.MouseData >> 16)
+				var r result
 				if button == xButton1 {
-					detected.key = "XButton1"
-					procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
+					r.key = "XButton1"
 				} else if button == xButton2 {
-					detected.key = "XButton2"
-					procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
+					r.key = "XButton2"
+				}
+				if r.key != "" {
+					once.Do(func() { resultCh <- r })
+					procPostThreadMessageW.Call(uintptr(hookThreadID), wmQuit, 0, 0)
 				}
 			}
 			ret, _, _ := procCallNextHookEx.Call(0, nCode, wParam, lParam)
@@ -109,16 +120,26 @@ func DetectKeyPress() (modifiers []string, key string, err error) {
 				break
 			}
 		}
-
-		resultCh <- detected
 	}()
 
 	if err := <-errCh; err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 
+	// 搖桿偵測（與鍵盤/滑鼠同時進行）
+	go func() {
+		idx, btn := detectGamepadButtonPress(stopGamepad)
+		if btn != "" {
+			once.Do(func() {
+				resultCh <- result{key: btn, gamepadIndex: idx}
+			})
+			procPostThreadMessageW.Call(uintptr(hookThreadID), wmQuit, 0, 0)
+		}
+	}()
+
 	r := <-resultCh
-	return r.modifiers, r.key, nil
+	close(stopGamepad)
+	return r.modifiers, r.key, r.gamepadIndex, nil
 }
 
 // isKeyPressed checks if a key is currently pressed using GetAsyncKeyState.
