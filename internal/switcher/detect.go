@@ -59,6 +59,8 @@ func DetectKeyPress() (modifiers []string, key string, err error) {
 					}
 
 					procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
+					// 吞掉該按鍵，避免字元殘留到 stdin
+					return 1
 				}
 			}
 			ret, _, _ := procCallNextHookEx.Call(0, nCode, wParam, lParam)
