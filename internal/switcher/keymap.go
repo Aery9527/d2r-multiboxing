@@ -48,6 +48,32 @@ func init() {
 		"Escape":    vkEscape,
 		"Space":     vkSpace,
 		"`":         vkOEM3,
+
+		// 方向鍵
+		"Left": 0x25, "Up": 0x26, "Right": 0x27, "Down": 0x28,
+
+		// 功能鍵
+		"Insert": 0x2D, "Delete": 0x2E,
+		"Home": 0x24, "End": 0x23,
+		"PageUp": 0x21, "PageDown": 0x22,
+
+		// 數字鍵盤
+		"Num0": 0x60, "Num1": 0x61, "Num2": 0x62, "Num3": 0x63,
+		"Num4": 0x64, "Num5": 0x65, "Num6": 0x66, "Num7": 0x67,
+		"Num8": 0x68, "Num9": 0x69,
+		"Num*": 0x6A, "Num+": 0x6B, "Num-": 0x6D, "Num.": 0x6E, "Num/": 0x6F,
+
+		// 符號鍵
+		"-":  0xBD, // OEM_MINUS
+		"=":  0xBB, // OEM_PLUS
+		"[":  0xDB, // OEM_4
+		"]":  0xDD, // OEM_6
+		"\\": 0xDC, // OEM_5
+		";":  0xBA, // OEM_1
+		"'":  0xDE, // OEM_7
+		",":  0xBC, // OEM_COMMA
+		".":  0xBE, // OEM_PERIOD
+		"/":  0xBF, // OEM_2
 	}
 
 	// F1-F12
@@ -118,11 +144,9 @@ func MouseButtonID(key string) uint16 {
 	}
 }
 
-// FormatHotkey formats a hotkey combination for display.
+// FormatHotkey formats a hotkey combination for display with a friendly description.
+// Example: "Ctrl+Tab（Ctrl + Tab 鍵）" or "XButton1（滑鼠側鍵：後）"
 func FormatHotkey(modifiers []string, key string) string {
-	if len(modifiers) == 0 {
-		return key
-	}
 	parts := make([]string, 0, len(modifiers)+1)
 	for _, mod := range modifiers {
 		switch strings.ToLower(mod) {
@@ -137,7 +161,61 @@ func FormatHotkey(modifiers []string, key string) string {
 		}
 	}
 	parts = append(parts, key)
-	return strings.Join(parts, "+")
+	combo := strings.Join(parts, "+")
+
+	if desc := keyDescription(key); desc != "" {
+		return combo + "（" + desc + "）"
+	}
+	return combo
+}
+
+// keyDisplayName maps key names to user-friendly Chinese descriptions.
+var keyDisplayName = map[string]string{
+	"XButton1":  "滑鼠側鍵：後",
+	"XButton2":  "滑鼠側鍵：前",
+	"Tab":       "Tab 鍵",
+	"Space":     "空白鍵",
+	"Backspace": "Backspace 鍵",
+	"Enter":     "Enter 鍵",
+	"Escape":    "Esc 鍵",
+	"`":         "` 反引號鍵",
+	"Insert":    "Insert 鍵",
+	"Delete":    "Delete 鍵",
+	"Home":      "Home 鍵",
+	"End":       "End 鍵",
+	"PageUp":    "Page Up 鍵",
+	"PageDown":  "Page Down 鍵",
+	"Left":      "← 方向鍵",
+	"Up":        "↑ 方向鍵",
+	"Right":     "→ 方向鍵",
+	"Down":      "↓ 方向鍵",
+	"Num0":      "數字鍵盤 0",
+	"Num1":      "數字鍵盤 1",
+	"Num2":      "數字鍵盤 2",
+	"Num3":      "數字鍵盤 3",
+	"Num4":      "數字鍵盤 4",
+	"Num5":      "數字鍵盤 5",
+	"Num6":      "數字鍵盤 6",
+	"Num7":      "數字鍵盤 7",
+	"Num8":      "數字鍵盤 8",
+	"Num9":      "數字鍵盤 9",
+	"Num*":      "數字鍵盤 *",
+	"Num+":      "數字鍵盤 +",
+	"Num-":      "數字鍵盤 -",
+	"Num.":      "數字鍵盤 .",
+	"Num/":      "數字鍵盤 /",
+}
+
+// keyDescription returns a friendly description for a key, or empty string if self-explanatory.
+func keyDescription(key string) string {
+	if desc, ok := keyDisplayName[key]; ok {
+		return desc
+	}
+	// VK_0xNN 格式代表未知按鍵
+	if strings.HasPrefix(key, "VK_") {
+		return "未知按鍵 " + key
+	}
+	return ""
 }
 
 // isModifierKey returns true if the VK code is a modifier key.

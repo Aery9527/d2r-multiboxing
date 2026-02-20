@@ -23,6 +23,10 @@ func TestKeyToVK(t *testing.T) {
 		{"Backtick", "`", 0xC0, true},
 		{"Space", "Space", 0x20, true},
 		{"Unknown", "XButton1", 0, false},
+		{"Numpad0", "Num0", 0x60, true},
+		{"Numpad9", "Num9", 0x69, true},
+		{"Left", "Left", 0x25, true},
+		{"Delete", "Delete", 0x2E, true},
 	}
 
 	for _, tt := range tests {
@@ -67,10 +71,14 @@ func TestMouseButtonID(t *testing.T) {
 }
 
 func TestFormatHotkey(t *testing.T) {
-	assert.Equal(t, "Tab", FormatHotkey(nil, "Tab"))
-	assert.Equal(t, "Ctrl+Tab", FormatHotkey([]string{"ctrl"}, "Tab"))
+	assert.Equal(t, "Tab（Tab 鍵）", FormatHotkey(nil, "Tab"))
+	assert.Equal(t, "Ctrl+Tab（Tab 鍵）", FormatHotkey([]string{"ctrl"}, "Tab"))
 	assert.Equal(t, "Ctrl+Alt+F1", FormatHotkey([]string{"ctrl", "alt"}, "F1"))
-	assert.Equal(t, "XButton1", FormatHotkey(nil, "XButton1"))
+	assert.Equal(t, "XButton1（滑鼠側鍵：後）", FormatHotkey(nil, "XButton1"))
+	assert.Equal(t, "XButton2（滑鼠側鍵：前）", FormatHotkey(nil, "XButton2"))
+	assert.Equal(t, "Num0（數字鍵盤 0）", FormatHotkey(nil, "Num0"))
+	assert.Equal(t, "A", FormatHotkey(nil, "A"))                                        // 字母鍵不加描述
+	assert.Equal(t, "VK_0xFF（未知按鍵 VK_0xFF）", FormatHotkey(nil, "VK_0xFF"))
 }
 
 func TestIsModifierKey(t *testing.T) {
