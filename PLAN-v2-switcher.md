@@ -135,7 +135,8 @@ internal/
 │   ├── switcher.go       # Start/Stop、視窗切換核心邏輯
 │   ├── hotkey.go         # RegisterHotKey 鍵盤快捷鍵監聽
 │   ├── mousehook.go      # WH_MOUSE_LL 滑鼠側鍵監聽
-│   └── detect.go         # CLI 設定用：偵測按鍵/滑鼠輸入
+│   ├── detect.go         # CLI 設定用：偵測按鍵/滑鼠輸入
+│   └── keymap.go         # VK code 映射表與輔助函式
 ```
 
 ### `switcher.go` — 核心邏輯
@@ -205,16 +206,16 @@ func SwitchToNextD2RWindow() error
 
 ### Phase 2-1：Config 擴充
 
-- [ ] 在 [config.go](internal/config/config.go) 新增 `SwitcherConfig` struct
-- [ ] 欄位：`Enabled bool`, `Modifiers []string`, `Key string`
-- [ ] 更新 `DefaultConfig()`（switcher 預設 disabled）
-- [ ] 確保向下相容（舊 config.json 無 switcher 欄位時不報錯）
+- [x] 在 [config.go](internal/config/config.go) 新增 `SwitcherConfig` struct
+- [x] 欄位：`Enabled bool`, `Modifiers []string`, `Key string`
+- [x] 更新 `DefaultConfig()`（switcher 預設 disabled）
+- [x] 確保向下相容（舊 config.json 無 switcher 欄位時不報錯）
 
 ### Phase 2-2：視窗切換核心邏輯
 
-- [ ] 在 [window.go](internal/process/window.go) 新增 `FindD2RWindows()`
+- [x] 在 [window.go](internal/process/window.go) 新增 `FindD2RWindows()`
   - `EnumWindows` + `GetWindowTextW` 篩選 `D2R-` 前綴視窗
-- [ ] 新增 `SwitchToNextD2RWindow()`
+- [x] 新增 `SwitchToNextD2RWindow()`
   - `GetForegroundWindow()` 取得前景
   - 在 D2R 視窗列表中找下一個
   - `SetForegroundWindow()` 切換
@@ -222,39 +223,39 @@ func SwitchToNextD2RWindow() error
 
 ### Phase 2-3：鍵盤快捷鍵觸發器
 
-- [ ] 建立 `internal/switcher/hotkey.go`
+- [x] 建立 `internal/switcher/hotkey.go`
   - `RegisterHotKey` + `GetMessage` loop（獨立 goroutine）
   - Virtual key code 映射表（key name ↔ VK code）
   - Modifier 映射（ctrl/alt/shift → `MOD_CONTROL`/`MOD_ALT`/`MOD_SHIFT`）
-- [ ] `startHotkey()` / stop 生命週期管理
+- [x] `startHotkey()` / stop 生命週期管理
 
 ### Phase 2-4：滑鼠側鍵觸發器
 
-- [ ] 建立 `internal/switcher/mousehook.go`
+- [x] 建立 `internal/switcher/mousehook.go`
   - `SetWindowsHookExW(WH_MOUSE_LL)` + callback
   - 偵測 `WM_XBUTTONDOWN`（XButton1 / XButton2）
-- [ ] `startMouseHook()` / stop 生命週期管理
+- [x] `startMouseHook()` / stop 生命週期管理
 
 ### Phase 2-5：CLI 設定引導
 
-- [ ] 建立 `internal/switcher/detect.go`
+- [x] 建立 `internal/switcher/detect.go`
   - `DetectKeyPress()`：同時裝 keyboard + mouse hook 偵測一次按鍵
-- [ ] 在 [main.go](cmd/d2r-multiboxing/main.go) CLI 選單新增 `s` 選項
+- [x] 在 [main.go](cmd/d2r-multiboxing/main.go) CLI 選單新增 `s` 選項
   - 顯示目前設定
   - 「請按下切換按鍵...」→ 偵測 → 確認 → 寫入 config
   - 「關閉切換功能」→ 設 enabled=false → 寫入 config
 
 ### Phase 2-6：主程式整合
 
-- [ ] 啟動時讀取 `switcher` config
-- [ ] 若 enabled，根據 key 類型啟動 hotkey 或 mousehook
-- [ ] CLI 選單顯示當前切換設定狀態
-- [ ] 退出時清理資源（`UnregisterHotKey` / `UnhookWindowsHookEx`）
+- [x] 啟動時讀取 `switcher` config
+- [x] 若 enabled，根據 key 類型啟動 hotkey 或 mousehook
+- [x] CLI 選單顯示當前切換設定狀態
+- [x] 退出時清理資源（`UnregisterHotKey` / `UnhookWindowsHookEx`）
 
 ### Phase 2-7：文件更新
 
-- [ ] 更新 [USAGE.md](USAGE.md) 新增「視窗切換功能」章節
-- [ ] 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md)
+- [x] 更新 [USAGE.md](USAGE.md) 新增「視窗切換功能」章節
+- [x] 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md)
 
 ---
 

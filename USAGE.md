@@ -1,7 +1,7 @@
 # D2R Multiboxing — 使用說明
 
 > 本文件說明如何安裝、設定與操作 D2R Multiboxing CLI 工具。
-> 專案完整技術說明請參考 [PLAN.md](PLAN.md)。
+> 技術說明請參考 [PLAN-v1-multiboxing.md](PLAN-v1-multiboxing.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換）。
 
 ---
 
@@ -304,10 +304,10 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
   （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵）
   （按 Esc 取消）
 
-  偵測到：Ctrl+Tab
-  確認使用此組合？(y/n)：y
+  偵測到：Ctrl+Tab（Tab 鍵）
+  確認使用此組合？(Y/n)：
 
-  ✔ 已儲存切換設定：Ctrl+Tab
+  ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
 支援的觸發方式：
@@ -393,7 +393,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
 
 **A**: 使用雙引號包覆密碼欄位，例如：
 ```csv
-1,player@gmail.com,"my,password",主帳號,NA
+player@gmail.com,"my,password",主帳號
 ```
 
 ### Q: 視窗重命名失敗

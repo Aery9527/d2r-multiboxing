@@ -123,6 +123,6 @@
 | `-ns` | 副帳號靜音，避免多個遊戲音效互相干擾 |
 | `-lq` | 副帳號低畫質，降低系統資源佔用 |
 
-> ⚠️ `-w` 視窗模式參數已失效。本工具透過 `config.json` 的 `windowed` 選項自動修改
-> D2R 的 `Settings.json`（`%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`）
-> 中的 `"Window Mode"` 值來啟用視窗模式。
+> ⚠️ `-w` 視窗模式參數已失效。請先手動進入遊戲 **選項 → 畫面 → 視窗模式** 設定為「視窗化」，
+> D2R 會將設定寫入 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`，
+> 後續透過本工具啟動的所有帳號都會套用該設定。
