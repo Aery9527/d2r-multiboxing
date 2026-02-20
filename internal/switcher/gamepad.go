@@ -103,8 +103,11 @@ func GamepadButtonMask(key string) uint16 {
 	return gamepadButtonMasks[key]
 }
 
-// detectGamepadButtonPress polls all XInput controllers for a new button press.
-// Returns controller index, currently-held modifier buttons, and the newly-pressed button name.
+// detectGamepadButtonPress polls all XInput controllers for a button combo.
+// Detection fires on button RELEASE: the released button is the trigger key,
+// and any buttons still held at that moment become modifiers.
+// This allows the user to hold modifier buttons (e.g., LT) before pressing the trigger.
+// Returns controller index, modifier button names, and the trigger button name.
 // Returns (-1, nil, "") when stop channel is closed or XInput is unavailable.
 func detectGamepadButtonPress(stop <-chan struct{}) (int, []string, string) {
 	if !XInputAvailable() {
@@ -161,12 +164,13 @@ func detectGamepadButtonPress(stop <-chan struct{}) (int, []string, string) {
 				ltPressed := state.Gamepad.LeftTrigger >= triggerThreshold
 				rtPressed := state.Gamepad.RightTrigger >= triggerThreshold
 
-				// 偵測新按下的按鈕（邊緣觸發）
-				newButtons := state.Gamepad.Buttons & ^prev[i].buttons
-				if newButtons != 0 {
+				// 偵測放開的按鈕（下降沿觸發）：放開的按鈕為觸發鍵，仍按住的為修飾鍵
+				releasedButtons := prev[i].buttons & ^state.Gamepad.Buttons
+				if releasedButtons != 0 {
 					for mask, name := range gamepadMaskToName {
-						if newButtons&mask != 0 {
-							mods := captureGamepadModifiers(prev[i].buttons, mask, prev[i].leftTrigger, prev[i].rightTrigger)
+						if releasedButtons&mask != 0 {
+							// 仍按住的按鈕（不含剛放開的）+ LT/RT 為修飾鍵
+							mods := captureGamepadModifiers(state.Gamepad.Buttons, mask, ltPressed, rtPressed)
 							prev[i].buttons = state.Gamepad.Buttons
 							prev[i].leftTrigger = ltPressed
 							prev[i].rightTrigger = rtPressed
@@ -175,18 +179,18 @@ func detectGamepadButtonPress(stop <-chan struct{}) (int, []string, string) {
 					}
 				}
 
-				// 偵測左扳機
-				if ltPressed && !prev[i].leftTrigger {
-					mods := captureGamepadModifiers(prev[i].buttons, 0, false, prev[i].rightTrigger)
+				// 偵測左扳機放開
+				if !ltPressed && prev[i].leftTrigger {
+					mods := captureGamepadModifiers(state.Gamepad.Buttons, 0, false, rtPressed)
 					prev[i].buttons = state.Gamepad.Buttons
 					prev[i].leftTrigger = ltPressed
 					prev[i].rightTrigger = rtPressed
 					return i, mods, "Gamepad_LT"
 				}
 
-				// 偵測右扳機
-				if rtPressed && !prev[i].rightTrigger {
-					mods := captureGamepadModifiers(prev[i].buttons, 0, prev[i].leftTrigger, false)
+				// 偵測右扳機放開
+				if !rtPressed && prev[i].rightTrigger {
+					mods := captureGamepadModifiers(state.Gamepad.Buttons, 0, ltPressed, false)
 					prev[i].buttons = state.Gamepad.Buttons
 					prev[i].leftTrigger = ltPressed
 					prev[i].rightTrigger = rtPressed
