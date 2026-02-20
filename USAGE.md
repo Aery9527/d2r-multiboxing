@@ -39,7 +39,7 @@
 |------|------|
 | 作業系統 | Windows 10 / 11 |
 | Go 版本 | 1.26 以上（僅編譯時需要） |
-| 權限 | 必須以 **管理員權限** 執行 |
+| 權限 | 使用搖桿切換功能時必須以 **管理員權限** 執行（否則 XInput 讀取可能失敗）；其餘功能不一定需要 |
 | 遊戲版本 | Battle.net 版 D2R（不支援 Steam 版） |
 | 視窗模式 | 請先手動進入遊戲 **選項 → 畫面 → 視窗模式** 設定為「視窗化」 |
 
@@ -186,9 +186,11 @@ cd C:\path\to\d2r-multiboxing
 .\d2r-multiboxing.exe
 ```
 
-> ⚠️ **必須以管理員權限執行**，否則無法存取 D2R 進程的 Handle。
+> 💡 **管理員權限說明**：
+> - 帳號啟動、Handle 關閉等基本功能**不一定需要**管理員權限
+> - **搖桿切換功能**（XInput 讀取）需要管理員權限，否則偵測可能失敗
 >
-> 快速方式：在開始選單搜尋「PowerShell」→ 右鍵 →「以系統管理員身分執行」。
+> 建議統一以管理員身份執行以避免問題。快速方式：在開始選單搜尋「PowerShell」→ 右鍵 →「以系統管理員身分執行」。
 
 ---
 
@@ -270,7 +272,7 @@ Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 # 用編輯器填入帳號資訊
 notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
-# Step 3: 以管理員權限執行
+# Step 3: 執行（若使用搖桿切換功能，請以管理員權限執行）
 # （右鍵 PowerShell → 以系統管理員身分執行）
 .\d2r-multiboxing.exe
 
@@ -440,7 +442,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
 
 ### Q: Handle 關閉失敗 / 權限不足
 
-**A**: 請確認以 **管理員權限** 執行。在 PowerShell 視窗標題列應能看到「系統管理員」字樣。
+**A**: 若使用**搖桿切換功能**，必須以 **管理員權限** 執行，否則 XInput 讀取可能失敗。其他功能（帳號啟動、Handle 關閉）通常不需要管理員權限，但若遇到權限問題，請改以管理員身份執行。
 
 ### Q: 防毒軟體警告 / 誤報
 
@@ -487,7 +489,7 @@ D2R 會將設定寫入 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings
 
 ## 注意事項
 
-- ⚠️ **管理員權限**：必須以管理員身份執行，否則無法操作 D2R 進程 Handle
+- ⚠️ **管理員權限**：使用搖桿切換功能時必須以管理員身份執行（XInput 讀取需要）；其餘功能不一定需要
 - ⚠️ **防毒誤報**：操作進程 Handle 為正常行為，但可能觸發防毒警告
 - ⚠️ **服務條款**：使用本工具可能違反 Blizzard 服務條款，風險由使用者自行承擔
 - ⚠️ **密碼安全**：密碼加密綁定當前 Windows 使用者，換機器需重新設定
