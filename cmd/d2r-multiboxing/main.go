@@ -349,12 +349,13 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 
 		display := switcher.FormatHotkey(modifiers, key)
 		fmt.Printf("  偵測到：%s\n", display)
-		fmt.Print("  確認使用此組合？(y/n)：")
+		fmt.Print("  確認使用此組合？(Y/n)：")
 
 		if !scanner.Scan() {
 			return
 		}
-		if strings.ToLower(strings.TrimSpace(scanner.Text())) != "y" {
+		answer := strings.ToLower(strings.TrimSpace(scanner.Text()))
+		if answer != "" && answer != "y" {
 			fmt.Println("  已取消。")
 			restartSwitcherIfNeeded(cfg, wasRunning)
 			return
