@@ -207,10 +207,12 @@ func startGamepadPoll(controllerIndex int, key string, onTrigger func()) error {
 	go func() {
 		stopCh := make(chan struct{})
 
+		mu.Lock()
 		stopFunc = func() {
 			close(stopCh)
 		}
 		running = true
+		mu.Unlock()
 		errCh <- nil
 
 		var wasPressed bool

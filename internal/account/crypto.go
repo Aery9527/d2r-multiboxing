@@ -85,5 +85,12 @@ func DecryptPassword(encrypted string) (string, error) {
 	defer procLocalFree.Call(uintptr(unsafe.Pointer(outputBlob.Data)))
 
 	decryptedBytes := unsafe.Slice(outputBlob.Data, outputBlob.Size)
-	return string(decryptedBytes), nil
+	result := string(decryptedBytes)
+
+	// 清零 DPAPI 配置的記憶體，避免敏感資料殘留
+	for i := range decryptedBytes {
+		decryptedBytes[i] = 0
+	}
+
+	return result, nil
 }

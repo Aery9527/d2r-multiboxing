@@ -23,10 +23,12 @@ func startHotkey(modifiers uint32, vk uint32, onTrigger func()) error {
 			return
 		}
 
+		mu.Lock()
 		stopFunc = func() {
 			procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
 		}
 		running = true
+		mu.Unlock()
 		errCh <- nil
 
 		var m msg

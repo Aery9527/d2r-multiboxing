@@ -2,6 +2,7 @@ package switcher
 
 import (
 	"fmt"
+	"sync"
 	"unsafe"
 
 	"d2r-multiboxing/internal/config"
@@ -69,12 +70,15 @@ type msllHookStruct struct {
 }
 
 var (
+	mu       sync.Mutex
 	stopFunc func()
 	running  bool
 )
 
 // IsRunning returns whether the switcher is currently active.
 func IsRunning() bool {
+	mu.Lock()
+	defer mu.Unlock()
 	return running
 }
 
@@ -83,9 +87,13 @@ func Start(cfg *config.SwitcherConfig) error {
 	if cfg == nil || !cfg.Enabled || cfg.Key == "" {
 		return nil
 	}
+
+	mu.Lock()
 	if running {
+		mu.Unlock()
 		return fmt.Errorf("switcher already running")
 	}
+	mu.Unlock()
 
 	if IsMouseButton(cfg.Key) {
 		buttonID := MouseButtonID(cfg.Key)
@@ -106,6 +114,8 @@ func Start(cfg *config.SwitcherConfig) error {
 
 // Stop stops the switcher and releases resources.
 func Stop() {
+	mu.Lock()
+	defer mu.Unlock()
 	if stopFunc != nil {
 		stopFunc()
 		stopFunc = nil

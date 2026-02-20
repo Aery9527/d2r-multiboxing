@@ -60,7 +60,7 @@ func LoadAccounts(path string) ([]Account, error) {
 
 // SaveAccounts writes accounts to a CSV file.
 func SaveAccounts(path string, accounts []Account) error {
-	f, err := os.Create(path)
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return fmt.Errorf("failed to create accounts file: %w", err)
 	}
