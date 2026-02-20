@@ -118,6 +118,15 @@ account2@email.com,anotherpass,副帳號-野蠻人
   ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
+**搖桿偵測範例**：
+
+```
+  偵測到：搖桿 #2 A 按鈕
+  確認使用此組合？(Y/n)：
+
+  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
+```
+
 支援鍵盤快捷鍵（如 `Ctrl+Tab`、`Alt+F1`）、滑鼠側鍵（`XButton1`、`XButton2`）與搖桿按鈕（XInput）。
 設定存入 `config.json` 後自動載入。
 

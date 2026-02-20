@@ -35,7 +35,7 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
 | DLL 注入風險高 | Hook `GetForegroundWindow` 可行但會觸發反作弊 |
 
 **解法**：不嘗試隔離輸入，而是透過**快速切換視窗焦點**解決。
-使用者按下指定的鍵盤快捷鍵或滑鼠側鍵，即可毫秒等級切換到下一個 D2R 視窗。
+使用者按下指定的鍵盤快捷鍵、滑鼠側鍵或搖桿按鈕，即可毫秒等級切換到下一個 D2R 視窗。
 
 ---
 
@@ -43,7 +43,7 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
 
 ### 觸發方式
 
-透過鍵盤快捷鍵（含修飾鍵）或滑鼠側鍵（XButton1 / XButton2）觸發視窗切換。
+透過鍵盤快捷鍵（含修飾鍵）、滑鼠側鍵（XButton1 / XButton2）或搖桿按鈕（XInput，任意 controller 的任意按鈕/扳機）觸發視窗切換。
 
 ### 切換邏輯
 
@@ -82,6 +82,8 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
 
 ### config.json 範例
 
+**鍵盤快捷鍵**：
+
 ```json
 {
   "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
@@ -94,13 +96,28 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
 }
 ```
 
+**搖桿按鈕**：
+
+```json
+{
+  "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
+  "launch_delay": 5,
+  "switcher": {
+    "enabled": true,
+    "key": "Gamepad_A",
+    "gamepad_index": 1
+  }
+}
+```
+
 ### 欄位說明
 
 | 欄位 | 類型 | 說明 |
 |------|------|------|
 | `switcher.enabled` | `bool` | 是否啟用視窗切換功能 |
-| `switcher.modifiers` | `[]string` | 修飾鍵列表：`"ctrl"`, `"alt"`, `"shift"`（滑鼠側鍵時為空） |
-| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`, `"F1"`, `"XButton1"`, `"XButton2"`） |
+| `switcher.modifiers` | `[]string` | 修飾鍵列表：`"ctrl"`, `"alt"`, `"shift"`（滑鼠側鍵/搖桿時為空） |
+| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`, `"F1"`, `"XButton1"`, `"Gamepad_A"`, `"Gamepad_LT"`） |
+| `switcher.gamepad_index` | `int` | XInput 搖桿編號（0-3），僅搖桿觸發時使用 |
 
 ---
 
@@ -110,18 +127,29 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
   === 視窗切換設定 ===
 
   請按下想用來切換視窗的按鍵組合...
-  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵）
+  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）
 
-  偵測到：Ctrl + Tab
-  確認使用此組合？(y/n)：y
+  偵測到：Ctrl+Tab（Tab 鍵）
+  確認使用此組合？(Y/n)：
 
-  ✔ 已儲存切換設定：Ctrl+Tab
+  ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
+```
+
+**搖桿偵測範例**：
+
+```
+  偵測到：搖桿 #2 A 按鈕
+  確認使用此組合？(Y/n)：
+
+  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
 ```
 
 **偵測方式**：
 - 鍵盤：使用 `WH_KEYBOARD_LL` low-level hook 偵測按鍵 + 修飾鍵狀態
 - 滑鼠側鍵：使用 `WH_MOUSE_LL` low-level hook 偵測 `WM_XBUTTONDOWN`
-- 偵測到後立即解除 hook，僅用於設定階段
+- 搖桿：使用 `XInputGetState` 輪詢所有已連接的 XInput controller（每 10ms），偵測新按下的按鈕或扳機
+- 三種偵測透過 `sync.Once` 協調，最先觸發的輸入會被採用
+- 偵測完成後立即解除 hook / 停止輪詢，僅用於設定階段
 
 ---
 
@@ -135,7 +163,8 @@ internal/
 │   ├── switcher.go       # Start/Stop、視窗切換核心邏輯
 │   ├── hotkey.go         # RegisterHotKey 鍵盤快捷鍵監聽
 │   ├── mousehook.go      # WH_MOUSE_LL 滑鼠側鍵監聽
-│   ├── detect.go         # CLI 設定用：偵測按鍵/滑鼠輸入
+│   ├── gamepad.go        # XInput 搖桿偵測與輪詢
+│   ├── detect.go         # CLI 設定用：偵測按鍵/滑鼠/搖桿輸入
 │   └── keymap.go         # VK code 映射表與輔助函式
 ```
 
@@ -180,15 +209,37 @@ func startMouseHook(targetButton uint16, onTrigger func()) error
 ### `detect.go` — 按鍵偵測（CLI 設定用）
 
 ```go
-// DetectKeyPress 等待使用者按下按鍵組合（鍵盤或滑鼠側鍵）
-// 回傳 modifiers 列表與 key 名稱
-func DetectKeyPress() (modifiers []string, key string, err error)
+// DetectKeyPress 等待使用者按下按鍵組合（鍵盤、滑鼠側鍵或搖桿按鈕）
+// 回傳 modifiers 列表、key 名稱及 gamepad controller index
+func DetectKeyPress() (modifiers []string, key string, gamepadIndex int, err error)
 ```
 
 **實作要點**：
-- 同時安裝 `WH_KEYBOARD_LL` + `WH_MOUSE_LL`
-- 偵測到第一個非修飾鍵的按鍵（或滑鼠側鍵）即回傳
+- 同時安裝 `WH_KEYBOARD_LL` + `WH_MOUSE_LL` 並啟動 XInput 輪詢
+- 使用 `sync.Once` 確保三路偵測中只有一路能送出結果
+- 偵測到第一個非修飾鍵的按鍵（或滑鼠側鍵、搖桿按鈕）即回傳
 - 修飾鍵（Ctrl/Alt/Shift）透過 `GetAsyncKeyState` 讀取狀態
+
+### `gamepad.go` — XInput 搖桿支援
+
+```go
+// XInputAvailable 檢查 XInput DLL 是否可載入
+func XInputAvailable() bool
+
+// detectGamepadButtonPress 輪詢所有 XInput controller，偵測新按下的按鈕
+func detectGamepadButtonPress(stop <-chan struct{}) (controllerIndex int, buttonName string)
+
+// startGamepadPoll 輪詢指定 controller 的指定按鈕，觸發時呼叫 onTrigger
+func startGamepadPoll(controllerIndex int, key string, onTrigger func()) error
+```
+
+**實作要點**：
+- 使用 `xinput1_4.dll` 的 `XInputGetState` API（Windows 10+ 內建）
+- 支援 4 個 controller（index 0-3）、14 個按鈕 + LT/RT 扳機
+- 邊緣觸發偵測：記錄前一次狀態，只在 not-pressed → pressed 時觸發
+- 扳機閾值：`LeftTrigger` / `RightTrigger` >= 128 視為按下
+- 輪詢頻率 10ms（100Hz），使用 `time.Ticker`
+- 若 XInput 不可用（DLL 載入失敗），偵測階段靜默等待 stop，啟動階段回傳錯誤
 
 ### `internal/process/window.go` — 新增函式
 
@@ -239,7 +290,7 @@ func SwitchToNextD2RWindow() error
 ### Phase 2-5：CLI 設定引導
 
 - [x] 建立 `internal/switcher/detect.go`
-  - `DetectKeyPress()`：同時裝 keyboard + mouse hook 偵測一次按鍵
+  - `DetectKeyPress()`：同時裝 keyboard + mouse hook + XInput 輪詢偵測一次按鍵
 - [x] 在 [main.go](cmd/d2r-multiboxing/main.go) CLI 選單新增 `s` 選項
   - 顯示目前設定
   - 「請按下切換按鍵...」→ 偵測 → 確認 → 寫入 config
@@ -256,6 +307,20 @@ func SwitchToNextD2RWindow() error
 
 - [x] 更新 [USAGE.md](USAGE.md) 新增「視窗切換功能」章節
 - [x] 更新 [project-context.instructions.md](.github/instructions/project-context.instructions.md)
+
+### Phase 2-8：搖桿（XInput）支援
+
+- [x] 建立 `internal/switcher/gamepad.go`
+  - XInput API 封裝（`xinput1_4.dll` → `XInputGetState`）
+  - `detectGamepadButtonPress()`：輪詢所有 controller，邊緣觸發偵測
+  - `startGamepadPoll()`：運行時持續輪詢指定 controller + 按鈕
+  - 支援 14 個按鈕 + LT/RT 扳機（閾值 128）
+- [x] `DetectKeyPress()` 新增搖桿偵測（三路 `sync.Once` 協調）
+- [x] `SwitcherConfig` 新增 `GamepadIndex int` 欄位
+- [x] `Start()` 路由：`Gamepad_*` key → `startGamepadPoll`
+- [x] `keymap.go` 新增 `IsGamepadButton`、`FormatSwitcherDisplay`、搖桿按鈕中文顯示名稱
+- [x] CLI 引導文字更新、`main.go` 全面改用 `FormatSwitcherDisplay`
+- [x] 更新 README.md / USAGE.md / PLAN-v2-switcher.md / project-context
 
 ---
 
@@ -285,9 +350,46 @@ Windows 對 `SetForegroundWindow` 有限制 — 只有在以下情況才能成�
 | `A`~`Z` | `0x41`~`0x5A` | |
 | `` ` `` | `0xC0` | 反引號/波浪號 |
 
-### 滑鼠側鍵 vs 鍵盤的判斷
+### 滑鼠側鍵 vs 鍵盤 vs 搖桿的判斷
 
-設定時若偵測到的 key 為 `XButton1` 或 `XButton2`，執行時走 mouse hook 路徑；否則走 `RegisterHotKey` 路徑。`config.json` 中不需額外欄位區分，由 key 名稱自動判斷。
+設定時若偵測到的 key 為 `XButton1` 或 `XButton2`，執行時走 mouse hook 路徑；若為 `Gamepad_*`，走 XInput 輪詢路徑；否則走 `RegisterHotKey` 路徑。`config.json` 中由 key 名稱自動判斷，不需額外欄位區分。
+
+### XInput 搖桿支援
+
+| 項目 | 說明 |
+|------|------|
+| DLL | `xinput1_4.dll`（Windows 10+ 內建） |
+| API | `XInputGetState(dwUserIndex, *XINPUT_STATE)` |
+| Controller 數量 | 最多 4 個（index 0-3） |
+| 支援按鈕 | A/B/X/Y、LB/RB、Back/Start、LS/RS（搖桿按下）、十字鍵 |
+| 扳機支援 | LT/RT（`LeftTrigger` / `RightTrigger` >= 128 視為按下） |
+
+**偵測機制**：
+- **設定階段**：同時輪詢所有 4 個 controller，先讀取初始狀態作為基準，只偵測 not-pressed → pressed 的邊緣觸發
+- **運行時**：只輪詢 config 中指定的 `gamepad_index`，偵測指定按鈕的邊緣觸發
+- **輪詢頻率**：10ms（100Hz），使用 `time.Ticker`
+- **斷線處理**：`XInputGetState` 回傳非 0 時視為斷線，重新連接後以當前狀態為基準
+
+**搖桿按鈕命名（config key 欄位）**：
+
+| Key 名稱 | 按鈕 | XInput Mask |
+|-----------|------|-------------|
+| `Gamepad_A` | A | `0x1000` |
+| `Gamepad_B` | B | `0x2000` |
+| `Gamepad_X` | X | `0x4000` |
+| `Gamepad_Y` | Y | `0x8000` |
+| `Gamepad_LB` | 左肩鍵 | `0x0100` |
+| `Gamepad_RB` | 右肩鍵 | `0x0200` |
+| `Gamepad_LT` | 左扳機 | analog >= 128 |
+| `Gamepad_RT` | 右扳機 | analog >= 128 |
+| `Gamepad_Back` | Back | `0x0020` |
+| `Gamepad_Start` | Start | `0x0010` |
+| `Gamepad_LS` | 左搖桿按下 | `0x0040` |
+| `Gamepad_RS` | 右搖桿按下 | `0x0080` |
+| `Gamepad_DPadUp` | 十字鍵 ↑ | `0x0001` |
+| `Gamepad_DPadDown` | 十字鍵 ↓ | `0x0002` |
+| `Gamepad_DPadLeft` | 十字鍵 ← | `0x0004` |
+| `Gamepad_DPadRight` | 十字鍵 → | `0x0008` |
 
 ---
 
@@ -304,6 +406,7 @@ Windows 對 `SetForegroundWindow` 有限制 — 只有在以下情況才能成�
 | `user32.dll` | `GetMessageW` / `CallNextHookEx` | Windows message loop |
 | `user32.dll` | `AllowSetForegroundWindow` | 授權前景切換 |
 | `user32.dll` | `GetAsyncKeyState` | 偵測修飾鍵狀態 |
+| `xinput1_4.dll` | `XInputGetState` | 讀取搖桿狀態（Windows 10+ 內建） |
 
 ### Go 依賴
 
@@ -316,5 +419,7 @@ Windows 對 `SetForegroundWindow` 有限制 — 只有在以下情況才能成�
 - ⚠️ `RegisterHotKey` 可能與其他程式衝突，註冊失敗時需提示使用者換組合鍵
 - ⚠️ `SetForegroundWindow` 在某些 Windows 版本有額外限制，需實作多重 fallback
 - ⚠️ Low-level hook callback 必須在安裝 hook 的同一 thread 上跑 message loop
+- ⚠️ XInput 搖桿偵測使用輪詢（polling），CPU 開銷極低（10ms ticker）但非事件驅動
 - ℹ️ 所有功能皆使用標準 Win32 API，不修改遊戲、不注入 DLL
 - ℹ️ CLI 設定引導只需操作一次，設定存入 `config.json` 後自動載入
+- ℹ️ XInput 搖桿最多支援 4 個（Windows 限制），且僅支援 XInput 相容控制器（Xbox 系列）

@@ -310,6 +310,19 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
   ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
+**搖桿偵測範例**：
+
+```
+  請按下想用來切換視窗的按鍵組合...
+  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）
+  （按 Esc 取消）
+
+  偵測到：搖桿 #2 A 按鈕
+  確認使用此組合？(Y/n)：
+
+  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
+```
+
 支援的觸發方式：
 
 | 類型 | 範例 | 說明 |
@@ -328,6 +341,8 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
 設定引導完成後，`config.json` 會新增 `switcher` 區段：
 
+**鍵盤快捷鍵**：
+
 ```json
 {
   "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
@@ -336,6 +351,20 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
     "enabled": true,
     "modifiers": ["ctrl"],
     "key": "Tab"
+  }
+}
+```
+
+**搖桿按鈕**（第 2 支搖桿的 A 按鈕）：
+
+```json
+{
+  "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
+  "launch_delay": 5,
+  "switcher": {
+    "enabled": true,
+    "key": "Gamepad_A",
+    "gamepad_index": 1
   }
 }
 ```
@@ -405,6 +434,10 @@ player@gmail.com,"my,password",主帳號
 ### Q: 我可以在工具運行時修改 accounts.csv 嗎？
 
 **A**: 可以。修改後在選單中按 `r` 重新整理即可載入最新設定。
+
+### Q: 搖桿按鈕偵測沒有反應
+
+**A**: 本工具使用 XInput API（`xinput1_4.dll`），僅支援 XInput 相容的搖桿（Xbox 系列控制器）。部分第三方搖桿可能需要 XInput 模擬驅動。確認搖桿已連接且 Windows 能識別後，在設定引導中按下搖桿上的按鈕即可偵測。
 
 ---
 
