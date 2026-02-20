@@ -128,10 +128,10 @@ func DetectKeyPress() (modifiers []string, key string, gamepadIndex int, err err
 
 	// 搖桿偵測（與鍵盤/滑鼠同時進行）
 	go func() {
-		idx, btn := detectGamepadButtonPress(stopGamepad)
+		idx, mods, btn := detectGamepadButtonPress(stopGamepad)
 		if btn != "" {
 			once.Do(func() {
-				resultCh <- result{key: btn, gamepadIndex: idx}
+				resultCh <- result{modifiers: mods, key: btn, gamepadIndex: idx}
 			})
 			procPostThreadMessageW.Call(uintptr(hookThreadID), wmQuit, 0, 0)
 		}

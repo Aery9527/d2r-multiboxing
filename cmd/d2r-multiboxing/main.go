@@ -332,6 +332,7 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 		fmt.Println()
 		fmt.Println("  請按下想用來切換視窗的按鍵組合...")
 		fmt.Println("  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）")
+		fmt.Println("  （搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕）")
 		fmt.Println("  （按 Esc 取消）")
 		fmt.Println()
 

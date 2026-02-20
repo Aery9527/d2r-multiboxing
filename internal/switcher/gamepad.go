@@ -104,12 +104,12 @@ func GamepadButtonMask(key string) uint16 {
 }
 
 // detectGamepadButtonPress polls all XInput controllers for a new button press.
-// Returns controller index and button name when detected.
-// Returns (-1, "") when stop channel is closed or XInput is unavailable.
-func detectGamepadButtonPress(stop <-chan struct{}) (int, string) {
+// Returns controller index, currently-held modifier buttons, and the newly-pressed button name.
+// Returns (-1, nil, "") when stop channel is closed or XInput is unavailable.
+func detectGamepadButtonPress(stop <-chan struct{}) (int, []string, string) {
 	if !XInputAvailable() {
 		<-stop
-		return -1, ""
+		return -1, nil, ""
 	}
 
 	type controllerSnapshot struct {
@@ -138,7 +138,7 @@ func detectGamepadButtonPress(stop <-chan struct{}) (int, string) {
 	for {
 		select {
 		case <-stop:
-			return -1, ""
+			return -1, nil, ""
 		case <-ticker.C:
 			for i := 0; i < xinputMaxControllers; i++ {
 				state, ok := getXInputState(i)
@@ -158,26 +158,39 @@ func detectGamepadButtonPress(stop <-chan struct{}) (int, string) {
 					continue
 				}
 
+				ltPressed := state.Gamepad.LeftTrigger >= triggerThreshold
+				rtPressed := state.Gamepad.RightTrigger >= triggerThreshold
+
 				// 偵測新按下的按鈕（邊緣觸發）
 				newButtons := state.Gamepad.Buttons & ^prev[i].buttons
 				if newButtons != 0 {
 					for mask, name := range gamepadMaskToName {
 						if newButtons&mask != 0 {
-							return i, name
+							mods := captureGamepadModifiers(prev[i].buttons, mask, prev[i].leftTrigger, prev[i].rightTrigger)
+							prev[i].buttons = state.Gamepad.Buttons
+							prev[i].leftTrigger = ltPressed
+							prev[i].rightTrigger = rtPressed
+							return i, mods, name
 						}
 					}
 				}
 
 				// 偵測左扳機
-				ltPressed := state.Gamepad.LeftTrigger >= triggerThreshold
 				if ltPressed && !prev[i].leftTrigger {
-					return i, "Gamepad_LT"
+					mods := captureGamepadModifiers(prev[i].buttons, 0, false, prev[i].rightTrigger)
+					prev[i].buttons = state.Gamepad.Buttons
+					prev[i].leftTrigger = ltPressed
+					prev[i].rightTrigger = rtPressed
+					return i, mods, "Gamepad_LT"
 				}
 
 				// 偵測右扳機
-				rtPressed := state.Gamepad.RightTrigger >= triggerThreshold
 				if rtPressed && !prev[i].rightTrigger {
-					return i, "Gamepad_RT"
+					mods := captureGamepadModifiers(prev[i].buttons, 0, prev[i].leftTrigger, false)
+					prev[i].buttons = state.Gamepad.Buttons
+					prev[i].leftTrigger = ltPressed
+					prev[i].rightTrigger = rtPressed
+					return i, mods, "Gamepad_RT"
 				}
 
 				prev[i].buttons = state.Gamepad.Buttons
@@ -188,8 +201,39 @@ func detectGamepadButtonPress(stop <-chan struct{}) (int, string) {
 	}
 }
 
+// captureGamepadModifiers collects the currently-held buttons (excluding the triggering button)
+// as a modifier list. excludeMask is the mask of the button that just fired.
+func captureGamepadModifiers(heldButtons uint16, excludeMask uint16, ltHeld bool, rtHeld bool) []string {
+	var mods []string
+	for mask, name := range gamepadMaskToName {
+		if mask != excludeMask && heldButtons&mask != 0 {
+			mods = append(mods, name)
+		}
+	}
+	if ltHeld {
+		mods = append(mods, "Gamepad_LT")
+	}
+	if rtHeld {
+		mods = append(mods, "Gamepad_RT")
+	}
+	return mods
+}
+
+// isGamepadModifierHeld checks if a modifier key (by name) is currently held in the given state.
+func isGamepadModifierHeld(state *xinputState, mod string) bool {
+	if mod == "Gamepad_LT" {
+		return state.Gamepad.LeftTrigger >= triggerThreshold
+	}
+	if mod == "Gamepad_RT" {
+		return state.Gamepad.RightTrigger >= triggerThreshold
+	}
+	mask := gamepadButtonMasks[mod]
+	return mask != 0 && state.Gamepad.Buttons&mask != 0
+}
+
 // startGamepadPoll starts polling a specific controller button and calls onTrigger on each press.
-func startGamepadPoll(controllerIndex int, key string, onTrigger func()) error {
+// modifierKeys is a list of gamepad button names that must ALL be held for the trigger to fire.
+func startGamepadPoll(controllerIndex int, modifierKeys []string, key string, onTrigger func()) error {
 	if !XInputAvailable() {
 		return fmt.Errorf("XInput 不可用（缺少 xinput1_4.dll）")
 	}
@@ -230,13 +274,24 @@ func startGamepadPoll(controllerIndex int, key string, onTrigger func()) error {
 					continue
 				}
 
+				// 確認所有修飾鍵都按住
+				allModsHeld := true
+				for _, mod := range modifierKeys {
+					if !isGamepadModifierHeld(state, mod) {
+						allModsHeld = false
+						break
+					}
+				}
+
 				var pressed bool
-				if isLT {
-					pressed = state.Gamepad.LeftTrigger >= triggerThreshold
-				} else if isRT {
-					pressed = state.Gamepad.RightTrigger >= triggerThreshold
-				} else {
-					pressed = state.Gamepad.Buttons&buttonMask != 0
+				if allModsHeld {
+					if isLT {
+						pressed = state.Gamepad.LeftTrigger >= triggerThreshold
+					} else if isRT {
+						pressed = state.Gamepad.RightTrigger >= triggerThreshold
+					} else {
+						pressed = state.Gamepad.Buttons&buttonMask != 0
+					}
 				}
 
 				if pressed && !wasPressed {

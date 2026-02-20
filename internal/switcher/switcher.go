@@ -101,7 +101,14 @@ func Start(cfg *config.SwitcherConfig) error {
 	}
 
 	if IsGamepadButton(cfg.Key) {
-		return startGamepadPoll(cfg.GamepadIndex, cfg.Key, switchToNext)
+		// 從 Modifiers 中篩出搖桿修飾鍵
+		var gamepadMods []string
+		for _, m := range cfg.Modifiers {
+			if IsGamepadButton(m) {
+				gamepadMods = append(gamepadMods, m)
+			}
+		}
+		return startGamepadPoll(cfg.GamepadIndex, gamepadMods, cfg.Key, switchToNext)
 	}
 
 	vk, ok := KeyToVK(cfg.Key)

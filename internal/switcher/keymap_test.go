@@ -105,11 +105,15 @@ func TestFormatSwitcherDisplay(t *testing.T) {
 	assert.Equal(t, "Ctrl+Tab（Tab 鍵）", FormatSwitcherDisplay([]string{"ctrl"}, "Tab", 0))
 	assert.Equal(t, "XButton1（滑鼠側鍵：後）", FormatSwitcherDisplay(nil, "XButton1", 0))
 
-	// 搖桿
+	// 搖桿單鍵
 	assert.Equal(t, "搖桿 #1 A 按鈕", FormatSwitcherDisplay(nil, "Gamepad_A", 0))
 	assert.Equal(t, "搖桿 #2 LB（左肩鍵）", FormatSwitcherDisplay(nil, "Gamepad_LB", 1))
 	assert.Equal(t, "搖桿 #3 LT（左扳機）", FormatSwitcherDisplay(nil, "Gamepad_LT", 2))
 	assert.Equal(t, "搖桿 #1 十字鍵 ↑", FormatSwitcherDisplay(nil, "Gamepad_DPadUp", 0))
+
+	// 搖桿組合鍵
+	assert.Equal(t, "搖桿 #1 LT（左扳機）+A 按鈕", FormatSwitcherDisplay([]string{"Gamepad_LT"}, "Gamepad_A", 0))
+	assert.Equal(t, "搖桿 #2 Back 按鈕+A 按鈕", FormatSwitcherDisplay([]string{"Gamepad_Back"}, "Gamepad_A", 1))
 }
 
 func TestGamepadButtonMask(t *testing.T) {

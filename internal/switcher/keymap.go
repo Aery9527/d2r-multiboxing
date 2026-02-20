@@ -180,11 +180,23 @@ func FormatHotkey(modifiers []string, key string) string {
 // FormatSwitcherDisplay formats a full switcher display string, including gamepad controller index.
 func FormatSwitcherDisplay(modifiers []string, key string, gamepadIndex int) string {
 	if IsGamepadButton(key) {
-		desc := keyDescription(key)
-		if desc == "" {
-			desc = key
+		// 組合搖桿修飾鍵 + 主鍵
+		parts := make([]string, 0, len(modifiers)+1)
+		for _, mod := range modifiers {
+			if IsGamepadButton(mod) {
+				if desc := keyDescription(mod); desc != "" {
+					parts = append(parts, desc)
+				} else {
+					parts = append(parts, mod)
+				}
+			}
 		}
-		return fmt.Sprintf("搖桿 #%d %s", gamepadIndex+1, desc)
+		mainDesc := keyDescription(key)
+		if mainDesc == "" {
+			mainDesc = key
+		}
+		parts = append(parts, mainDesc)
+		return fmt.Sprintf("搖桿 #%d %s", gamepadIndex+1, strings.Join(parts, "+"))
 	}
 	return FormatHotkey(modifiers, key)
 }
