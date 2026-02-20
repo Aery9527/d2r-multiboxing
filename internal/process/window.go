@@ -2,6 +2,7 @@ package process
 
 import (
 	"fmt"
+	"strings"
 	"syscall"
 	"time"
 	"unsafe"
@@ -16,6 +17,9 @@ var (
 	procGetWindowTextW        = user32.NewProc("GetWindowTextW")
 	procSetWindowTextW        = user32.NewProc("SetWindowTextW")
 	procIsWindowVisible       = user32.NewProc("IsWindowVisible")
+	procGetForegroundWindow   = user32.NewProc("GetForegroundWindow")
+	procSetForegroundWindow   = user32.NewProc("SetForegroundWindow")
+	procKeybdEvent            = user32.NewProc("keybd_event")
 )
 
 // FindWindowByTitle returns true if a visible top-level window with the exact title exists.
@@ -97,4 +101,56 @@ func setWindowText(hwnd windows.Handle, text string) error {
 	}
 
 	return nil
+}
+
+// FindWindowsByTitlePrefix returns handles of all visible windows whose title starts with prefix.
+func FindWindowsByTitlePrefix(prefix string) []windows.Handle {
+	var handles []windows.Handle
+	buf := make([]uint16, 512)
+
+	cb := syscall.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
+		visible, _, _ := procIsWindowVisible.Call(hwnd)
+		if visible == 0 {
+			return 1
+		}
+		n, _, _ := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+		if n > 0 && strings.HasPrefix(syscall.UTF16ToString(buf[:n]), prefix) {
+			handles = append(handles, windows.Handle(hwnd))
+		}
+		return 1
+	})
+
+	procEnumWindows.Call(cb, 0)
+	return handles
+}
+
+// GetForegroundHwnd returns the handle of the current foreground window.
+func GetForegroundHwnd() windows.Handle {
+	hwnd, _, _ := procGetForegroundWindow.Call()
+	return windows.Handle(hwnd)
+}
+
+const (
+	vkMenu         = 0x12
+	keyeventfKeyup = 0x0002
+)
+
+// SwitchToWindow sets the given window as the foreground window.
+// Falls back to simulating an Alt key press if the direct call fails.
+func SwitchToWindow(hwnd windows.Handle) error {
+	ret, _, _ := procSetForegroundWindow.Call(uintptr(hwnd))
+	if ret != 0 {
+		return nil
+	}
+
+	// Fallback: simulate Alt key press to unlock foreground switching
+	procKeybdEvent.Call(vkMenu, 0, 0, 0)
+	procKeybdEvent.Call(vkMenu, 0, keyeventfKeyup, 0)
+
+	ret, _, _ = procSetForegroundWindow.Call(uintptr(hwnd))
+	if ret != 0 {
+		return nil
+	}
+
+	return fmt.Errorf("SetForegroundWindow failed for hwnd %v", hwnd)
 }

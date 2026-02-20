@@ -1,0 +1,84 @@
+package switcher
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestKeyToVK(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		vk   uint32
+		ok   bool
+	}{
+		{"Tab", "Tab", 0x09, true},
+		{"F1", "F1", 0x70, true},
+		{"F12", "F12", 0x7B, true},
+		{"A", "A", 0x41, true},
+		{"Z", "Z", 0x5A, true},
+		{"0", "0", 0x30, true},
+		{"9", "9", 0x39, true},
+		{"Backtick", "`", 0xC0, true},
+		{"Space", "Space", 0x20, true},
+		{"Unknown", "XButton1", 0, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			vk, ok := KeyToVK(tt.key)
+			assert.Equal(t, tt.ok, ok)
+			if ok {
+				assert.Equal(t, tt.vk, vk)
+			}
+		})
+	}
+}
+
+func TestVKToKeyName(t *testing.T) {
+	name, ok := VKToKeyName(0x09)
+	assert.True(t, ok)
+	assert.Equal(t, "Tab", name)
+
+	_, ok = VKToKeyName(0xFFFF)
+	assert.False(t, ok)
+}
+
+func TestModifiersToFlags(t *testing.T) {
+	assert.Equal(t, uint32(0), ModifiersToFlags(nil))
+	assert.Equal(t, modControl, ModifiersToFlags([]string{"ctrl"}))
+	assert.Equal(t, modControl|modAlt, ModifiersToFlags([]string{"ctrl", "alt"}))
+	assert.Equal(t, modControl|modAlt|modShift, ModifiersToFlags([]string{"ctrl", "alt", "shift"}))
+	assert.Equal(t, modShift, ModifiersToFlags([]string{"Shift"})) // case insensitive
+}
+
+func TestIsMouseButton(t *testing.T) {
+	assert.True(t, IsMouseButton("XButton1"))
+	assert.True(t, IsMouseButton("XButton2"))
+	assert.False(t, IsMouseButton("Tab"))
+	assert.False(t, IsMouseButton("F1"))
+}
+
+func TestMouseButtonID(t *testing.T) {
+	assert.Equal(t, xButton1, MouseButtonID("XButton1"))
+	assert.Equal(t, xButton2, MouseButtonID("XButton2"))
+	assert.Equal(t, uint16(0), MouseButtonID("Tab"))
+}
+
+func TestFormatHotkey(t *testing.T) {
+	assert.Equal(t, "Tab", FormatHotkey(nil, "Tab"))
+	assert.Equal(t, "Ctrl+Tab", FormatHotkey([]string{"ctrl"}, "Tab"))
+	assert.Equal(t, "Ctrl+Alt+F1", FormatHotkey([]string{"ctrl", "alt"}, "F1"))
+	assert.Equal(t, "XButton1", FormatHotkey(nil, "XButton1"))
+}
+
+func TestIsModifierKey(t *testing.T) {
+	assert.True(t, isModifierKey(vkShift))
+	assert.True(t, isModifierKey(vkControl))
+	assert.True(t, isModifierKey(vkMenu))
+	assert.True(t, isModifierKey(vkLShift))
+	assert.True(t, isModifierKey(vkRControl))
+	assert.False(t, isModifierKey(vkTab))
+	assert.False(t, isModifierKey(0x41)) // A
+}

@@ -13,6 +13,7 @@ import (
 	"d2r-multiboxing/internal/d2r"
 	"d2r-multiboxing/internal/handle"
 	"d2r-multiboxing/internal/process"
+	"d2r-multiboxing/internal/switcher"
 )
 
 // version is set at build time via -ldflags "-X main.version=x.y.z".
@@ -33,7 +34,17 @@ func main() {
 	cfgDir, _ := config.Dir()
 	fmt.Printf("  資料目錄：%s\n", cfgDir)
 	fmt.Printf("  D2R 路徑：%s\n", cfg.D2RPath)
-	fmt.Printf("  啟動間隔：%d 秒\n\n", cfg.LaunchDelay)
+	fmt.Printf("  啟動間隔：%d 秒\n", cfg.LaunchDelay)
+
+	// 啟動視窗切換功能
+	if cfg.Switcher != nil && cfg.Switcher.Enabled {
+		if err := switcher.Start(cfg.Switcher); err != nil {
+			fmt.Printf("  ⚠ 視窗切換啟動失敗：%v\n", err)
+		} else {
+			fmt.Printf("  ✔ 視窗切換已啟用：%s\n", switcher.FormatHotkey(cfg.Switcher.Modifiers, cfg.Switcher.Key))
+		}
+	}
+	fmt.Println()
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {
@@ -80,6 +91,7 @@ func main() {
 
 		switch strings.ToLower(input) {
 		case "q":
+			switcher.Stop()
 			fmt.Println("  再見！")
 			return
 		case "r":
@@ -91,6 +103,9 @@ func main() {
 			continue
 		case "a":
 			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
+			continue
+		case "s":
+			setupSwitcher(cfg, scanner)
 			continue
 		default:
 			id, err := strconv.Atoi(input)
@@ -118,6 +133,7 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
 	fmt.Println("  a       啟動所有帳號（只啟動未啟動的）")
+	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
 	fmt.Println("--------------------------------------------")
@@ -284,4 +300,102 @@ func parseRegionInput(input string) *d2r.Region {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
+	fmt.Println()
+	fmt.Println("  === 視窗切換設定 ===")
+
+	if cfg.Switcher != nil && cfg.Switcher.Enabled {
+		fmt.Printf("  目前設定：%s\n", switcher.FormatHotkey(cfg.Switcher.Modifiers, cfg.Switcher.Key))
+	} else {
+		fmt.Println("  目前狀態：未啟用")
+	}
+
+	fmt.Println()
+	fmt.Println("  [1] 設定切換按鍵")
+	fmt.Println("  [0] 關閉切換功能")
+	fmt.Println("  [Enter] 返回")
+	fmt.Print("  > 請選擇：")
+
+	if !scanner.Scan() {
+		return
+	}
+	choice := strings.TrimSpace(scanner.Text())
+
+	switch choice {
+	case "1":
+		// 先停止現有的 switcher 以避免衝突
+		wasRunning := switcher.IsRunning()
+		switcher.Stop()
+
+		fmt.Println()
+		fmt.Println("  請按下想用來切換視窗的按鍵組合...")
+		fmt.Println("  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵）")
+		fmt.Println("  （按 Esc 取消）")
+		fmt.Println()
+
+		modifiers, key, err := switcher.DetectKeyPress()
+		if err != nil {
+			fmt.Printf("  ⚠ 偵測失敗：%v\n", err)
+			restartSwitcherIfNeeded(cfg, wasRunning)
+			return
+		}
+		if key == "" {
+			fmt.Println("  已取消。")
+			restartSwitcherIfNeeded(cfg, wasRunning)
+			return
+		}
+
+		display := switcher.FormatHotkey(modifiers, key)
+		fmt.Printf("  偵測到：%s\n", display)
+		fmt.Print("  確認使用此組合？(y/n)：")
+
+		if !scanner.Scan() {
+			return
+		}
+		if strings.ToLower(strings.TrimSpace(scanner.Text())) != "y" {
+			fmt.Println("  已取消。")
+			restartSwitcherIfNeeded(cfg, wasRunning)
+			return
+		}
+
+		cfg.Switcher = &config.SwitcherConfig{
+			Enabled:   true,
+			Modifiers: modifiers,
+			Key:       key,
+		}
+		if err := config.Save(cfg); err != nil {
+			fmt.Printf("  ⚠ 設定儲存失敗：%v\n", err)
+			return
+		}
+
+		if err := switcher.Start(cfg.Switcher); err != nil {
+			fmt.Printf("  ⚠ 切換功能啟動失敗：%v\n", err)
+			return
+		}
+
+		fmt.Printf("  ✔ 已儲存切換設定：%s\n", display)
+
+	case "0":
+		switcher.Stop()
+		if cfg.Switcher != nil {
+			cfg.Switcher.Enabled = false
+		}
+		if err := config.Save(cfg); err != nil {
+			fmt.Printf("  ⚠ 設定儲存失敗：%v\n", err)
+			return
+		}
+		fmt.Println("  ✔ 已關閉切換功能")
+	}
+
+	fmt.Println()
+}
+
+func restartSwitcherIfNeeded(cfg *config.Config, wasRunning bool) {
+	if wasRunning && cfg.Switcher != nil && cfg.Switcher.Enabled {
+		if err := switcher.Start(cfg.Switcher); err != nil {
+			fmt.Printf("  ⚠ 重新啟動切換功能失敗：%v\n", err)
+		}
+	}
 }

@@ -26,6 +26,18 @@ const (
 	HomeDirEnv = "D2R_MULTIBOXING_HOME"
 )
 
+// SwitcherConfig holds the window switcher configuration.
+type SwitcherConfig struct {
+	// Enabled controls whether the window switcher is active.
+	Enabled bool `json:"enabled"`
+
+	// Modifiers is the list of modifier keys (e.g., "ctrl", "alt", "shift").
+	Modifiers []string `json:"modifiers,omitempty"`
+
+	// Key is the trigger key name (e.g., "Tab", "F1", "XButton1").
+	Key string `json:"key"`
+}
+
 // Config represents the application configuration.
 type Config struct {
 	// D2RPath is the path to D2R.exe.
@@ -33,6 +45,9 @@ type Config struct {
 
 	// LaunchDelay is the delay in seconds between launching each account.
 	LaunchDelay int `json:"launch_delay"`
+
+	// Switcher holds the window switcher settings.
+	Switcher *SwitcherConfig `json:"switcher,omitempty"`
 }
 
 // DefaultConfig returns a Config with default values.
