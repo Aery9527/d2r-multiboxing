@@ -110,13 +110,28 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
 }
 ```
 
+**搖桿組合鍵**（按住 LT，按 A，放開 A）：
+
+```json
+{
+  "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
+  "launch_delay": 5,
+  "switcher": {
+    "enabled": true,
+    "modifiers": ["Gamepad_LT"],
+    "key": "Gamepad_A",
+    "gamepad_index": 0
+  }
+}
+```
+
 ### 欄位說明
 
 | 欄位 | 類型 | 說明 |
 |------|------|------|
 | `switcher.enabled` | `bool` | 是否啟用視窗切換功能 |
-| `switcher.modifiers` | `[]string` | 修飾鍵列表：`"ctrl"`, `"alt"`, `"shift"`（滑鼠側鍵/搖桿時為空） |
-| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`, `"F1"`, `"XButton1"`, `"Gamepad_A"`, `"Gamepad_LT"`） |
+| `switcher.modifiers` | `[]string` | 修飾鍵：鍵盤用 `"ctrl"`, `"alt"`, `"shift"`；搖桿用 `"Gamepad_LT"`, `"Gamepad_Back"` 等 |
+| `switcher.key` | `string` | 觸發鍵名稱（如 `"Tab"`, `"F1"`, `"XButton1"`, `"Gamepad_A"`, `"Gamepad_LT"`） |
 | `switcher.gamepad_index` | `int` | XInput 搖桿編號（0-3），僅搖桿觸發時使用 |
 
 ---
@@ -135,19 +150,28 @@ D2R 多開後，使用者希望能「同時」操控兩個視窗。但 Windows �
   ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
-**搖桿偵測範例**：
+**搖桿偵測範例**（單鍵）：
 
 ```
-  偵測到：搖桿 #2 A 按鈕
+  偵測到：搖桿 #1 A 按鈕
   確認使用此組合？(Y/n)：
 
-  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
+  ✔ 已儲存切換設定：搖桿 #1 A 按鈕
+```
+
+**搖桿組合鍵範例**（按住 LT，按 A，放開 A）：
+
+```
+  偵測到：搖桿 #1 LT（左扳機）+A 按鈕
+  確認使用此組合？(Y/n)：
+
+  ✔ 已儲存切換設定：搖桿 #1 LT（左扳機）+A 按鈕
 ```
 
 **偵測方式**：
 - 鍵盤：使用 `WH_KEYBOARD_LL` low-level hook 偵測按鍵 + 修飾鍵狀態
 - 滑鼠側鍵：使用 `WH_MOUSE_LL` low-level hook 偵測 `WM_XBUTTONDOWN`
-- 搖桿：使用 `XInputGetState` 輪詢所有已連接的 XInput controller（每 10ms），偵測新按下的按鈕或扳機
+- 搖桿：使用 `XInputGetState` 輪詢所有已連接的 XInput controller（每 10ms），**偵測按鍵放開（falling edge）**，放開的按鍵為觸發鍵，仍按住的為修飾鍵
 - 三種偵測透過 `sync.Once` 協調，最先觸發的輸入會被採用
 - 偵測完成後立即解除 hook / 停止輪詢，僅用於設定階段
 
@@ -226,11 +250,13 @@ func DetectKeyPress() (modifiers []string, key string, gamepadIndex int, err err
 // XInputAvailable 檢查 XInput DLL 是否可載入
 func XInputAvailable() bool
 
-// detectGamepadButtonPress 輪詢所有 XInput controller，偵測新按下的按鈕
-func detectGamepadButtonPress(stop <-chan struct{}) (controllerIndex int, buttonName string)
+// detectGamepadButtonPress 輪詢所有 XInput controller，偵測按鈕放開事件（falling edge）
+// 放開的按鈕為觸發鍵，仍按住的其他按鈕為修飾鍵
+// 支援組合鍵：按住 LT，按 A，放開 A → 回傳 (idx, ["Gamepad_LT"], "Gamepad_A")
+func detectGamepadButtonPress(stop <-chan struct{}) (controllerIndex int, modifiers []string, buttonName string)
 
-// startGamepadPoll 輪詢指定 controller 的指定按鈕，觸發時呼叫 onTrigger
-func startGamepadPoll(controllerIndex int, key string, onTrigger func()) error
+// startGamepadPoll 輪詢指定 controller 的按鈕，所有修飾鍵按住時邊緣觸發呼叫 onTrigger
+func startGamepadPoll(controllerIndex int, modifierKeys []string, key string, onTrigger func()) error
 ```
 
 **實作要點**：
@@ -322,9 +348,23 @@ func SwitchToNextD2RWindow() error
 - [x] CLI 引導文字更新、`main.go` 全面改用 `FormatSwitcherDisplay`
 - [x] 更新 README.md / USAGE.md / PLAN-v2-switcher.md / project-context
 
----
+### Phase 2-9：搖桿組合鍵與偵測修正
 
-## 技術細節
+- [x] `detectGamepadButtonPress()` 改為**放開觸發**（falling edge）
+  - 原本：按下時立即回傳，導致 LT 按住再按 RT 時只偵測到 LT
+  - 修正後：放開按鍵時才回傳，放開的按鈕為觸發鍵，仍按住的為修飾鍵
+  - 流程：按住 LT → 按 RT → 放開 RT → 偵測到 `mods=[LT], trigger=RT`
+- [x] `startGamepadPoll()` 新增 `modifierKeys []string` 參數
+  - 輪詢時驗證所有修飾鍵都按住才邊緣觸發主鍵
+  - 修飾鍵支援所有 `Gamepad_*` 名稱（含 LT/RT 扳機）
+- [x] `captureGamepadModifiers()` 在放開觸發時，從當前狀態讀取仍按住的按鈕作為修飾鍵列表
+- [x] `isGamepadModifierHeld()` 執行時按名稱檢查單一修飾鍵是否按住（LT/RT 用閾值判斷）
+- [x] `SwitcherConfig.Modifiers` 同時支援鍵盤修飾鍵（`"ctrl"`/`"alt"`/`"shift"`）與搖桿修飾鍵（`"Gamepad_LT"` 等），由 `IsGamepadButton()` 判斷路由
+- [x] `FormatSwitcherDisplay()` 顯示搖桿組合鍵格式，如「搖桿 #1 LT（左扳機）+A 按鈕」
+- [x] CLI 設定引導提示文字更新，說明需放開按鍵才完成偵測
+- [x] 更新 [USAGE.md](USAGE.md)、[PLAN-v2-switcher.md](PLAN-v2-switcher.md)
+
+---
 
 ### `SetForegroundWindow` 限制
 
@@ -365,8 +405,12 @@ Windows 對 `SetForegroundWindow` 有限制 — 只有在以下情況才能成�
 | 扳機支援 | LT/RT（`LeftTrigger` / `RightTrigger` >= 128 視為按下） |
 
 **偵測機制**：
-- **設定階段**：同時輪詢所有 4 個 controller，先讀取初始狀態作為基準，只偵測 not-pressed → pressed 的邊緣觸發
-- **運行時**：只輪詢 config 中指定的 `gamepad_index`，偵測指定按鈕的邊緣觸發
+- **設定階段**（`detectGamepadButtonPress`）：同時輪詢所有 4 個 controller，**放開按鍵時觸發（falling edge）**
+  - 放開的按鈕 = 觸發鍵，仍按住的按鈕 = 修飾鍵
+  - 支援組合鍵設定：按住 LT 後按 A 再放開 A → 偵測到 `LT+A`
+  - 先讀取初始狀態作為基準，避免誤觸已按住的按鈕
+- **運行時**（`startGamepadPoll`）：只輪詢 config 中指定的 `gamepad_index`，**按下時觸發（rising edge）**
+  - 先確認所有 `modifierKeys` 都按住，才允許主鍵邊緣觸發
 - **輪詢頻率**：10ms（100Hz），使用 `time.Ticker`
 - **斷線處理**：`XInputGetState` 回傳非 0 時視為斷線，重新連接後以當前狀態為基準
 

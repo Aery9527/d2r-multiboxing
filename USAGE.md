@@ -302,6 +302,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
   請按下想用來切換視窗的按鍵組合...
   （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）
+  （搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕，放開後完成偵測）
   （按 Esc 取消）
 
   偵測到：Ctrl+Tab（Tab 鍵）
@@ -310,18 +311,31 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
   ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
 ```
 
-**搖桿偵測範例**：
+**搖桿單鍵偵測範例**：
 
 ```
   請按下想用來切換視窗的按鍵組合...
-  （支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）
-  （按 Esc 取消）
+  （搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕，放開後完成偵測）
 
-  偵測到：搖桿 #2 A 按鈕
+  偵測到：搖桿 #1 A 按鈕
   確認使用此組合？(Y/n)：
 
-  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
+  ✔ 已儲存切換設定：搖桿 #1 A 按鈕
 ```
+
+**搖桿組合鍵偵測範例**（按住 LT，再按 A，放開 A）：
+
+```
+  請按下想用來切換視窗的按鍵組合...
+  （搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕，放開後完成偵測）
+
+  偵測到：搖桿 #1 LT（左扳機）+A 按鈕
+  確認使用此組合？(Y/n)：
+
+  ✔ 已儲存切換設定：搖桿 #1 LT（左扳機）+A 按鈕
+```
+
+> 💡 **搖桿偵測採用放開觸發**：按下所有按鈕後，放開觸發鍵時才完成偵測。最後放開的按鈕為觸發鍵，仍按住的其他按鈕為修飾鍵。
 
 支援的觸發方式：
 
@@ -329,7 +343,8 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 |------|------|------|
 | 鍵盤快捷鍵 | `Ctrl+Tab`、`Alt+F1` | 任意鍵 + 修飾鍵組合 |
 | 滑鼠側鍵 | `XButton1`、`XButton2` | 滑鼠前側鍵 / 後側鍵 |
-| 搖桿按鈕 | `Gamepad_A`、`Gamepad_LB` | XInput 搖桿任意按鈕（自動偵測搖桿編號） |
+| 搖桿單鍵 | `Gamepad_A`、`Gamepad_LB` | XInput 搖桿任意按鈕（自動偵測搖桿編號） |
+| 搖桿組合鍵 | `LT+A`、`Back+RB` | 先按住修飾鍵，再按觸發鍵，放開觸發鍵即完成 |
 
 > 💡 設定只需操作一次，會自動存入 `config.json`，後續啟動自動載入。
 
@@ -369,11 +384,26 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 }
 ```
 
+**搖桿組合鍵**（按住 LT，按 A，放開 A）：
+
+```json
+{
+  "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
+  "launch_delay": 5,
+  "switcher": {
+    "enabled": true,
+    "modifiers": ["Gamepad_LT"],
+    "key": "Gamepad_A",
+    "gamepad_index": 0
+  }
+}
+```
+
 | 欄位 | 類型 | 說明 |
 |------|------|------|
 | `switcher.enabled` | `bool` | 是否啟用視窗切換 |
-| `switcher.modifiers` | `[]string` | 修飾鍵：`"ctrl"`、`"alt"`、`"shift"` |
-| `switcher.key` | `string` | 按鍵名稱（如 `"Tab"`、`"F1"`、`"XButton1"`、`"Gamepad_A"`） |
+| `switcher.modifiers` | `[]string` | 修飾鍵：鍵盤用 `"ctrl"`、`"alt"`、`"shift"`；搖桿用 `"Gamepad_LT"`、`"Gamepad_Back"` 等 |
+| `switcher.key` | `string` | 觸發鍵名稱（如 `"Tab"`、`"F1"`、`"XButton1"`、`"Gamepad_A"`） |
 | `switcher.gamepad_index` | `int` | 搖桿編號（0-3），僅搖桿觸發時使用 |
 
 > ⚠️ 若快捷鍵與其他程式衝突，註冊會失敗並提示。請換一組按鍵組合。
