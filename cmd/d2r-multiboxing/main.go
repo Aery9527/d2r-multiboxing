@@ -14,12 +14,17 @@ import (
 	"d2r-multiboxing/internal/handle"
 	"d2r-multiboxing/internal/process"
 	"d2r-multiboxing/internal/switcher"
+	"golang.org/x/sys/windows"
 )
 
 // version is set at build time via -ldflags "-X main.version=x.y.z".
 var version = "dev"
 
 func main() {
+	// 設定 Windows console 輸出為 UTF-8，避免中文亂碼
+	_ = windows.SetConsoleCP(65001)
+	_ = windows.SetConsoleOutputCP(65001)
+
 	fmt.Println("============================================")
 	fmt.Printf("  D2R Multiboxing Launcher  v%s\n", version)
 	fmt.Println("============================================")
