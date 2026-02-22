@@ -93,6 +93,10 @@ Get-Item .\d2r-multiboxing.exe
 
 > ⚠️ **重要**：密碼欄位首次填入明文密碼即可，工具啟動後會自動加密。
 
+> ⚠️ **編碼格式**：CSV 必須存為 **UTF-8 無 BOM** 格式，否則中文顯示名稱會出現亂碼。
+> - ✅ 推薦編輯器：VS Code、Notepad++（另存為 UTF-8 無 BOM）
+> - ❌ 避免使用 Windows 記事本（Notepad）存檔，它預設會加入 BOM
+
 ### CSV 欄位說明
 
 | 欄位 | 必填 | 說明 | 範例 |
