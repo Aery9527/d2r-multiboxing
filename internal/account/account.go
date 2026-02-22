@@ -3,10 +3,8 @@
 package account
 
 import (
-	"bytes"
 	"encoding/csv"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 )
@@ -25,12 +23,8 @@ func IsPasswordEncrypted(password string) bool {
 	return strings.HasPrefix(password, encryptedPrefix)
 }
 
-// utf8BOM is the UTF-8 byte order mark written by Windows Notepad and some editors.
-var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
-
 // LoadAccounts reads accounts from a CSV file.
 // CSV format: Email,Password,DisplayName (first row is header).
-// Automatically strips UTF-8 BOM if present (written by Windows Notepad).
 func LoadAccounts(path string) ([]Account, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -38,15 +32,7 @@ func LoadAccounts(path string) ([]Account, error) {
 	}
 	defer f.Close()
 
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read accounts file: %w", err)
-	}
-
-	// 去除 UTF-8 BOM（Windows 記事本預設會加上 BOM）
-	data = bytes.TrimPrefix(data, utf8BOM)
-
-	reader := csv.NewReader(bytes.NewReader(data))
+	reader := csv.NewReader(f)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CSV: %w", err)
