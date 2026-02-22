@@ -51,6 +51,24 @@ func TestLoadAccounts_EmptyFile(t *testing.T) {
 	assert.Contains(t, err.Error(), "empty")
 }
 
+func TestLoadAccounts_UTF8BOM(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+
+	// 模擬 Windows 記事本存檔（UTF-8 with BOM）
+	bom := []byte{0xEF, 0xBB, 0xBF}
+	content := "Email,Password,DisplayName\n主帳號@gmail.com,pass123,主帳號-法師\n"
+	err := os.WriteFile(csvPath, append(bom, []byte(content)...), 0644)
+	assert.NoError(t, err)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Len(t, loaded, 1)
+	// BOM 不應汙染 Email 欄位
+	assert.Equal(t, "主帳號@gmail.com", loaded[0].Email)
+	assert.Equal(t, "主帳號-法師", loaded[0].DisplayName)
+}
+
 func TestIsPasswordEncrypted(t *testing.T) {
 	assert.False(t, IsPasswordEncrypted("plaintext"))
 	assert.False(t, IsPasswordEncrypted(""))
