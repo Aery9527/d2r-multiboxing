@@ -14,6 +14,7 @@ import (
 	"d2r-multiboxing/internal/handle"
 	"d2r-multiboxing/internal/process"
 	"d2r-multiboxing/internal/switcher"
+
 	"golang.org/x/sys/windows"
 )
 
