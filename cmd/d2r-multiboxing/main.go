@@ -23,10 +23,11 @@ import (
 // version is set at build time via -ldflags "-X main.version=x.y.z".
 var version = "dev"
 
-// 子選單統一導航指令（所有子選單必須支援這兩個選項）
+// 子選單統一導航指令（所有子選單必須支援這三個選項）
 const (
 	menuBack = "b" // 回上一層
 	menuHome = "h" // 回主選單
+	menuQuit = "q" // 離開程式
 )
 
 func main() {
@@ -342,15 +343,21 @@ func fileExists(path string) bool {
 func printSubMenuNav() {
 	fmt.Printf("  %s       回上一層\n", menuBack)
 	fmt.Printf("  %s       回主選單\n", menuHome)
+	fmt.Printf("  %s       離開程式\n", menuQuit)
 }
 
 // isMenuNav returns "back" if the input is menuBack, "home" if menuHome, or "" otherwise.
+// If the input is menuQuit, the program exits immediately.
 func isMenuNav(input string) string {
 	switch strings.ToLower(strings.TrimSpace(input)) {
 	case menuBack:
 		return "back"
 	case menuHome:
 		return "home"
+	case menuQuit:
+		fmt.Println("  再見！")
+		os.Exit(0)
+		return "" // unreachable
 	default:
 		return ""
 	}
