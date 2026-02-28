@@ -381,26 +381,14 @@ func launchOffline(d2rPath string, scanner *bufio.Scanner) {
 	fmt.Println()
 	fmt.Println("  === 離線遊玩模式 ===")
 
-	// 掃描可用 mod（專案 mods/ 目錄）
-	modsDir := localModsDir()
-	availableMods, _ := modfile.DiscoverMods(modsDir)
-
 	// 掃描 D2R 已安裝的 mod
 	installedMods, _ := modfile.DiscoverInstalledMods(d2rPath)
-	installedSet := make(map[string]bool)
-	for _, m := range installedMods {
-		installedSet[m] = true
-	}
 
 	// 顯示 mod 選擇
 	fmt.Println("  選擇 Mod：")
 	fmt.Println("  [0] 不使用 Mod（原版）")
-	for i, name := range availableMods {
-		status := ""
-		if installedSet[name] {
-			status = " ✔ 已安裝"
-		}
-		fmt.Printf("  [%d] %s%s\n", i+1, name, status)
+	for i, name := range installedMods {
+		fmt.Printf("  [%d] %s\n", i+1, name)
 	}
 	printSubMenuNav()
 	fmt.Print("  > 請選擇：")
@@ -417,24 +405,12 @@ func launchOffline(d2rPath string, scanner *bufio.Scanner) {
 	var extraArgs []string
 	if choice != "0" && choice != "" {
 		idx, err := strconv.Atoi(choice)
-		if err != nil || idx < 1 || idx > len(availableMods) {
+		if err != nil || idx < 1 || idx > len(installedMods) {
 			fmt.Println("  無效選擇。")
 			return
 		}
 
-		modName := availableMods[idx-1]
-
-		// 若 D2R 尚未安裝此 mod，自動複製
-		if !installedSet[modName] {
-			srcDir := filepath.Join(modsDir, modName)
-			fmt.Printf("  正在安裝 Mod: %s...\n", modName)
-			if err := modfile.InstallMod(srcDir, d2rPath); err != nil {
-				fmt.Printf("  ⚠ Mod 安裝失敗：%v\n", err)
-				return
-			}
-			fmt.Printf("  ✔ Mod 已安裝到 D2R\n")
-		}
-
+		modName := installedMods[idx-1]
 		extraArgs = append(extraArgs, "-mod", modName, "-txt")
 	}
 
