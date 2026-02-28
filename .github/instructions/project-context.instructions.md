@@ -45,4 +45,11 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 - 使用 `printSubMenuNav()` 印出導航提示、`isMenuNav(input)` 判斷使用者輸入是否為導航指令（輸入 `q` 時直接結束程式）
 - 主選單同樣以 `q` 退出程式
 
+## Windows 安全規則
+
+- **禁止在新功能中引入會觸發 Windows 安全監控（如 Windows Defender）的 API 或手法**
+- 僅 [internal/handle/](../../internal/handle/) 因核心多開功能需要使用 NT API（`NtDuplicateObject`、`NtQuerySystemInformation`、`NtQueryObject`），此為已知且必要的例外
+- 其餘功能（檔案操作、進程啟動、UI 互動等）一律使用 Go 標準庫或 `golang.org/x/sys/windows` 提供的高階 API，不得直接呼叫 `ntdll.dll`、注入記憶體、操作遠端進程等低階操作
+- 編譯產物若被防毒軟體誤判，應優先透過排除清單或簽章解決，不以修改核心機制為手段
+
 ---
