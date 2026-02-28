@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"d2r-multiboxing/internal/config"
 	"d2r-multiboxing/internal/d2r"
 	"d2r-multiboxing/internal/handle"
+	"d2r-multiboxing/internal/modfile"
 	"d2r-multiboxing/internal/process"
 	"d2r-multiboxing/internal/switcher"
 
@@ -20,6 +22,12 @@ import (
 
 // version is set at build time via -ldflags "-X main.version=x.y.z".
 var version = "dev"
+
+// 子選單統一導航指令（所有子選單必須支援這兩個選項）
+const (
+	menuBack = "b" // 回上一層
+	menuHome = "h" // 回主選單
+)
 
 func main() {
 	// 設定 Windows console 輸出為 UTF-8，避免中文亂碼
@@ -107,8 +115,14 @@ func main() {
 				fmt.Printf("  讀取帳號失敗：%v\n", err)
 			}
 			continue
+		case "0":
+			launchOffline(cfg.D2RPath, scanner)
+			continue
 		case "a":
 			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
+			continue
+		case "m":
+			installMods(cfg.D2RPath, scanner)
 			continue
 		case "s":
 			setupSwitcher(cfg, scanner)
@@ -138,7 +152,9 @@ func printMenu(accounts []account.Account) {
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
+	fmt.Println("  0       離線遊玩（不需帳密）")
 	fmt.Println("  a       啟動所有帳號（只啟動未啟動的）")
+	fmt.Println("  m       安裝 Mod 到 D2R")
 	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
@@ -147,11 +163,18 @@ func printMenu(accounts []account.Account) {
 
 func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner) {
 	// 選擇區域
-	fmt.Print("  > 選擇區域 (1=NA, 2=EU, 3=Asia)：")
+	fmt.Println()
+	fmt.Println("  選擇區域 (1=NA, 2=EU, 3=Asia)")
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
 	if !scanner.Scan() {
 		return
 	}
-	region := parseRegionInput(scanner.Text())
+	input := strings.TrimSpace(scanner.Text())
+	if nav := isMenuNav(input); nav != "" {
+		return
+	}
+	region := parseRegionInput(input)
 	if region == nil {
 		fmt.Println("  無效的區域選擇。")
 		return
@@ -197,11 +220,18 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 }
 
 func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scanner *bufio.Scanner) {
-	fmt.Print("  > 選擇區域 (1=NA, 2=EU, 3=Asia)：")
+	fmt.Println()
+	fmt.Println("  選擇區域 (1=NA, 2=EU, 3=Asia)")
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
 	if !scanner.Scan() {
 		return
 	}
-	region := parseRegionInput(scanner.Text())
+	input := strings.TrimSpace(scanner.Text())
+	if nav := isMenuNav(input); nav != "" {
+		return
+	}
+	region := parseRegionInput(input)
 	if region == nil {
 		fmt.Println("  無效的區域選擇。")
 		return
@@ -308,6 +338,181 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
+// printSubMenuNav prints the standard sub-menu navigation options.
+func printSubMenuNav() {
+	fmt.Printf("  %s       回上一層\n", menuBack)
+	fmt.Printf("  %s       回主選單\n", menuHome)
+}
+
+// isMenuNav returns "back" if the input is menuBack, "home" if menuHome, or "" otherwise.
+func isMenuNav(input string) string {
+	switch strings.ToLower(strings.TrimSpace(input)) {
+	case menuBack:
+		return "back"
+	case menuHome:
+		return "home"
+	default:
+		return ""
+	}
+}
+
+// localModsDir returns the mods/ directory next to the running executable.
+func localModsDir() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return "mods"
+	}
+	dir := filepath.Join(filepath.Dir(exe), "mods")
+	if info, err := os.Stat(dir); err == nil && info.IsDir() {
+		return dir
+	}
+	// Fallback to current directory
+	return "mods"
+}
+
+func launchOffline(d2rPath string, scanner *bufio.Scanner) {
+	fmt.Println()
+	fmt.Println("  === 離線遊玩模式 ===")
+
+	// 掃描可用 mod（專案 mods/ 目錄）
+	modsDir := localModsDir()
+	availableMods, _ := modfile.DiscoverMods(modsDir)
+
+	// 掃描 D2R 已安裝的 mod
+	installedMods, _ := modfile.DiscoverInstalledMods(d2rPath)
+	installedSet := make(map[string]bool)
+	for _, m := range installedMods {
+		installedSet[m] = true
+	}
+
+	// 顯示 mod 選擇
+	fmt.Println("  選擇 Mod：")
+	fmt.Println("  [0] 不使用 Mod（原版）")
+	for i, name := range availableMods {
+		status := ""
+		if installedSet[name] {
+			status = " ✔ 已安裝"
+		}
+		fmt.Printf("  [%d] %s%s\n", i+1, name, status)
+	}
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
+
+	if !scanner.Scan() {
+		return
+	}
+	choice := strings.TrimSpace(scanner.Text())
+
+	if nav := isMenuNav(choice); nav != "" {
+		return
+	}
+
+	var extraArgs []string
+	if choice != "0" && choice != "" {
+		idx, err := strconv.Atoi(choice)
+		if err != nil || idx < 1 || idx > len(availableMods) {
+			fmt.Println("  無效選擇。")
+			return
+		}
+
+		modName := availableMods[idx-1]
+
+		// 若 D2R 尚未安裝此 mod，自動複製
+		if !installedSet[modName] {
+			srcDir := filepath.Join(modsDir, modName)
+			fmt.Printf("  正在安裝 Mod: %s...\n", modName)
+			if err := modfile.InstallMod(srcDir, d2rPath); err != nil {
+				fmt.Printf("  ⚠ Mod 安裝失敗：%v\n", err)
+				return
+			}
+			fmt.Printf("  ✔ Mod 已安裝到 D2R\n")
+		}
+
+		extraArgs = append(extraArgs, "-mod", modName, "-txt")
+	}
+
+	fmt.Println("  正在啟動 D2R（離線模式）...")
+	pid, err := process.LaunchD2ROffline(d2rPath, extraArgs...)
+	if err != nil {
+		fmt.Printf("  啟動失敗：%v\n", err)
+		return
+	}
+	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
+	if len(extraArgs) > 0 {
+		fmt.Printf("  ✔ 使用 Mod: %s\n", extraArgs[1])
+	}
+	fmt.Println()
+}
+
+func installMods(d2rPath string, scanner *bufio.Scanner) {
+	fmt.Println()
+	fmt.Println("  === 安裝 Mod 到 D2R ===")
+
+	modsDir := localModsDir()
+	availableMods, err := modfile.DiscoverMods(modsDir)
+	if err != nil {
+		fmt.Printf("  掃描 mods/ 目錄失敗：%v\n", err)
+		return
+	}
+
+	if len(availableMods) == 0 {
+		fmt.Println("  mods/ 目錄下沒有找到任何 Mod。")
+		return
+	}
+
+	// 掃描已安裝
+	installedMods, _ := modfile.DiscoverInstalledMods(d2rPath)
+	installedSet := make(map[string]bool)
+	for _, m := range installedMods {
+		installedSet[m] = true
+	}
+
+	fmt.Println("  可用 Mod：")
+	for i, name := range availableMods {
+		status := ""
+		if installedSet[name] {
+			status = " ✔ 已安裝"
+		}
+		fmt.Printf("  [%d] %s%s\n", i+1, name, status)
+	}
+	fmt.Println("  a       安裝全部")
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
+
+	if !scanner.Scan() {
+		return
+	}
+	choice := strings.TrimSpace(strings.ToLower(scanner.Text()))
+
+	if choice == "" || isMenuNav(choice) != "" {
+		return
+	}
+
+	var toInstall []string
+	if choice == "a" {
+		toInstall = availableMods
+	} else {
+		idx, err := strconv.Atoi(choice)
+		if err != nil || idx < 1 || idx > len(availableMods) {
+			fmt.Println("  無效選擇。")
+			return
+		}
+		toInstall = []string{availableMods[idx-1]}
+	}
+
+	d2rModsDir := modfile.D2RModsDir(d2rPath)
+	for _, name := range toInstall {
+		srcDir := filepath.Join(modsDir, name)
+		fmt.Printf("  正在安裝 %s → %s...\n", name, d2rModsDir)
+		if err := modfile.InstallMod(srcDir, d2rPath); err != nil {
+			fmt.Printf("  ⚠ %s 安裝失敗：%v\n", name, err)
+			continue
+		}
+		fmt.Printf("  ✔ %s 安裝完成\n", name)
+	}
+	fmt.Println()
+}
+
 func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 	fmt.Println()
 	fmt.Println("  === 視窗切換設定 ===")
@@ -321,13 +526,17 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 	fmt.Println()
 	fmt.Println("  [1] 設定切換按鍵")
 	fmt.Println("  [0] 關閉切換功能")
-	fmt.Println("  [Enter] 返回")
+	printSubMenuNav()
 	fmt.Print("  > 請選擇：")
 
 	if !scanner.Scan() {
 		return
 	}
 	choice := strings.TrimSpace(scanner.Text())
+
+	if isMenuNav(choice) != "" {
+		return
+	}
 
 	switch choice {
 	case "1":

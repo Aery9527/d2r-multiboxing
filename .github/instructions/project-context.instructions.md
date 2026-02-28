@@ -38,4 +38,11 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 - [chenwei791129/multiablo](https://github.com/chenwei791129/multiablo) - Go handle 關閉參考
 - [shupershuff/Diablo2RLoader](https://github.com/shupershuff/Diablo2RLoader) - 功能參考
 
+## CLI 選單設計規則
+
+- 所有子選單（非主選單的互動畫面）**必須**提供「回上一層」與「回主選單」兩個導航選項
+- 導航選項值在整個專案內統一使用常數 `menuBack = "b"`（回上一層）、`menuHome = "h"`（回主選單），定義於 [cmd/d2r-multiboxing/main.go](../../cmd/d2r-multiboxing/main.go)
+- 使用 `printSubMenuNav()` 印出導航提示、`isMenuNav(input)` 判斷使用者輸入是否為導航指令
+- 主選單以 `q` 退出程式，子選單不得使用 `q` 退出
+
 ---

@@ -23,3 +23,14 @@ func LaunchD2R(d2rPath string, username string, password string, address string,
 
 	return uint32(cmd.Process.Pid), nil
 }
+
+// LaunchD2ROffline starts D2R.exe without account parameters (offline/single-player mode).
+func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
+	cmd := exec.Command(d2rPath, extraArgs...)
+
+	if err := cmd.Start(); err != nil {
+		return 0, fmt.Errorf("failed to start D2R: %w", err)
+	}
+
+	return uint32(cmd.Process.Pid), nil
+}
