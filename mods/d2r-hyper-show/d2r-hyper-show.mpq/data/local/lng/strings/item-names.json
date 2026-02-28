@@ -1,0 +1,386 @@
+[
+  {
+    "id": 11147,
+    "Key": "r01",
+    "enUS": "ÿc5El Rune #1",
+    "zhTW": "ÿc5艾爾 符文 #1"
+  },
+  {
+    "id": 11148,
+    "Key": "r02",
+    "enUS": "ÿc5Eld Rune #2",
+    "zhTW": "ÿc5艾德 符文 #2"
+  },
+  {
+    "id": 11149,
+    "Key": "r03",
+    "enUS": "ÿc5Tir Rune #3",
+    "zhTW": "ÿc5提爾 符文 #3"
+  },
+  {
+    "id": 11150,
+    "Key": "r04",
+    "enUS": "ÿc5Nef Rune #4",
+    "zhTW": "ÿc5乃夫 符文 #4"
+  },
+  {
+    "id": 11151,
+    "Key": "r05",
+    "enUS": "ÿc5Eth Rune #5",
+    "zhTW": "ÿc5乙太 符文 #5"
+  },
+  {
+    "id": 11152,
+    "Key": "r06",
+    "enUS": "ÿc5Ith Rune #6",
+    "zhTW": "ÿc5伊斯 符文 #6"
+  },
+  {
+    "id": 11153,
+    "Key": "r07",
+    "enUS": "ÿc5Tal Rune #7",
+    "zhTW": "ÿc5塔爾 符文 #7"
+  },
+  {
+    "id": 11154,
+    "Key": "r08",
+    "enUS": "ÿc5Ral Rune #8",
+    "zhTW": "ÿc5拉爾 符文 #8"
+  },
+  {
+    "id": 11155,
+    "Key": "r09",
+    "enUS": "ÿc5Ort Rune #9",
+    "zhTW": "ÿc5乙特 符文 #9"
+  },
+  {
+    "id": 11156,
+    "Key": "r10",
+    "enUS": "ÿc5Thul Rune #10",
+    "zhTW": "ÿc5乙爾 符文 #10"
+  },
+  {
+    "id": 11157,
+    "Key": "r11",
+    "enUS": "ÿc5Amn Rune #11",
+    "zhTW": "ÿc5安姆 符文 #11"
+  },
+  {
+    "id": 11158,
+    "Key": "r12",
+    "enUS": "ÿc5Sol Rune #12",
+    "zhTW": "ÿc5索爾 符文 #12"
+  },
+  {
+    "id": 11159,
+    "Key": "r13",
+    "enUS": "ÿc5Shael Rune #13",
+    "zhTW": "ÿc5乙爾 符文 #13"
+  },
+  {
+    "id": 11160,
+    "Key": "r14",
+    "enUS": "ÿc5Dol Rune #14",
+    "zhTW": "ÿc5杜爾 符文 #14"
+  },
+  {
+    "id": 11161,
+    "Key": "r15",
+    "enUS": "ÿc5Hel Rune #15",
+    "zhTW": "ÿc5海爾 符文 #15"
+  },
+  {
+    "id": 11162,
+    "Key": "r16",
+    "enUS": "ÿc5Io Rune #16",
+    "zhTW": "ÿc5艾歐 符文 #16"
+  },
+  {
+    "id": 11163,
+    "Key": "r17",
+    "enUS": "ÿc5Lum Rune #17",
+    "zhTW": "ÿc5盧姆 符文 #17"
+  },
+  {
+    "id": 11164,
+    "Key": "r18",
+    "enUS": "ÿc5Ko Rune #18",
+    "zhTW": "ÿc5乙歐 符文 #18"
+  },
+  {
+    "id": 11165,
+    "Key": "r19",
+    "enUS": "ÿc5Fal Rune #19",
+    "zhTW": "ÿc5法爾 符文 #19"
+  },
+  {
+    "id": 11166,
+    "Key": "r20",
+    "enUS": "ÿc5Lem Rune #20",
+    "zhTW": "ÿc5雷姆 符文 #20"
+  },
+  {
+    "id": 11167,
+    "Key": "r21",
+    "enUS": "ÿc3★ Pul Rune #21",
+    "zhTW": "ÿc3★ 普爾 符文 #21"
+  },
+  {
+    "id": 11168,
+    "Key": "r22",
+    "enUS": "ÿc3★ Um Rune #22",
+    "zhTW": "ÿc3★ 乙姆 符文 #22"
+  },
+  {
+    "id": 11169,
+    "Key": "r23",
+    "enUS": "ÿc3★ Mal Rune #23",
+    "zhTW": "ÿc3★ 乙爾 符文 #23"
+  },
+  {
+    "id": 11170,
+    "Key": "r24",
+    "enUS": "ÿc3★ Ist Rune #24",
+    "zhTW": "ÿc3★ 伊斯特 符文 #24"
+  },
+  {
+    "id": 11171,
+    "Key": "r25",
+    "enUS": "ÿc3★ Gul Rune #25",
+    "zhTW": "ÿc3★ 古爾 符文 #25"
+  },
+  {
+    "id": 11172,
+    "Key": "r26",
+    "enUS": "ÿc8★★ Vex Rune #26",
+    "zhTW": "ÿc8★★ 乙克斯 符文 #26"
+  },
+  {
+    "id": 11173,
+    "Key": "r27",
+    "enUS": "ÿc8★★ Ohm Rune #27",
+    "zhTW": "ÿc8★★ 歐姆 符文 #27"
+  },
+  {
+    "id": 11174,
+    "Key": "r28",
+    "enUS": "ÿc8★★ Lo Rune #28",
+    "zhTW": "ÿc8★★ 洛 符文 #28"
+  },
+  {
+    "id": 11175,
+    "Key": "r29",
+    "enUS": "ÿc8★★ Sur Rune #29",
+    "zhTW": "ÿc8★★ 瑟 符文 #29"
+  },
+  {
+    "id": 11176,
+    "Key": "r30",
+    "enUS": "ÿc1★★★ Ber Rune #30 ★★★",
+    "zhTW": "ÿc1★★★ 柏 符文 #30 ★★★"
+  },
+  {
+    "id": 11177,
+    "Key": "r31",
+    "enUS": "ÿc1★★★ Jah Rune #31 ★★★",
+    "zhTW": "ÿc1★★★ 賈 符文 #31 ★★★"
+  },
+  {
+    "id": 11178,
+    "Key": "r32",
+    "enUS": "ÿc1★★★ Cham Rune #32 ★★★",
+    "zhTW": "ÿc1★★★ 乙安 符文 #32 ★★★"
+  },
+  {
+    "id": 11179,
+    "Key": "r33",
+    "enUS": "ÿc1★★★ Zod Rune #33 ★★★",
+    "zhTW": "ÿc1★★★ 乙得 符文 #33 ★★★"
+  },
+  {
+    "id": 22478,
+    "Key": "pk1",
+    "enUS": "ÿc8★★ Key of Terror",
+    "zhTW": "ÿc8★★ 恐懼之鑰"
+  },
+  {
+    "id": 22479,
+    "Key": "pk2",
+    "enUS": "ÿc8★★ Key of Hate",
+    "zhTW": "ÿc8★★ 憎恨之鑰"
+  },
+  {
+    "id": 22480,
+    "Key": "pk3",
+    "enUS": "ÿc8★★ Key of Destruction",
+    "zhTW": "ÿc8★★ 毀滅之鑰"
+  },
+  {
+    "id": 22471,
+    "Key": "tes",
+    "enUS": "ÿc8★★ Twisted Essence of Suffering",
+    "zhTW": "ÿc8★★ 扭曲的苦難精華"
+  },
+  {
+    "id": 22472,
+    "Key": "ceh",
+    "enUS": "ÿc8★★ Charged Essence of Hatred",
+    "zhTW": "ÿc8★★ 充能的憎恨精華"
+  },
+  {
+    "id": 22473,
+    "Key": "bet",
+    "enUS": "ÿc8★★ Burning Essence of Terror",
+    "zhTW": "ÿc8★★ 燃燒的恐懼精華"
+  },
+  {
+    "id": 22474,
+    "Key": "fed",
+    "enUS": "ÿc8★★ Festering Essence of Destruction",
+    "zhTW": "ÿc8★★ 潰爛的毀滅精華"
+  },
+  {
+    "id": 22475,
+    "Key": "mbr",
+    "enUS": "ÿc8★★ Diablo's Horn",
+    "zhTW": "ÿc8★★ 暗黑破壞神之角"
+  },
+  {
+    "id": 22476,
+    "Key": "dhn",
+    "enUS": "ÿc8★★ Baal's Eye",
+    "zhTW": "ÿc8★★ 巴爾之眼"
+  },
+  {
+    "id": 22477,
+    "Key": "bey",
+    "enUS": "ÿc8★★ Mephisto's Brain",
+    "zhTW": "ÿc8★★ 墨菲斯托之腦"
+  },
+  {
+    "id": 11198,
+    "Key": "rin",
+    "enUS": "ÿc3★ Ring",
+    "zhTW": "ÿc3★ 戒指"
+  },
+  {
+    "id": 11199,
+    "Key": "amu",
+    "enUS": "ÿc3★ Amulet",
+    "zhTW": "ÿc3★ 護身符"
+  },
+  {
+    "id": 11230,
+    "Key": "jew",
+    "enUS": "ÿc3★ Jewel",
+    "zhTW": "ÿc3★ 珠寶"
+  },
+  {
+    "id": 11225,
+    "Key": "cm1",
+    "enUS": "ÿc3★ Small Charm",
+    "zhTW": "ÿc3★ 小型護身符"
+  },
+  {
+    "id": 11226,
+    "Key": "cm2",
+    "enUS": "ÿc3★ Large Charm",
+    "zhTW": "ÿc3★ 大型護身符"
+  },
+  {
+    "id": 11227,
+    "Key": "cm3",
+    "enUS": "ÿc3★ Grand Charm",
+    "zhTW": "ÿc3★ 超大型護身符"
+  },
+  {
+    "id": 11318,
+    "Key": "hp1",
+    "enUS": "ÿc1HP1",
+    "zhTW": "ÿc1HP1"
+  },
+  {
+    "id": 11319,
+    "Key": "hp2",
+    "enUS": "ÿc1HP2",
+    "zhTW": "ÿc1HP2"
+  },
+  {
+    "id": 11320,
+    "Key": "hp3",
+    "enUS": "ÿc1HP3",
+    "zhTW": "ÿc1HP3"
+  },
+  {
+    "id": 11321,
+    "Key": "hp4",
+    "enUS": "ÿc1HP4",
+    "zhTW": "ÿc1HP4"
+  },
+  {
+    "id": 11322,
+    "Key": "hp5",
+    "enUS": "ÿc1HP5",
+    "zhTW": "ÿc1HP5"
+  },
+  {
+    "id": 11323,
+    "Key": "mp1",
+    "enUS": "ÿc3MP1",
+    "zhTW": "ÿc3MP1"
+  },
+  {
+    "id": 11324,
+    "Key": "mp2",
+    "enUS": "ÿc3MP2",
+    "zhTW": "ÿc3MP2"
+  },
+  {
+    "id": 11325,
+    "Key": "mp3",
+    "enUS": "ÿc3MP3",
+    "zhTW": "ÿc3MP3"
+  },
+  {
+    "id": 11326,
+    "Key": "mp4",
+    "enUS": "ÿc3MP4",
+    "zhTW": "ÿc3MP4"
+  },
+  {
+    "id": 11327,
+    "Key": "mp5",
+    "enUS": "ÿc3MP5",
+    "zhTW": "ÿc3MP5"
+  },
+  {
+    "id": 11338,
+    "Key": "rvs",
+    "enUS": "ÿc;RJ",
+    "zhTW": "ÿc;RJ"
+  },
+  {
+    "id": 11339,
+    "Key": "rvl",
+    "enUS": "ÿc;FRJ",
+    "zhTW": "ÿc;FRJ"
+  },
+  {
+    "id": 11340,
+    "Key": "tsc",
+    "enUS": "ÿc0TP",
+    "zhTW": "ÿc0TP"
+  },
+  {
+    "id": 11341,
+    "Key": "isc",
+    "enUS": "ÿc0ID",
+    "zhTW": "ÿc0ID"
+  },
+  {
+    "id": 11342,
+    "Key": "key",
+    "enUS": "ÿc5KEY",
+    "zhTW": "ÿc5KEY"
+  }
+]
