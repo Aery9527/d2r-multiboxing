@@ -1,0 +1,40 @@
+{
+  "runewords": [
+    {
+      "name": "Dragon Breath",
+      "localName": "龍息",
+      "runes": ["Ber", "Jah", "Cham"],
+      "runeIds": ["r30", "r31", "r32"],
+      "numSockets": 3,
+      "itemTypes": ["weap"],
+      "itemTypeDescription": "所有武器",
+      "enabled": true,
+      "properties": [
+        {
+          "code": "allskills",
+          "description": "+3 到所有技能",
+          "min": 3,
+          "max": 3
+        },
+        {
+          "code": "swing2",
+          "description": "40% 增加攻擊速度",
+          "min": 40,
+          "max": 40
+        },
+        {
+          "code": "lifesteal",
+          "description": "15% 生命偷取",
+          "min": 15,
+          "max": 15
+        },
+        {
+          "code": "dmg%",
+          "description": "+300% 增強傷害",
+          "min": 300,
+          "max": 300
+        }
+      ]
+    }
+  ]
+}

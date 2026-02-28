@@ -1,0 +1,1 @@
+{"eval_id":2,"eval_name":"runeword","prompt":"我想做一個 D2R 的自訂符文之語 mod，名字叫 my-runewords。新增一個符文之語叫「龍息 (Dragon Breath)」，用 Ber + Jah + Cham 三顆符文，可以裝在所有武器上。效果：+3 所有技能、40% 攻擊速度、15% 生命偷取、+300% 傷害。放到 ./mods/ 底下","assertions":[]}

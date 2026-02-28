@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {"text": "生成了 mods/high-drop/modinfo.json 且包含正確的 name 和 savepath", "passed": true, "evidence": "modinfo.json 存在且包含正確欄位"},
+    {"text": "生成了 mods/high-drop/high-drop.mpq/data/global/excel/treasureclassex.txt", "passed": true, "evidence": "TreasureClassEx.txt 位於正確路徑，另外還多產了 ItemRatio.txt"},
+    {"text": "treasureclassex.txt 是 Tab 分隔格式", "passed": true, "evidence": "TSV 格式正確"},
+    {"text": "NoDrop 值被降低以提升掉落率", "passed": true, "evidence": "NoDrop 被降低，Boss NoDrop 從 ~15 降至 3"},
+    {"text": "生成了 README.md 包含安裝說明和 -mod high-drop -txt 啟動參數", "passed": true, "evidence": "README.md 存在 (2838 bytes)"},
+    {"text": "有提醒使用者僅限離線使用的警告", "passed": true, "evidence": "README.md 包含相關警告"}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}
+}

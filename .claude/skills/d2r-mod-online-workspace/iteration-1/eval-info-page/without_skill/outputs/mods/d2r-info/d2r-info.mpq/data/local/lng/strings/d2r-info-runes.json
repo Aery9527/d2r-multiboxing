@@ -1,0 +1,200 @@
+[
+  {
+    "id": 90100,
+    "Key": "r01",
+    "enUS": "El Rune\nÿc5Cube: 3x El ÿc4→ Eld",
+    "zhTW": "El 符文\nÿc5合成: 3x El ÿc4→ Eld"
+  },
+  {
+    "id": 90101,
+    "Key": "r02",
+    "enUS": "Eld Rune\nÿc5Cube: 3x Eld ÿc4→ Tir",
+    "zhTW": "Eld 符文\nÿc5合成: 3x Eld ÿc4→ Tir"
+  },
+  {
+    "id": 90102,
+    "Key": "r03",
+    "enUS": "Tir Rune\nÿc5Cube: 3x Tir ÿc4→ Nef",
+    "zhTW": "Tir 符文\nÿc5合成: 3x Tir ÿc4→ Nef"
+  },
+  {
+    "id": 90103,
+    "Key": "r04",
+    "enUS": "Nef Rune\nÿc5Cube: 3x Nef ÿc4→ Eth",
+    "zhTW": "Nef 符文\nÿc5合成: 3x Nef ÿc4→ Eth"
+  },
+  {
+    "id": 90104,
+    "Key": "r05",
+    "enUS": "Eth Rune\nÿc5Cube: 3x Eth ÿc4→ Ith",
+    "zhTW": "Eth 符文\nÿc5合成: 3x Eth ÿc4→ Ith"
+  },
+  {
+    "id": 90105,
+    "Key": "r06",
+    "enUS": "Ith Rune\nÿc5Cube: 3x Ith ÿc4→ Tal",
+    "zhTW": "Ith 符文\nÿc5合成: 3x Ith ÿc4→ Tal"
+  },
+  {
+    "id": 90106,
+    "Key": "r07",
+    "enUS": "Tal Rune\nÿc5Cube: 3x Tal ÿc4→ Ral",
+    "zhTW": "Tal 符文\nÿc5合成: 3x Tal ÿc4→ Ral"
+  },
+  {
+    "id": 90107,
+    "Key": "r08",
+    "enUS": "Ral Rune\nÿc5Cube: 3x Ral ÿc4→ Ort",
+    "zhTW": "Ral 符文\nÿc5合成: 3x Ral ÿc4→ Ort"
+  },
+  {
+    "id": 90108,
+    "Key": "r09",
+    "enUS": "Ort Rune\nÿc5Cube: 3x Ort ÿc4→ Thul",
+    "zhTW": "Ort 符文\nÿc5合成: 3x Ort ÿc4→ Thul"
+  },
+  {
+    "id": 90109,
+    "Key": "r10",
+    "enUS": "Thul Rune\nÿc5Cube: 3x Thul + ÿc9Chipped Topaz ÿc4→ Amn",
+    "zhTW": "Thul 符文\nÿc5合成: 3x Thul + ÿc9碎裂黃寶石 ÿc4→ Amn"
+  },
+  {
+    "id": 90110,
+    "Key": "r11",
+    "enUS": "Amn Rune\nÿc5Cube: 3x Amn + ÿc9Chipped Amethyst ÿc4→ Sol",
+    "zhTW": "Amn 符文\nÿc5合成: 3x Amn + ÿc9碎裂紫寶石 ÿc4→ Sol"
+  },
+  {
+    "id": 90111,
+    "Key": "r12",
+    "enUS": "Sol Rune\nÿc5Cube: 3x Sol + ÿc9Chipped Sapphire ÿc4→ Shael",
+    "zhTW": "Sol 符文\nÿc5合成: 3x Sol + ÿc9碎裂藍寶石 ÿc4→ Shael"
+  },
+  {
+    "id": 90112,
+    "Key": "r13",
+    "enUS": "Shael Rune\nÿc5Cube: 3x Shael + ÿc9Chipped Ruby ÿc4→ Dol",
+    "zhTW": "Shael 符文\nÿc5合成: 3x Shael + ÿc9碎裂紅寶石 ÿc4→ Dol"
+  },
+  {
+    "id": 90113,
+    "Key": "r14",
+    "enUS": "Dol Rune\nÿc5Cube: 3x Dol + ÿc9Chipped Emerald ÿc4→ Hel",
+    "zhTW": "Dol 符文\nÿc5合成: 3x Dol + ÿc9碎裂綠寶石 ÿc4→ Hel"
+  },
+  {
+    "id": 90114,
+    "Key": "r15",
+    "enUS": "Hel Rune\nÿc5Cube: 3x Hel + ÿc9Chipped Diamond ÿc4→ Io",
+    "zhTW": "Hel 符文\nÿc5合成: 3x Hel + ÿc9碎裂鑽石 ÿc4→ Io"
+  },
+  {
+    "id": 90115,
+    "Key": "r16",
+    "enUS": "Io Rune\nÿc5Cube: 3x Io + ÿc9Flawed Topaz ÿc4→ Lum",
+    "zhTW": "Io 符文\nÿc5合成: 3x Io + ÿc9瑕疵黃寶石 ÿc4→ Lum"
+  },
+  {
+    "id": 90116,
+    "Key": "r17",
+    "enUS": "Lum Rune\nÿc5Cube: 3x Lum + ÿc9Flawed Amethyst ÿc4→ Ko",
+    "zhTW": "Lum 符文\nÿc5合成: 3x Lum + ÿc9瑕疵紫寶石 ÿc4→ Ko"
+  },
+  {
+    "id": 90117,
+    "Key": "r18",
+    "enUS": "Ko Rune\nÿc5Cube: 3x Ko + ÿc9Flawed Sapphire ÿc4→ Fal",
+    "zhTW": "Ko 符文\nÿc5合成: 3x Ko + ÿc9瑕疵藍寶石 ÿc4→ Fal"
+  },
+  {
+    "id": 90118,
+    "Key": "r19",
+    "enUS": "Fal Rune\nÿc5Cube: 3x Fal + ÿc9Flawed Ruby ÿc4→ Lem",
+    "zhTW": "Fal 符文\nÿc5合成: 3x Fal + ÿc9瑕疵紅寶石 ÿc4→ Lem"
+  },
+  {
+    "id": 90119,
+    "Key": "r20",
+    "enUS": "Lem Rune\nÿc5Cube: 3x Lem + ÿc9Flawed Emerald ÿc4→ Pul",
+    "zhTW": "Lem 符文\nÿc5合成: 3x Lem + ÿc9瑕疵綠寶石 ÿc4→ Pul"
+  },
+  {
+    "id": 90120,
+    "Key": "r21",
+    "enUS": "Pul Rune\nÿc5Cube: 2x Pul + ÿc9Flawed Diamond ÿc4→ Um",
+    "zhTW": "Pul 符文\nÿc5合成: 2x Pul + ÿc9瑕疵鑽石 ÿc4→ Um"
+  },
+  {
+    "id": 90121,
+    "Key": "r22",
+    "enUS": "Um Rune\nÿc5Cube: 2x Um + ÿc9Topaz ÿc4→ Mal",
+    "zhTW": "Um 符文\nÿc5合成: 2x Um + ÿc9黃寶石 ÿc4→ Mal"
+  },
+  {
+    "id": 90122,
+    "Key": "r23",
+    "enUS": "Mal Rune\nÿc5Cube: 2x Mal + ÿc9Amethyst ÿc4→ Ist",
+    "zhTW": "Mal 符文\nÿc5合成: 2x Mal + ÿc9紫寶石 ÿc4→ Ist"
+  },
+  {
+    "id": 90123,
+    "Key": "r24",
+    "enUS": "Ist Rune\nÿc5Cube: 2x Ist + ÿc9Sapphire ÿc4→ Gul",
+    "zhTW": "Ist 符文\nÿc5合成: 2x Ist + ÿc9藍寶石 ÿc4→ Gul"
+  },
+  {
+    "id": 90124,
+    "Key": "r25",
+    "enUS": "Gul Rune\nÿc5Cube: 2x Gul + ÿc9Ruby ÿc4→ Vex",
+    "zhTW": "Gul 符文\nÿc5合成: 2x Gul + ÿc9紅寶石 ÿc4→ Vex"
+  },
+  {
+    "id": 90125,
+    "Key": "r26",
+    "enUS": "Vex Rune\nÿc5Cube: 2x Vex + ÿc9Emerald ÿc4→ Ohm",
+    "zhTW": "Vex 符文\nÿc5合成: 2x Vex + ÿc9綠寶石 ÿc4→ Ohm"
+  },
+  {
+    "id": 90126,
+    "Key": "r27",
+    "enUS": "Ohm Rune\nÿc5Cube: 2x Ohm + ÿc9Diamond ÿc4→ Lo",
+    "zhTW": "Ohm 符文\nÿc5合成: 2x Ohm + ÿc9鑽石 ÿc4→ Lo"
+  },
+  {
+    "id": 90127,
+    "Key": "r28",
+    "enUS": "Lo Rune\nÿc5Cube: 2x Lo + ÿc9Flawless Topaz ÿc4→ Sur",
+    "zhTW": "Lo 符文\nÿc5合成: 2x Lo + ÿc9無瑕黃寶石 ÿc4→ Sur"
+  },
+  {
+    "id": 90128,
+    "Key": "r29",
+    "enUS": "Sur Rune\nÿc5Cube: 2x Sur + ÿc9Flawless Amethyst ÿc4→ Ber",
+    "zhTW": "Sur 符文\nÿc5合成: 2x Sur + ÿc9無瑕紫寶石 ÿc4→ Ber"
+  },
+  {
+    "id": 90129,
+    "Key": "r30",
+    "enUS": "Ber Rune\nÿc5Cube: 2x Ber + ÿc9Flawless Sapphire ÿc4→ Jah",
+    "zhTW": "Ber 符文\nÿc5合成: 2x Ber + ÿc9無瑕藍寶石 ÿc4→ Jah"
+  },
+  {
+    "id": 90130,
+    "Key": "r31",
+    "enUS": "Jah Rune\nÿc5Cube: 2x Jah + ÿc9Flawless Ruby ÿc4→ Cham",
+    "zhTW": "Jah 符文\nÿc5合成: 2x Jah + ÿc9無瑕紅寶石 ÿc4→ Cham"
+  },
+  {
+    "id": 90131,
+    "Key": "r32",
+    "enUS": "Cham Rune\nÿc5Cube: 2x Cham + ÿc9Flawless Emerald ÿc4→ Zod",
+    "zhTW": "Cham 符文\nÿc5合成: 2x Cham + ÿc9無瑕綠寶石 ÿc4→ Zod"
+  },
+  {
+    "id": 90132,
+    "Key": "r33",
+    "enUS": "Zod Rune\nÿc8[Highest Rune]",
+    "zhTW": "Zod 符文\nÿc8[最高階符文]"
+  }
+]

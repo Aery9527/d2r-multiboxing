@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "custom-runeword",
+  "prompt": "我想做一個 D2R 的自訂符文之語 mod，名字叫 my-runewords。新增一個符文之語叫「龍息 (Dragon Breath)」，用 Ber + Jah + Cham 三顆符文，可以裝在所有武器上。效果：+3 所有技能、40% 攻擊速度、15% 生命偷取、+300% 傷害。放到 ./mods/ 底下",
+  "assertions": [
+    "生成了 mods/my-runewords/modinfo.json",
+    "生成了 runes.txt 包含 Dragon Breath 的定義行",
+    "runes.txt 中 Rune1-Rune3 對應 Ber(r30), Jah(r31), Cham(r32)",
+    "runes.txt 中 itype1 設為 weap",
+    "屬性包含 allskills、swing2、lifesteal、dmg%",
+    "生成了 item-runes.json 包含 Dragon Breath 和龍息的中英文名稱",
+    "JSON 字串的 id 使用 90000+ 避免衝突"
+  ]
+}

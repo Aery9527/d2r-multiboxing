@@ -1,0 +1,20 @@
+[
+  {
+    "id": 90001,
+    "Key": "item_fastercastrate",
+    "enUS": "+%d%% Faster Cast Rate\nÿc4== FCR Breakpoints ==ÿc0\nÿc3Sorceress: ÿc00/9/20/37/63/105/200\nÿc3Sorc(Light): ÿc00/7/15/23/35/52/78/117/194\nÿc3Paladin: ÿc00/9/18/30/48/75/125",
+    "zhTW": "+%d%% 更快的施法速度\nÿc4== FCR 斷點表 ==ÿc0\nÿc3女巫: ÿc00/9/20/37/63/105/200\nÿc3女巫(閃電): ÿc00/7/15/23/35/52/78/117/194\nÿc3聖騎士: ÿc00/9/18/30/48/75/125"
+  },
+  {
+    "id": 90002,
+    "Key": "item_fastergethitrate",
+    "enUS": "+%d%% Faster Hit Recovery\nÿc4== FHR Breakpoints ==ÿc0\nÿc3Sorceress: ÿc00/5/9/14/20/30/42/60/86/142\nÿc3Paladin: ÿc00/7/15/27/48/86",
+    "zhTW": "+%d%% 更快的打擊恢復\nÿc4== FHR 斷點表 ==ÿc0\nÿc3女巫: ÿc00/5/9/14/20/30/42/60/86/142\nÿc3聖騎士: ÿc00/7/15/27/48/86"
+  },
+  {
+    "id": 90003,
+    "Key": "item_fasterblockrate",
+    "enUS": "+%d%% Faster Block Rate\nÿc4== FBR Breakpoints ==ÿc0\nÿc3Sorceress: ÿc00/7/15/27/48/86\nÿc3Paladin: ÿc00/13/32/86\nÿc3Pala(HolyShield): ÿc00/86",
+    "zhTW": "+%d%% 更快的格擋速度\nÿc4== FBR 斷點表 ==ÿc0\nÿc3女巫: ÿc00/7/15/27/48/86\nÿc3聖騎士: ÿc00/13/32/86\nÿc3聖騎士(聖盾): ÿc00/86"
+  }
+]

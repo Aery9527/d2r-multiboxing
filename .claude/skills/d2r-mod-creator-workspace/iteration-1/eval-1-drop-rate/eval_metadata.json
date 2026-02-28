@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "drop-rate-mod",
+  "prompt": "幫我建一個 D2R mod，把 Hell 難度的掉落率提升 5 倍，特別是高階符文的掉落。Mod 名稱叫 high-drop，放到 ./mods/ 底下",
+  "assertions": [
+    "生成了 mods/high-drop/modinfo.json 且包含正確的 name 和 savepath",
+    "生成了 mods/high-drop/high-drop.mpq/data/global/excel/treasureclassex.txt",
+    "treasureclassex.txt 是 Tab 分隔格式",
+    "NoDrop 值被降低以提升掉落率",
+    "生成了 README.md 包含安裝說明和 -mod high-drop -txt 啟動參數",
+    "有提醒使用者僅限離線使用的警告"
+  ]
+}

@@ -1,0 +1,200 @@
+[
+  {
+    "id": 21001,
+    "Key": "r01",
+    "enUS": "El Rune #1\\nÿc2Runewords: Steel, Stealth, Zephyr, Leaf, Holy Thunder",
+    "zhTW": "El Rune #1\\nÿc2Runewords: Steel, Stealth, Zephyr, Leaf, Holy Thunder"
+  },
+  {
+    "id": 21002,
+    "Key": "r02",
+    "enUS": "Eld Rune #2\\nÿc2Runewords: Steel, Stealth, Ancient's Pledge, Zephyr",
+    "zhTW": "Eld Rune #2\\nÿc2Runewords: Steel, Stealth, Ancient's Pledge, Zephyr"
+  },
+  {
+    "id": 21003,
+    "Key": "r03",
+    "enUS": "Tir Rune #3\\nÿc2Runewords: Steel, Stealth, Edge, Nadir",
+    "zhTW": "Tir Rune #3\\nÿc2Runewords: Steel, Stealth, Edge, Nadir"
+  },
+  {
+    "id": 21004,
+    "Key": "r04",
+    "enUS": "Nef Rune #4\\nÿc2Runewords: Steel, Nadir, Edge, Delirium",
+    "zhTW": "Nef Rune #4\\nÿc2Runewords: Steel, Nadir, Edge, Delirium"
+  },
+  {
+    "id": 21005,
+    "Key": "r05",
+    "enUS": "Eth Rune #5\\nÿc2Runewords: Holy Thunder, King's Grace, Venom, Death, Breath of the Dying",
+    "zhTW": "Eth Rune #5\\nÿc2Runewords: Holy Thunder, King's Grace, Venom, Death, Breath of the Dying"
+  },
+  {
+    "id": 21006,
+    "Key": "r06",
+    "enUS": "Ith Rune #6\\nÿc2Runewords: Malice, Insight, Honor, Call to Arms",
+    "zhTW": "Ith Rune #6\\nÿc2Runewords: Malice, Insight, Honor, Call to Arms"
+  },
+  {
+    "id": 21007,
+    "Key": "r07",
+    "enUS": "Tal Rune #7\\nÿc2Runewords: Stealth, Spirit, Insight, Rhyme, Ancient's Pledge",
+    "zhTW": "Tal Rune #7\\nÿc2Runewords: Stealth, Spirit, Insight, Rhyme, Ancient's Pledge"
+  },
+  {
+    "id": 21008,
+    "Key": "r08",
+    "enUS": "Ral Rune #8\\nÿc2Runewords: Leaf, Ancient's Pledge, Spirit, Holy Thunder, Insight",
+    "zhTW": "Ral Rune #8\\nÿc2Runewords: Leaf, Ancient's Pledge, Spirit, Holy Thunder, Insight"
+  },
+  {
+    "id": 21009,
+    "Key": "r09",
+    "enUS": "Ort Rune #9\\nÿc2Runewords: Lore, Spirit, Zephyr, Obedience",
+    "zhTW": "Ort Rune #9\\nÿc2Runewords: Lore, Spirit, Zephyr, Obedience"
+  },
+  {
+    "id": 21010,
+    "Key": "r10",
+    "enUS": "Thul Rune #10\\nÿc2Runewords: Spirit, Prudence, Wisdom, White",
+    "zhTW": "Thul Rune #10\\nÿc2Runewords: Spirit, Prudence, Wisdom, White"
+  },
+  {
+    "id": 21011,
+    "Key": "r11",
+    "enUS": "Amn Rune #11\\nÿc2Runewords: Lionheart, Edge, Strength, Crescent Moon",
+    "zhTW": "Amn Rune #11\\nÿc2Runewords: Lionheart, Edge, Strength, Crescent Moon"
+  },
+  {
+    "id": 21012,
+    "Key": "r12",
+    "enUS": "Sol Rune #12\\nÿc2Runewords: Lore, Insight, Honor, Obedience",
+    "zhTW": "Sol Rune #12\\nÿc2Runewords: Lore, Insight, Honor, Obedience"
+  },
+  {
+    "id": 21013,
+    "Key": "r13",
+    "enUS": "Shael Rune #13\\nÿc2Runewords: Rhyme, Duress, Treachery",
+    "zhTW": "Shael Rune #13\\nÿc2Runewords: Rhyme, Duress, Treachery"
+  },
+  {
+    "id": 21014,
+    "Key": "r14",
+    "enUS": "Dol Rune #14\\nÿc2Runewords: Prudence, Nadir, Splendor, Delirium",
+    "zhTW": "Dol Rune #14\\nÿc2Runewords: Prudence, Nadir, Splendor, Delirium"
+  },
+  {
+    "id": 21015,
+    "Key": "r15",
+    "enUS": "Hel Rune #15\\nÿc2Runewords: Smoke, Obedience",
+    "zhTW": "Hel Rune #15\\nÿc2Runewords: Smoke, Obedience"
+  },
+  {
+    "id": 21016,
+    "Key": "r16",
+    "enUS": "Io Rune #16\\nÿc2Runewords: Prudence, Smoke, Delirium",
+    "zhTW": "Io Rune #16\\nÿc2Runewords: Prudence, Smoke, Delirium"
+  },
+  {
+    "id": 21017,
+    "Key": "r17",
+    "enUS": "Lum Rune #17\\nÿc2Runewords: Smoke, White, Wisdom, Unbending Will",
+    "zhTW": "Lum Rune #17\\nÿc2Runewords: Smoke, White, Wisdom, Unbending Will"
+  },
+  {
+    "id": 21018,
+    "Key": "r18",
+    "enUS": "Ko Rune #18\\nÿc2Runewords: Passion, Sanctuary, Chaos, Doom",
+    "zhTW": "Ko Rune #18\\nÿc2Runewords: Passion, Sanctuary, Chaos, Doom"
+  },
+  {
+    "id": 21019,
+    "Key": "r19",
+    "enUS": "Fal Rune #19\\nÿc2Runewords: Lionheart, Duress, Fortitude",
+    "zhTW": "Fal Rune #19\\nÿc2Runewords: Lionheart, Duress, Fortitude"
+  },
+  {
+    "id": 21020,
+    "Key": "r20",
+    "enUS": "Lem Rune #20\\nÿc2Runewords: Treachery, Wealth, Lawbringer",
+    "zhTW": "Lem Rune #20\\nÿc2Runewords: Treachery, Wealth, Lawbringer"
+  },
+  {
+    "id": 21021,
+    "Key": "r21",
+    "enUS": "Pul Rune #21\\nÿc2Runewords: Enlightenment, Heart of the Oak, Oath",
+    "zhTW": "Pul Rune #21\\nÿc2Runewords: Enlightenment, Heart of the Oak, Oath"
+  },
+  {
+    "id": 21022,
+    "Key": "r22",
+    "enUS": "Um Rune #22\\nÿc2Runewords: Duress, Crescent Moon, Bone, Lawbringer",
+    "zhTW": "Um Rune #22\\nÿc2Runewords: Duress, Crescent Moon, Bone, Lawbringer"
+  },
+  {
+    "id": 21023,
+    "Key": "r23",
+    "enUS": "Mal Rune #23\\nÿc2Runewords: Grief, Heart of the Oak, Oath, Last Wish",
+    "zhTW": "Mal Rune #23\\nÿc2Runewords: Grief, Heart of the Oak, Oath, Last Wish"
+  },
+  {
+    "id": 21024,
+    "Key": "r24",
+    "enUS": "ÿc4Ist Rune #24\\nÿc2Runewords: Call to Arms, Delirium, Death",
+    "zhTW": "ÿc4Ist Rune #24\\nÿc2Runewords: Call to Arms, Delirium, Death"
+  },
+  {
+    "id": 21025,
+    "Key": "r25",
+    "enUS": "ÿc4Gul Rune #25\\nÿc2Runewords: Chains of Honor, Breath of the Dying, Kingslayer",
+    "zhTW": "ÿc4Gul Rune #25\\nÿc2Runewords: Chains of Honor, Breath of the Dying, Kingslayer"
+  },
+  {
+    "id": 21026,
+    "Key": "r26",
+    "enUS": "ÿc4Vex Rune #26\\nÿc2Runewords: Heart of the Oak, Chains of Honor",
+    "zhTW": "ÿc4Vex Rune #26\\nÿc2Runewords: Heart of the Oak, Chains of Honor"
+  },
+  {
+    "id": 21027,
+    "Key": "r27",
+    "enUS": "ÿc4Ohm Rune #27\\nÿc2Runewords: Call to Arms, Exile, Fortitude, Doom",
+    "zhTW": "ÿc4Ohm Rune #27\\nÿc2Runewords: Call to Arms, Exile, Fortitude, Doom"
+  },
+  {
+    "id": 21028,
+    "Key": "r28",
+    "enUS": "ÿc4Lo Rune #28\\nÿc2Runewords: Fortitude, Grief, Phoenix",
+    "zhTW": "ÿc4Lo Rune #28\\nÿc2Runewords: Fortitude, Grief, Phoenix"
+  },
+  {
+    "id": 21029,
+    "Key": "r29",
+    "enUS": "ÿc4Sur Rune #29\\nÿc2Runewords: Bramble, Pride, Last Wish, Hand of Justice",
+    "zhTW": "ÿc4Sur Rune #29\\nÿc2Runewords: Bramble, Pride, Last Wish, Hand of Justice"
+  },
+  {
+    "id": 21030,
+    "Key": "r30",
+    "enUS": "ÿc4Ber Rune #30\\nÿc2Runewords: Chains of Honor, Enigma, Infinity, Beast",
+    "zhTW": "ÿc4Ber Rune #30\\nÿc2Runewords: Chains of Honor, Enigma, Infinity, Beast"
+  },
+  {
+    "id": 21031,
+    "Key": "r31",
+    "enUS": "ÿc4Jah Rune #31\\nÿc2Runewords: Enigma, Faith, Dream, Last Wish, Phoenix",
+    "zhTW": "ÿc4Jah Rune #31\\nÿc2Runewords: Enigma, Faith, Dream, Last Wish, Phoenix"
+  },
+  {
+    "id": 21032,
+    "Key": "r32",
+    "enUS": "ÿc4Cham Rune #32\\nÿc2Runewords: Dream, Hand of Justice, Plague",
+    "zhTW": "ÿc4Cham Rune #32\\nÿc2Runewords: Dream, Hand of Justice, Plague"
+  },
+  {
+    "id": 21033,
+    "Key": "r33",
+    "enUS": "ÿc4Zod Rune #33\\nÿc2Runewords: Breath of the Dying, Obsession",
+    "zhTW": "ÿc4Zod Rune #33\\nÿc2Runewords: Breath of the Dying, Obsession"
+  }
+]

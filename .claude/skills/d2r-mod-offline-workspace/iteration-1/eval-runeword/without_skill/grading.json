@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "runeword",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "modinfo.json exists", "passed": true, "evidence": "name: \"my-runewords\""},
+    {"text": "runes.txt with Dragon Breath definition", "passed": true, "evidence": "Row present but Name='Dragon Breath' (space) — may not match Key 'DragonBreath' in JSON"},
+    {"text": "Rune1-3 = Ber(r30), Jah(r31), Cham(r32)", "passed": true, "evidence": "r30, r31, r32 confirmed in runes.txt"},
+    {"text": "itype1 = weap", "passed": true, "evidence": "weap confirmed"},
+    {"text": "Properties: allskills, swing2, lifesteal, dmg%", "passed": true, "evidence": "allskills=3, swing2=40, lifesteal=15, dmg%=300"},
+    {"text": "item-runes.json with Dragon Breath and 龍息", "passed": true, "evidence": "Key: DragonBreath, enUS: Dragon Breath, zhTW: 龍息, id=90001"},
+    {"text": "JSON id uses 90000+", "passed": true, "evidence": "id: 90001"}
+  ]
+}

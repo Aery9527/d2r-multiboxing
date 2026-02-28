@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "drop-rate",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "modinfo.json with correct name and savepath", "passed": true, "evidence": "name: \"high-drop\", savepath: \"high-drop/\""},
+    {"text": "treasureclassex.txt in .mpq/data/global/excel/", "passed": true, "evidence": "high-drop.mpq/data/global/excel/treasureclassex.txt exists"},
+    {"text": "TSV tab-separated format", "passed": true, "evidence": "Header row tab-separated: Treasure Class\\tPicks\\tUnique\\t..."},
+    {"text": "NoDrop values lowered", "passed": true, "evidence": "Act bosses NoDrop=0, super uniques NoDrop=2 (from ~100)"},
+    {"text": "README with -mod high-drop -txt", "passed": true, "evidence": "README contains launch parameter instructions"},
+    {"text": "Warning about offline-only use", "passed": true, "evidence": "Multiple 🚫 warnings: 僅限離線/單人模式"}
+  ]
+}

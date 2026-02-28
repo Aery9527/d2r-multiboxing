@@ -1,0 +1,1 @@
+{"eval_id":3,"eval_name":"cube-recipes","prompt":"做一個 D2R mod 叫 easy-cube，新增三個 Horadric Cube 配方：1) 3個完美寶石合成1個高階符文(Ist) 2) 任何暗金物品+精煉寶石=隨機暗金物品 3) El符文x33=Zod符文。放在 ./mods/ 下","assertions":[]}

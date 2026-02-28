@@ -1,0 +1,10 @@
+{
+  "name": "my-runewords",
+  "savepath": "my-runewords/",
+  "version": "1.0.0",
+  "author": "Custom",
+  "description": "自訂符文之語 mod — 新增「龍息 (Dragon Breath)」符文之語",
+  "config": {
+    "type": "runeword"
+  }
+}

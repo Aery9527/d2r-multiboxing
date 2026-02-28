@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "info-page",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "modinfo.json exists", "passed": true, "evidence": "Exists but inside d2r-info.mpq/ (wrong location — should be at mod root)"},
+    {"text": "No .txt data table files", "passed": true, "evidence": "Only JSON files present"},
+    {"text": "Sorceress FCR breakpoints (63%/9f, 105%/8f)", "passed": true, "evidence": "d2r-info-breakpoints.json contains Sorc: 0/9/20/37/63/105/200"},
+    {"text": "Paladin FCR breakpoints (75%/10f, 125%/9f)", "passed": true, "evidence": "d2r-info-breakpoints.json contains Paladin: 0/9/18/30/48/75/125"},
+    {"text": "Cube recipe info included", "passed": true, "evidence": "d2r-info-cube.json contains cube recipe data"},
+    {"text": "Uses color codes for formatting", "passed": true, "evidence": "ÿc4, ÿc3, ÿc0 color codes present"},
+    {"text": "JSON format correct and proper path", "passed": false, "evidence": "modinfo.json misplaced inside .mpq; custom file names instead of standard D2R JSON names"}
+  ]
+}

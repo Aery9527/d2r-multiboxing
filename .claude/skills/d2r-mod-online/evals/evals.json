@@ -1,0 +1,129 @@
+{
+  "skill_name": "d2r-mod-online",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我做一個 D2R loot filter mod 叫 my-filter，把高階符文(Vex以上)用紅色星號標記，中階符文(Pul-Ist)用橙色標記，藥水用縮寫顯示（例如 Super Healing Potion → SHP），寶石類用藍色標記。放到 ./mods/ 下",
+      "expected_output": "生成完整 mod 目錄結構，只有 JSON 字串檔（沒有 .txt 檔），item-names.json 包含符文色碼標記和藥水縮寫",
+      "files": [],
+      "assertions": [
+        {
+          "id": "a1-1",
+          "text": "生成了 mods/my-filter/modinfo.json 且 savepath 為 ../（共用存檔）",
+          "type": "structural"
+        },
+        {
+          "id": "a1-2",
+          "text": "生成了 item-names.json 在正確路徑 mods/my-filter/my-filter.mpq/data/local/lng/strings/",
+          "type": "structural"
+        },
+        {
+          "id": "a1-3",
+          "text": "不存在任何 data/global/excel/ 目錄或 .txt 檔案（純 JSON 修改）",
+          "type": "structural"
+        },
+        {
+          "id": "a1-4",
+          "text": "高階符文(Ber r30, Jah r31 等)使用 ÿc1（紅色）和星號標記",
+          "type": "content"
+        },
+        {
+          "id": "a1-5",
+          "text": "藥水名稱有縮寫（如 SHP、SMP 等）",
+          "type": "content"
+        },
+        {
+          "id": "a1-6",
+          "text": "JSON 格式正確：陣列包含 id/Key/enUS 欄位的物件",
+          "type": "format"
+        },
+        {
+          "id": "a1-7",
+          "text": "有明確標示此 mod 為線上安全（不修改遊戲數據）",
+          "type": "content"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "做一個 D2R mod 叫 d2r-info，把各職業的 FCR/FHR breakpoint 資訊嵌入遊戲內顯示。我主要玩 Sorceress 和 Paladin，想在技能描述或其他 tooltip 裡看到 breakpoint 表。同時也把常用的 Cube 配方（符文升級、洗裝備）的資訊加進去。放到 ./mods/ 下",
+      "expected_output": "生成 mod 結構，透過修改 skills.json 或 ui.json 嵌入 breakpoint 和 cube recipe 資訊",
+      "files": [],
+      "assertions": [
+        {
+          "id": "a2-1",
+          "text": "生成了 modinfo.json",
+          "type": "structural"
+        },
+        {
+          "id": "a2-2",
+          "text": "不存在任何 .txt 資料表檔案",
+          "type": "structural"
+        },
+        {
+          "id": "a2-3",
+          "text": "包含 Sorceress FCR breakpoint 數據（至少含 63%/9f 和 105%/8f）",
+          "type": "content"
+        },
+        {
+          "id": "a2-4",
+          "text": "包含 Paladin FCR breakpoint 數據（至少含 75%/10f 和 125%/9f）",
+          "type": "content"
+        },
+        {
+          "id": "a2-5",
+          "text": "包含 Cube 配方資訊（符文升級或洗裝備配方）",
+          "type": "content"
+        },
+        {
+          "id": "a2-6",
+          "text": "使用色碼(ÿcX)格式化資訊以提升可讀性",
+          "type": "content"
+        },
+        {
+          "id": "a2-7",
+          "text": "JSON 格式正確且檔案在正確路徑下",
+          "type": "format"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "幫我建一個 D2R mod 叫 rune-helper，功能：1) 所有符文名稱後面加上編號（例如 El → El #1, Zod → Zod #33） 2) 高價符文(Ist以上)加上金色高亮 3) 每個符文的描述加上它可以組成哪些熱門符文之語的提示。放到 ./mods/",
+      "expected_output": "生成 mod 結構，item-names.json 修改符文名稱加編號和色碼",
+      "files": [],
+      "assertions": [
+        {
+          "id": "a3-1",
+          "text": "生成了 modinfo.json 且 savepath 為共用存檔",
+          "type": "structural"
+        },
+        {
+          "id": "a3-2",
+          "text": "所有 33 個符文都有編號（至少涵蓋 r01-r33 的 Key）",
+          "type": "content"
+        },
+        {
+          "id": "a3-3",
+          "text": "Ist(r24)以上的符文使用 ÿc4（金色）或其他高亮色碼",
+          "type": "content"
+        },
+        {
+          "id": "a3-4",
+          "text": "不存在任何 .txt 資料表檔案",
+          "type": "structural"
+        },
+        {
+          "id": "a3-5",
+          "text": "符文描述中有提及相關符文之語（如 Ber 提到 Enigma 或 Infinity）",
+          "type": "content"
+        },
+        {
+          "id": "a3-6",
+          "text": "JSON 格式正確：陣列含 id/Key 欄位",
+          "type": "format"
+        }
+      ]
+    }
+  ]
+}

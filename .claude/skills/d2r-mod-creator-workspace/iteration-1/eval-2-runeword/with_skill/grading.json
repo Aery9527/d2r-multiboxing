@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "生成了 mods/my-runewords/modinfo.json", "passed": true, "evidence": "modinfo.json 存在，僅包含必要的 name + savepath 欄位"},
+    {"text": "生成了 runes.txt 包含 Dragon Breath 的定義行", "passed": true, "evidence": "runes.txt 位於 .mpq/data/global/excel/ 路徑，包含 Dragon Breath 行"},
+    {"text": "runes.txt 中 Rune1-Rune3 對應 Ber(r30), Jah(r31), Cham(r32)", "passed": true, "evidence": "Rune1=r30, Rune2=r31, Rune3=r32 正確"},
+    {"text": "runes.txt 中 itype1 設為 weap", "passed": true, "evidence": "itype1=weap 正確"},
+    {"text": "屬性包含 allskills、swing2、lifesteal、dmg%", "passed": true, "evidence": "T1Code1=allskills(3), T1Code2=swing2(40), T1Code3=lifesteal(15), T1Code4=dmg%(300)"},
+    {"text": "生成了 item-runes.json 包含 Dragon Breath 和龍息的中英文名稱", "passed": true, "evidence": "item-runes.json 位於正確路徑 local/lng/strings/，格式正確含 id=90001, Key=DragonBreath, enUS=Dragon Breath, zhTW=龍息"},
+    {"text": "JSON 字串的 id 使用 90000+ 避免衝突", "passed": true, "evidence": "id=90001"}
+  ],
+  "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0}
+}

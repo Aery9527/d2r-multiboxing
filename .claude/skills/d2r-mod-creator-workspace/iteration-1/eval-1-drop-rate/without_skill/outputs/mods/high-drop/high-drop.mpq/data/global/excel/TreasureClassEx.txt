@@ -1,0 +1,58 @@
+Treasure Class	group	level	Picks	Unique	Set	Rare	Magic	NoDrop	Item1	Prob1	Item2	Prob2	Item3	Prob3	Item4	Prob4	Item5	Prob5	Item6	Prob6	Item7	Prob7	Item8	Prob8	Item9	Prob9	Item10	Prob10	SumItems	TotalProb	DropChance	Term
+Runes 1			1	0	0	0	0	0	r01	2	r02	2	Runes 2	2																		
+Runes 2			1	0	0	0	0	0	r03	2	r04	2	Runes 3	2																		
+Runes 3			1	0	0	0	0	0	r05	2	r06	2	Runes 4	2																		
+Runes 4			1	0	0	0	0	0	r07	2	r08	2	Runes 5	2																		
+Runes 5			1	0	0	0	0	0	r09	2	r10	2	Runes 6	2																		
+Runes 6			1	0	0	0	0	0	r11	2	r12	2	Runes 7	2																		
+Runes 7			1	0	0	0	0	0	r13	2	r14	2	Runes 8	2																		
+Runes 8			1	0	0	0	0	0	r15	2	r16	2	Runes 9	2																		
+Runes 9			1	0	0	0	0	0	r17	2	r18	2	Runes 10	2																		
+Runes 10			1	0	0	0	0	0	r19	2	r20	2	Runes 11	2																		
+Runes 11			1	0	0	0	0	0	r21	2	r22	2	Runes 12	2																		
+Runes 12			1	0	0	0	0	0	r23	2	r24	2	Runes 13	10																		
+Runes 13			1	0	0	0	0	0	r25	2	r26	2	Runes 14	10																		
+Runes 14			1	0	0	0	0	0	r27	2	r28	2	Runes 15	10																		
+Runes 15			1	0	0	0	0	0	r29	2	r30	2	Runes 16	10																		
+Runes 16			1	0	0	0	0	0	r31	2	r32	2	Runes 17	10																		
+Runes 17			1	0	0	0	0	0	r32	2	r33	2																				
+Countess Rune (H)			3	0	0	0	0	0	r13	20	r14	18	r15	16	r16	14	r17	12	r18	10	r19	8	r20	8	r21	6	r22	6				
+Countess Item (H)	19	82	1	983	983	983	1024	3	Countess Rune (H)	21	gld,mul=2048	10	Act 5 (H) Equip A	16	Act 5 (H) Junk	5																
+Andarielq (H)	13	75	5	983	983	983	1024	3	Act 2 (H) Equip A	16	Act 2 (H) Junk	5	gld,mul=2048	10	Runes 12	3																
+Durielq (H)	14	75	5	983	983	983	1024	3	Act 3 (H) Equip A	16	Act 3 (H) Junk	5	gld,mul=2048	10	Runes 13	3																
+Mephistoq (H)	16	81	6	983	983	983	1024	3	Act 4 (H) Equip A	16	Act 4 (H) Junk	5	gld,mul=2048	10	Runes 14	3																
+Diabloq (H)	18	85	6	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 15	3																
+Baalq (H)	20	87	7	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 16	5																
+Nihlathakq (H)	20	85	5	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 15	3																
+Summoner (H)	19	83	4	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 12	3																
+Izual (H)	19	83	4	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 13	3																
+Hephasto (H)	19	83	4	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 14	3																
+Act 1 (H) H2H A	7	67	1	800	800	800	1024	12	Act 1 (H) Equip A	16	Act 1 (H) Junk	5	gld,mul=1024	10	Runes 10	1																
+Act 1 (H) Champ A	7	69	1	800	800	800	1024	6	Act 1 (H) Equip A	19	Act 1 (H) Junk	5	gld,mul=2048	10	Runes 11	2																
+Act 1 (H) Unique A	7	70	3	983	983	983	1024	4	Act 1 (H) Equip A	19	Act 1 (H) Junk	5	gld,mul=2048	10	Runes 11	3																
+Act 2 (H) H2H A	8	70	1	800	800	800	1024	12	Act 2 (H) Equip A	16	Act 2 (H) Junk	5	gld,mul=1024	10	Runes 11	1																
+Act 2 (H) Champ A	8	72	1	800	800	800	1024	6	Act 2 (H) Equip A	19	Act 2 (H) Junk	5	gld,mul=2048	10	Runes 12	2																
+Act 2 (H) Unique A	8	73	3	983	983	983	1024	4	Act 2 (H) Equip A	19	Act 2 (H) Junk	5	gld,mul=2048	10	Runes 12	3																
+Act 3 (H) H2H A	9	75	1	800	800	800	1024	12	Act 3 (H) Equip A	16	Act 3 (H) Junk	5	gld,mul=1024	10	Runes 12	1																
+Act 3 (H) Champ A	9	77	1	800	800	800	1024	6	Act 3 (H) Equip A	19	Act 3 (H) Junk	5	gld,mul=2048	10	Runes 13	2																
+Act 3 (H) Unique A	9	78	3	983	983	983	1024	4	Act 3 (H) Equip A	19	Act 3 (H) Junk	5	gld,mul=2048	10	Runes 13	3																
+Act 4 (H) H2H A	10	80	1	800	800	800	1024	12	Act 4 (H) Equip A	16	Act 4 (H) Junk	5	gld,mul=1024	10	Runes 13	1																
+Act 4 (H) Champ A	10	82	1	800	800	800	1024	6	Act 4 (H) Equip A	19	Act 4 (H) Junk	5	gld,mul=2048	10	Runes 14	2																
+Act 4 (H) Unique A	10	83	3	983	983	983	1024	4	Act 4 (H) Equip A	19	Act 4 (H) Junk	5	gld,mul=2048	10	Runes 14	3																
+Act 5 (H) H2H A	11	85	1	800	800	800	1024	12	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=1024	10	Runes 14	1																
+Act 5 (H) Champ A	11	87	1	800	800	800	1024	6	Act 5 (H) Equip A	19	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 15	2																
+Act 5 (H) Unique A	11	88	3	983	983	983	1024	4	Act 5 (H) Equip A	19	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 15	3																
+Act 1 (H) Equip A			1	0	0	0	0	0	weap3	1	armo3	1	weap6	1	armo6	1	weap9	1	armo9	1	weap12	1	armo12	1								
+Act 1 (H) Junk			1	0	0	0	0	0	Misc	40	hp4	10	mp4	10	rvl	5	rvs	5	key	10	isc	5	tsc	5								
+Act 2 (H) Equip A			1	0	0	0	0	0	weap3	1	armo3	1	weap6	1	armo6	1	weap9	1	armo9	1	weap12	1	armo12	1								
+Act 2 (H) Junk			1	0	0	0	0	0	Misc	40	hp4	10	mp4	10	rvl	5	rvs	5	key	10	isc	5	tsc	5								
+Act 3 (H) Equip A			1	0	0	0	0	0	weap3	1	armo3	1	weap6	1	armo6	1	weap9	1	armo9	1	weap12	1	armo12	1								
+Act 3 (H) Junk			1	0	0	0	0	0	Misc	40	hp4	10	mp4	10	rvl	5	rvs	5	key	10	isc	5	tsc	5								
+Act 4 (H) Equip A			1	0	0	0	0	0	weap3	1	armo3	1	weap6	1	armo6	1	weap9	1	armo9	1	weap12	1	armo12	1								
+Act 4 (H) Junk			1	0	0	0	0	0	Misc	40	hp4	10	mp4	10	rvl	5	rvs	5	key	10	isc	5	tsc	5								
+Act 5 (H) Equip A			1	0	0	0	0	0	weap3	1	armo3	1	weap6	1	armo6	1	weap9	1	armo9	1	weap12	1	armo12	1								
+Act 5 (H) Junk			1	0	0	0	0	0	Misc	40	hp4	10	mp4	10	rvl	5	rvs	5	key	10	isc	5	tsc	5								
+Cow King (H)	20	81	5	983	983	983	1024	3	Act 5 (H) Equip A	16	Act 5 (H) Junk	5	gld,mul=2048	10	Runes 14	3																
+Uber Mephisto	20	87	7	983	983	983	1024	0	Act 5 (H) Equip A	16	Act 5 (H) Junk	3	gld,mul=4096	10	Runes 17	5																
+Uber Diablo	20	87	7	983	983	983	1024	0	Act 5 (H) Equip A	16	Act 5 (H) Junk	3	gld,mul=4096	10	Runes 17	5																
+Uber Baal	20	87	7	983	983	983	1024	0	Act 5 (H) Equip A	16	Act 5 (H) Junk	3	gld,mul=4096	10	Runes 17	5																

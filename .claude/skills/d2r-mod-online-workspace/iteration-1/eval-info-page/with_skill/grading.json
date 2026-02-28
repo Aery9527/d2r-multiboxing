@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "info-page",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "modinfo.json exists", "passed": true, "evidence": "modinfo.json with savepath: \"../\""},
+    {"text": "No .txt data table files", "passed": true, "evidence": "Only JSON files in local/lng/strings/"},
+    {"text": "Sorceress FCR breakpoints (63%/9f, 105%/8f)", "passed": true, "evidence": "skills.json contains 63%→9f and 105%→8f with ÿc4/ÿc1 highlights"},
+    {"text": "Paladin FCR breakpoints (75%/10f, 125%/9f)", "passed": true, "evidence": "skills.json contains 75%→10f, 125%→9f with Holy Shield FBR"},
+    {"text": "Cube recipe info included", "passed": true, "evidence": "item-names.json overrides Horadric Cube tooltip with rune upgrades, reroll, socket, upgrade recipes"},
+    {"text": "Uses color codes for formatting", "passed": true, "evidence": "ÿc4 gold headers, ÿc1 red critical, ÿc9 yellow emphasis, ÿcN teal"},
+    {"text": "JSON format correct and proper path", "passed": true, "evidence": "Array format in .mpq/data/local/lng/strings/"}
+  ]
+}

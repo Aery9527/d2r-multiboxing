@@ -1,0 +1,362 @@
+﻿[
+  {
+    "id": 40001,
+    "Key": "r26",
+    "enUS": "ÿc1★ Vex Rune ★",
+    "zhTW": "ÿc1★ Vex 符文 ★"
+  },
+  {
+    "id": 40002,
+    "Key": "r27",
+    "enUS": "ÿc1★ Ohm Rune ★",
+    "zhTW": "ÿc1★ Ohm 符文 ★"
+  },
+  {
+    "id": 40003,
+    "Key": "r28",
+    "enUS": "ÿc1★ Lo Rune ★",
+    "zhTW": "ÿc1★ Lo 符文 ★"
+  },
+  {
+    "id": 40004,
+    "Key": "r29",
+    "enUS": "ÿc1★ Sur Rune ★",
+    "zhTW": "ÿc1★ Sur 符文 ★"
+  },
+  {
+    "id": 40005,
+    "Key": "r30",
+    "enUS": "ÿc1★ Ber Rune ★",
+    "zhTW": "ÿc1★ Ber 符文 ★"
+  },
+  {
+    "id": 40006,
+    "Key": "r31",
+    "enUS": "ÿc1★ Jah Rune ★",
+    "zhTW": "ÿc1★ Jah 符文 ★"
+  },
+  {
+    "id": 40007,
+    "Key": "r32",
+    "enUS": "ÿc1★ Cham Rune ★",
+    "zhTW": "ÿc1★ Cham 符文 ★"
+  },
+  {
+    "id": 40008,
+    "Key": "r33",
+    "enUS": "ÿc1★ Zod Rune ★",
+    "zhTW": "ÿc1★ Zod 符文 ★"
+  },
+  {
+    "id": 40009,
+    "Key": "r21",
+    "enUS": "ÿc8Pul Rune",
+    "zhTW": "ÿc8Pul 符文"
+  },
+  {
+    "id": 40010,
+    "Key": "r22",
+    "enUS": "ÿc8Um Rune",
+    "zhTW": "ÿc8Um 符文"
+  },
+  {
+    "id": 40011,
+    "Key": "r23",
+    "enUS": "ÿc8Mal Rune",
+    "zhTW": "ÿc8Mal 符文"
+  },
+  {
+    "id": 40012,
+    "Key": "r24",
+    "enUS": "ÿc8Ist Rune",
+    "zhTW": "ÿc8Ist 符文"
+  },
+  {
+    "id": 40013,
+    "Key": "r25",
+    "enUS": "ÿc8Gul Rune",
+    "zhTW": "ÿc8Gul 符文"
+  },
+  {
+    "id": 40014,
+    "Key": "hp1",
+    "enUS": "mHP",
+    "zhTW": "mHP"
+  },
+  {
+    "id": 40015,
+    "Key": "hp2",
+    "enUS": "lHP",
+    "zhTW": "lHP"
+  },
+  {
+    "id": 40016,
+    "Key": "hp3",
+    "enUS": "HP",
+    "zhTW": "HP"
+  },
+  {
+    "id": 40017,
+    "Key": "hp4",
+    "enUS": "GHP",
+    "zhTW": "GHP"
+  },
+  {
+    "id": 40018,
+    "Key": "hp5",
+    "enUS": "SHP",
+    "zhTW": "SHP"
+  },
+  {
+    "id": 40019,
+    "Key": "mp1",
+    "enUS": "mMP",
+    "zhTW": "mMP"
+  },
+  {
+    "id": 40020,
+    "Key": "mp2",
+    "enUS": "lMP",
+    "zhTW": "lMP"
+  },
+  {
+    "id": 40021,
+    "Key": "mp3",
+    "enUS": "MP",
+    "zhTW": "MP"
+  },
+  {
+    "id": 40022,
+    "Key": "mp4",
+    "enUS": "GMP",
+    "zhTW": "GMP"
+  },
+  {
+    "id": 40023,
+    "Key": "mp5",
+    "enUS": "SMP",
+    "zhTW": "SMP"
+  },
+  {
+    "id": 40024,
+    "Key": "rvs",
+    "enUS": "Rej",
+    "zhTW": "Rej"
+  },
+  {
+    "id": 40025,
+    "Key": "rvl",
+    "enUS": "FRej",
+    "zhTW": "FRej"
+  },
+  {
+    "id": 40026,
+    "Key": "gcv",
+    "enUS": "ÿc3Chipped Amethyst",
+    "zhTW": "ÿc3Chipped Amethyst"
+  },
+  {
+    "id": 40027,
+    "Key": "gfv",
+    "enUS": "ÿc3Flawed Amethyst",
+    "zhTW": "ÿc3Flawed Amethyst"
+  },
+  {
+    "id": 40028,
+    "Key": "gsv",
+    "enUS": "ÿc3Amethyst",
+    "zhTW": "ÿc3Amethyst"
+  },
+  {
+    "id": 40029,
+    "Key": "gzv",
+    "enUS": "ÿc3Flawless Amethyst",
+    "zhTW": "ÿc3Flawless Amethyst"
+  },
+  {
+    "id": 40030,
+    "Key": "gpv",
+    "enUS": "ÿc3Perfect Amethyst",
+    "zhTW": "ÿc3Perfect Amethyst"
+  },
+  {
+    "id": 40031,
+    "Key": "gcw",
+    "enUS": "ÿc3Chipped Diamond",
+    "zhTW": "ÿc3Chipped Diamond"
+  },
+  {
+    "id": 40032,
+    "Key": "gfw",
+    "enUS": "ÿc3Flawed Diamond",
+    "zhTW": "ÿc3Flawed Diamond"
+  },
+  {
+    "id": 40033,
+    "Key": "gsw",
+    "enUS": "ÿc3Diamond",
+    "zhTW": "ÿc3Diamond"
+  },
+  {
+    "id": 40034,
+    "Key": "gzw",
+    "enUS": "ÿc3Flawless Diamond",
+    "zhTW": "ÿc3Flawless Diamond"
+  },
+  {
+    "id": 40035,
+    "Key": "gpw",
+    "enUS": "ÿc3Perfect Diamond",
+    "zhTW": "ÿc3Perfect Diamond"
+  },
+  {
+    "id": 40036,
+    "Key": "gcg",
+    "enUS": "ÿc3Chipped Emerald",
+    "zhTW": "ÿc3Chipped Emerald"
+  },
+  {
+    "id": 40037,
+    "Key": "gfg",
+    "enUS": "ÿc3Flawed Emerald",
+    "zhTW": "ÿc3Flawed Emerald"
+  },
+  {
+    "id": 40038,
+    "Key": "gsg",
+    "enUS": "ÿc3Emerald",
+    "zhTW": "ÿc3Emerald"
+  },
+  {
+    "id": 40039,
+    "Key": "gzg",
+    "enUS": "ÿc3Flawless Emerald",
+    "zhTW": "ÿc3Flawless Emerald"
+  },
+  {
+    "id": 40040,
+    "Key": "gpg",
+    "enUS": "ÿc3Perfect Emerald",
+    "zhTW": "ÿc3Perfect Emerald"
+  },
+  {
+    "id": 40041,
+    "Key": "gcr",
+    "enUS": "ÿc3Chipped Ruby",
+    "zhTW": "ÿc3Chipped Ruby"
+  },
+  {
+    "id": 40042,
+    "Key": "gfr",
+    "enUS": "ÿc3Flawed Ruby",
+    "zhTW": "ÿc3Flawed Ruby"
+  },
+  {
+    "id": 40043,
+    "Key": "gsr",
+    "enUS": "ÿc3Ruby",
+    "zhTW": "ÿc3Ruby"
+  },
+  {
+    "id": 40044,
+    "Key": "gzr",
+    "enUS": "ÿc3Flawless Ruby",
+    "zhTW": "ÿc3Flawless Ruby"
+  },
+  {
+    "id": 40045,
+    "Key": "gpr",
+    "enUS": "ÿc3Perfect Ruby",
+    "zhTW": "ÿc3Perfect Ruby"
+  },
+  {
+    "id": 40046,
+    "Key": "gcb",
+    "enUS": "ÿc3Chipped Sapphire",
+    "zhTW": "ÿc3Chipped Sapphire"
+  },
+  {
+    "id": 40047,
+    "Key": "gfb",
+    "enUS": "ÿc3Flawed Sapphire",
+    "zhTW": "ÿc3Flawed Sapphire"
+  },
+  {
+    "id": 40048,
+    "Key": "gsb",
+    "enUS": "ÿc3Sapphire",
+    "zhTW": "ÿc3Sapphire"
+  },
+  {
+    "id": 40049,
+    "Key": "gzb",
+    "enUS": "ÿc3Flawless Sapphire",
+    "zhTW": "ÿc3Flawless Sapphire"
+  },
+  {
+    "id": 40050,
+    "Key": "gpb",
+    "enUS": "ÿc3Perfect Sapphire",
+    "zhTW": "ÿc3Perfect Sapphire"
+  },
+  {
+    "id": 40051,
+    "Key": "gcy",
+    "enUS": "ÿc3Chipped Topaz",
+    "zhTW": "ÿc3Chipped Topaz"
+  },
+  {
+    "id": 40052,
+    "Key": "gfy",
+    "enUS": "ÿc3Flawed Topaz",
+    "zhTW": "ÿc3Flawed Topaz"
+  },
+  {
+    "id": 40053,
+    "Key": "gsy",
+    "enUS": "ÿc3Topaz",
+    "zhTW": "ÿc3Topaz"
+  },
+  {
+    "id": 40054,
+    "Key": "gzy",
+    "enUS": "ÿc3Flawless Topaz",
+    "zhTW": "ÿc3Flawless Topaz"
+  },
+  {
+    "id": 40055,
+    "Key": "gpy",
+    "enUS": "ÿc3Perfect Topaz",
+    "zhTW": "ÿc3Perfect Topaz"
+  },
+  {
+    "id": 40056,
+    "Key": "skc",
+    "enUS": "ÿc3Chipped Skull",
+    "zhTW": "ÿc3Chipped Skull"
+  },
+  {
+    "id": 40057,
+    "Key": "skf",
+    "enUS": "ÿc3Flawed Skull",
+    "zhTW": "ÿc3Flawed Skull"
+  },
+  {
+    "id": 40058,
+    "Key": "sku",
+    "enUS": "ÿc3Skull",
+    "zhTW": "ÿc3Skull"
+  },
+  {
+    "id": 40059,
+    "Key": "skl",
+    "enUS": "ÿc3Flawless Skull",
+    "zhTW": "ÿc3Flawless Skull"
+  },
+  {
+    "id": 40060,
+    "Key": "skz",
+    "enUS": "ÿc3Perfect Skull",
+    "zhTW": "ÿc3Perfect Skull"
+  }
+]

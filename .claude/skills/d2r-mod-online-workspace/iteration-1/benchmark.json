@@ -1,0 +1,53 @@
+{
+  "skill_name": "d2r-mod-online",
+  "iteration": 1,
+  "configurations": [
+    {
+      "configuration": "with_skill",
+      "evals": [
+        {"eval_name": "loot-filter", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 473},
+        {"eval_name": "info-page", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 249},
+        {"eval_name": "rune-helper", "pass_rate": null, "passed": 0, "total": 6, "duration_seconds": null, "note": "TIMED OUT after 1800s"}
+      ],
+      "aggregate": {
+        "pass_rate_completed": 1.0,
+        "total_passed": 14,
+        "total_assertions": 14,
+        "completed_evals": 2,
+        "timed_out_evals": 1,
+        "mean_duration_seconds": 361,
+        "note": "1 of 3 evals timed out; pass rate based on 2 completed evals"
+      }
+    },
+    {
+      "configuration": "without_skill",
+      "evals": [
+        {"eval_name": "loot-filter", "pass_rate": 0.714, "passed": 5, "total": 7, "duration_seconds": 171},
+        {"eval_name": "info-page", "pass_rate": 0.857, "passed": 6, "total": 7, "duration_seconds": 1620},
+        {"eval_name": "rune-helper", "pass_rate": 0.833, "passed": 5, "total": 6, "duration_seconds": 199}
+      ],
+      "aggregate": {
+        "pass_rate": 0.8,
+        "total_passed": 16,
+        "total_assertions": 20,
+        "completed_evals": 3,
+        "timed_out_evals": 0,
+        "mean_duration_seconds": 663
+      }
+    }
+  ],
+  "analysis": {
+    "key_differences": [
+      "With-skill achieves 100% pass on completed evals (14/14) vs without-skill 80% (16/20)",
+      "With-skill consistently uses correct savepath \"../\" for online-safe shared saves",
+      "With-skill correctly wraps files in .mpq folder structure",
+      "Without-skill tends to use mod-specific savepath and flat directory structure",
+      "1 with-skill eval timed out (rune-helper) — possibly due to generating all 33 rune entries with detailed runeword hints"
+    ],
+    "non_discriminating_assertions": [
+      "No .txt files (both configurations always pass this)",
+      "Color code usage (both use ÿcX correctly)",
+      "JSON array format (both get this right)"
+    ]
+  }
+}

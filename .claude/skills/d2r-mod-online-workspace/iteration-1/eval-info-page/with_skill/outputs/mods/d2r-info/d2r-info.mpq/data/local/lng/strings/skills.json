@@ -1,0 +1,36 @@
+[
+  {
+    "id": 4016,
+    "Key": "StrSklTree13",
+    "enUS": "Fire Spells\n\nÿc4=== Sorceress Breakpoints ===ÿc0\n\nÿc9FCR (General):ÿc0\n 0%\u219213f  9%\u219212f  20%\u219211f  37%\u219210f\n ÿc463%\u21929fÿc0  ÿc1105%\u21928fÿc0  200%\u21927f\n\nÿc9FCR (Lightning / Chain Lightning):ÿc0\n 0%\u219219f  7%\u219218f  15%\u219217f  23%\u219216f\n 35%\u219215f  52%\u219214f  ÿc478%\u219213fÿc0\n ÿc1117%\u219212fÿc0  194%\u219211f\n\nÿc9FHR:ÿc0\n 0%\u219215f  5%\u219214f  9%\u219213f  14%\u219212f\n 20%\u219211f  30%\u219210f  42%\u21929f\n ÿc460%\u21928fÿc0  ÿc186%\u21927fÿc0  142%\u21926f  280%\u21925f\n\nÿc9FBR:ÿc0\n 0%\u21929f  7%\u21928f  15%\u21927f  27%\u21926f\n ÿc448%\u21925fÿc0  ÿc186%\u21924fÿc0  200%\u21923f",
+    "zhTW": "\u706b\u7130\u6cd5\u8853\n\nÿc4=== \u5973\u5deb Breakpoints ===ÿc0\n\nÿc9FCR (\u4e00\u822c):ÿc0\n 0%\u219213f  9%\u219212f  20%\u219211f  37%\u219210f\n ÿc463%\u21929fÿc0  ÿc1105%\u21928fÿc0  200%\u21927f\n\nÿc9FCR (\u9583\u96fb / \u9023\u9396\u9583\u96fb):ÿc0\n 0%\u219219f  7%\u219218f  15%\u219217f  23%\u219216f\n 35%\u219215f  52%\u219214f  ÿc478%\u219213fÿc0\n ÿc1117%\u219212fÿc0  194%\u219211f\n\nÿc9FHR:ÿc0\n 0%\u219215f  5%\u219214f  9%\u219213f  14%\u219212f\n 20%\u219211f  30%\u219210f  42%\u21929f\n ÿc460%\u21928fÿc0  ÿc186%\u21927fÿc0  142%\u21926f  280%\u21925f\n\nÿc9FBR:ÿc0\n 0%\u21929f  7%\u21928f  15%\u21927f  27%\u21926f\n ÿc448%\u21925fÿc0  ÿc186%\u21924fÿc0  200%\u21923f",
+    "deDE": "Feuerzauber",
+    "esES": "Hechizos de fuego",
+    "frFR": "Sorts de feu",
+    "itIT": "Incantesimi del fuoco",
+    "koKR": "\uD654\uC5FC \uC8FC\uBB38",
+    "plPL": "Czary ognia",
+    "esMX": "Hechizos de fuego",
+    "jaJP": "\u30D5\u30A1\u30A4\u30A2\u30B9\u30DA\u30EB",
+    "ptBR": "Feiti\u00E7os de Fogo",
+    "ruRU": "\u0417\u0430\u043A\u043B\u0438\u043D\u0430\u043D\u0438\u044F \u043E\u0433\u043D\u044F",
+    "zhCN": "\u706b\u7130\u6cd5\u672f"
+  },
+  {
+    "id": 4010,
+    "Key": "StrSklTree7",
+    "enUS": "Combat Skills\n\nÿc4=== Paladin Breakpoints ===ÿc0\n\nÿc9FCR:ÿc0\n 0%\u219215f  9%\u219214f  18%\u219213f\n 30%\u219212f  ÿc448%\u219211fÿc0  ÿc175%\u219210fÿc0  125%\u21929f\n\nÿc9FHR:ÿc0\n 0%\u21929f  7%\u21928f  15%\u21927f\n 27%\u21926f  ÿc448%\u21925fÿc0  ÿc186%\u21924fÿc0  200%\u21923f\n\nÿc9FBR (Normal):ÿc0\n 0%\u21925f  13%\u21924f  32%\u21923f\n ÿc486%\u21922fÿc0  600%\u21921f\n\nÿc9FBR (Holy Shield):ÿc0\n 0%\u21922f  ÿc186%\u21921fÿc0",
+    "zhTW": "\u6230\u9b25\u6280\u80fd\n\nÿc4=== \u8056\u9a0e\u58eb Breakpoints ===ÿc0\n\nÿc9FCR:ÿc0\n 0%\u219215f  9%\u219214f  18%\u219213f\n 30%\u219212f  ÿc448%\u219211fÿc0  ÿc175%\u219210fÿc0  125%\u21929f\n\nÿc9FHR:ÿc0\n 0%\u21929f  7%\u21928f  15%\u21927f\n 27%\u21926f  ÿc448%\u21925fÿc0  ÿc186%\u21924fÿc0  200%\u21923f\n\nÿc9FBR (\u4e00\u822c):ÿc0\n 0%\u21925f  13%\u21924f  32%\u21923f\n ÿc486%\u21922fÿc0  600%\u21921f\n\nÿc9FBR (\u795e\u8056\u4e4b\u76fe):ÿc0\n 0%\u21922f  ÿc186%\u21921fÿc0",
+    "deDE": "Kampffertigkeiten",
+    "esES": "Habilidades de combate",
+    "frFR": "Comp\u00E9tences de combat",
+    "itIT": "Abilit\u00E0 di combattimento",
+    "koKR": "\uC804\uD22C \uAE30\uC220",
+    "plPL": "Umiej\u0119tno\u015Bci walki",
+    "esMX": "Habilidades de combate",
+    "jaJP": "\u6226\u95D8\u30B9\u30AD\u30EB",
+    "ptBR": "Per\u00EDcias de Combate",
+    "ruRU": "\u0411\u043E\u0435\u0432\u044B\u0435 \u043D\u0430\u0432\u044B\u043A\u0438",
+    "zhCN": "\u6218\u6597\u6280\u80fd"
+  }
+]

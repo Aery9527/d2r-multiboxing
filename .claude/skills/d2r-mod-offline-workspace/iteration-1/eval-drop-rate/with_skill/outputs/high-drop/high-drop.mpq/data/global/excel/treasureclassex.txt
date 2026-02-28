@@ -1,0 +1,39 @@
+Treasure Class	Picks	Unique	Set	Rare	Magic	NoDrop	Item1	Prob1	Item2	Prob2	Item3	Prob3	Item4	Prob4	Item5	Prob5	Item6	Prob6	Item7	Prob7	Item8	Prob8	Item9	Prob9	Item10	Prob10
+Andariel (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 17	3										
+Andarielq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 17	3										
+Duriel (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 2 (H) Equip C	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 17	3										
+Durielq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 2 (H) Equip C	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 17	3										
+Mephisto (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 3 (H) Equip B	160	Act 3 (H) Junk	21	Act 3 (H) Good	3	Runes 17	3										
+Mephistoq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 3 (H) Equip B	160	Act 3 (H) Junk	21	Act 3 (H) Good	3	Runes 17	3										
+Diablo (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 4 (H) Equip B	160	Act 4 (H) Junk	21	Act 4 (H) Good	3	Runes 17	3										
+Diabloq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 4 (H) Equip B	160	Act 4 (H) Junk	21	Act 4 (H) Good	3	Runes 17	3										
+Baal (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Baalq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Nihlathak (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Nihlathakq (H)	9	983	983	983	1024	0	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Cow King (H)	5	983	983	983	1024	0	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Countess (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 17	3										
+Summoner (H)	7	983	983	983	1024	0	gld,mul=2048	21	Act 2 (H) Equip C	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 17	3										
+Countess Rune (H)	9	0	0	0	0	0	Countess Item (H)	5																		
+Act 1 (H) Super A	2	983	983	983	1024	2	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 16	3										
+Act 1 (H) Super B	2	983	983	983	1024	2	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 16	3										
+Act 1 (H) Super C	2	983	983	983	1024	2	gld,mul=2048	21	Act 1 (H) Equip A	160	Act 1 (H) Junk	21	Act 1 (H) Good	3	Runes 16	3										
+Act 2 (H) Super A	2	983	983	983	1024	2	gld,mul=2048	21	Act 2 (H) Equip A	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 16	3										
+Act 2 (H) Super B	2	983	983	983	1024	2	gld,mul=2048	21	Act 2 (H) Equip A	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 16	3										
+Act 2 (H) Super C	2	983	983	983	1024	2	gld,mul=2048	21	Act 2 (H) Equip C	160	Act 2 (H) Junk	21	Act 2 (H) Good	3	Runes 16	3										
+Act 3 (H) Super A	2	983	983	983	1024	2	gld,mul=2048	21	Act 3 (H) Equip A	160	Act 3 (H) Junk	21	Act 3 (H) Good	3	Runes 16	3										
+Act 3 (H) Super B	2	983	983	983	1024	2	gld,mul=2048	21	Act 3 (H) Equip B	160	Act 3 (H) Junk	21	Act 3 (H) Good	3	Runes 16	3										
+Act 3 (H) Super C	2	983	983	983	1024	2	gld,mul=2048	21	Act 3 (H) Equip B	160	Act 3 (H) Junk	21	Act 3 (H) Good	3	Runes 16	3										
+Act 4 (H) Super A	2	983	983	983	1024	2	gld,mul=2048	21	Act 4 (H) Equip A	160	Act 4 (H) Junk	21	Act 4 (H) Good	3	Runes 16	3										
+Act 4 (H) Super B	2	983	983	983	1024	2	gld,mul=2048	21	Act 4 (H) Equip B	160	Act 4 (H) Junk	21	Act 4 (H) Good	3	Runes 16	3										
+Act 4 (H) Super C	2	983	983	983	1024	2	gld,mul=2048	21	Act 4 (H) Equip B	160	Act 4 (H) Junk	21	Act 4 (H) Good	3	Runes 16	3										
+Act 5 (H) Super A	2	983	983	983	1024	2	gld,mul=2048	21	Act 5 (H) Equip A	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 16	3										
+Act 5 (H) Super B	2	983	983	983	1024	2	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 16	3										
+Act 5 (H) Super C	2	983	983	983	1024	2	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 16	3										
+Act 5 (H) Super Cx	2	983	983	983	1024	2	gld,mul=2048	21	Act 5 (H) Equip B	160	Act 5 (H) Junk	21	Act 5 (H) Good	3	Runes 17	3										
+Runes 17	1	0	0	0	0	0	r33	10	Runes 16	2																
+Runes 16	1	0	0	0	0	0	r32	10	Runes 15	2																
+Runes 15	1	0	0	0	0	0	r31	10	Runes 14	2																
+Runes 14	1	0	0	0	0	0	r30	10	Runes 13	2																
+Runes 13	1	0	0	0	0	0	r29	10	Runes 12	2																
+Runes 12	1	0	0	0	0	0	r28	10	Runes 11	2																

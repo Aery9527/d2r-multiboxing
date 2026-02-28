@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "生成了 mods/my-runewords/modinfo.json", "passed": true, "evidence": "modinfo.json 存在，但包含多餘欄位 (version, author, description, config)"},
+    {"text": "生成了 runes.txt 包含 Dragon Breath 的定義行", "passed": true, "evidence": "runes.txt 存在於 data/global/excel/ 但未使用 .mpq 資料夾結構"},
+    {"text": "runes.txt 中 Rune1-Rune3 對應 Ber(r30), Jah(r31), Cham(r32)", "passed": true, "evidence": "符文代碼正確 r30, r31, r32"},
+    {"text": "runes.txt 中 itype1 設為 weap", "passed": true, "evidence": "itype1=weap 正確"},
+    {"text": "屬性包含 allskills、swing2、lifesteal、dmg%", "passed": true, "evidence": "四個屬性代碼全部正確"},
+    {"text": "生成了 item-runes.json 包含 Dragon Breath 和龍息的中英文名稱", "passed": false, "evidence": "item-runes.json 使用自訂 JSON 格式而非 D2R 標準字串格式（缺少 id/Key/enUS 欄位），且放置在根目錄而非 local/lng/strings/ 路徑下"},
+    {"text": "JSON 字串的 id 使用 90000+ 避免衝突", "passed": false, "evidence": "JSON 未使用 D2R 標準格式，無 id 欄位"}
+  ],
+  "summary": {"passed": 5, "failed": 2, "total": 7, "pass_rate": 0.71}
+}

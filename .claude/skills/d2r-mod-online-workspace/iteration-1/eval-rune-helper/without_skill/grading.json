@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "rune-helper",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "modinfo.json savepath is shared saves", "passed": false, "evidence": "savepath: \"rune-helper/\" — should be \"../\" for online-safe mod"},
+    {"text": "All 33 runes numbered (#1 to #33)", "passed": true, "evidence": "r01(El #1) through r33(Zod #33) all present"},
+    {"text": "Ist(r24)+ runes use gold highlight", "passed": true, "evidence": "Ist-Zod all prefixed with ÿc4"},
+    {"text": "No .txt data table files", "passed": true, "evidence": "Only item-runes.json in strings directory"},
+    {"text": "Rune descriptions mention runewords", "passed": true, "evidence": "Ber mentions Enigma & Infinity; each rune lists relevant runewords"},
+    {"text": "JSON format correct", "passed": true, "evidence": "Array of {id, Key, enUS, zhTW} objects"}
+  ]
+}

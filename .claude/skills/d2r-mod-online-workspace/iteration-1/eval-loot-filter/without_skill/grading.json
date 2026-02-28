@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "loot-filter",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "modinfo.json savepath is ../", "passed": false, "evidence": "savepath: \"my-filter/\" — should be \"../\" for online-safe shared saves"},
+    {"text": "item-names.json in .mpq/data/local/lng/strings/", "passed": false, "evidence": "No .mpq folder; files at my-filter/data/local/lng/strings/ (missing .mpq wrapper)"},
+    {"text": "No .txt files or data/global/excel/", "passed": true, "evidence": "Only JSON files present"},
+    {"text": "High runes use red with star markers", "passed": true, "evidence": "Ber(r30): ÿc1★ Ber Rune ★"},
+    {"text": "Potion names abbreviated", "passed": true, "evidence": "hp5 → SHP present"},
+    {"text": "JSON format correct (array of {id,Key,enUS})", "passed": true, "evidence": "Array of objects with id/Key/enUS/zhTW"},
+    {"text": "Marked as online-safe", "passed": true, "evidence": "README confirms online-safe"}
+  ]
+}

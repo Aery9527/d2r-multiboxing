@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "生成了 mods/easy-cube/modinfo.json", "passed": true, "evidence": "modinfo.json 存在，但包含多餘欄位 (version)"},
+    {"text": "生成了 cubemain.txt 包含三個新配方", "passed": true, "evidence": "cubemain.txt 位於 easy-cube.mpq/data/global/excel/，包含 3 個配方"},
+    {"text": "cubemain.txt 是 Tab 分隔格式", "passed": true, "evidence": "TSV 格式正確，且包含更完整的欄位 (mod 1-5)"},
+    {"text": "配方 1 使用完美寶石輸入和 Ist 符文(r24)輸出", "passed": true, "evidence": "input 1=gem4,qty=3, output=r24"},
+    {"text": "配方 3 使用 El 符文(r01) qty=33 輸入和 Zod 符文(r33)輸出", "passed": true, "evidence": "input 1=r01,qty=33, output=r33"},
+    {"text": "所有配方的 enabled 欄位設為 1", "passed": true, "evidence": "三個配方 enabled 皆為 1"},
+    {"text": "生成了 README.md 列出所有配方說明", "passed": true, "evidence": "README.md 存在 (2037 bytes)，包含配方一覽表"}
+  ],
+  "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0}
+}

@@ -1,0 +1,1 @@
+{"eval_id":2,"eval_name":"info-page","prompt":"做一個 D2R mod 叫 d2r-info，把各職業的 FCR/FHR breakpoint 資訊嵌入遊戲內顯示。我主要玩 Sorceress 和 Paladin，想在技能描述或其他 tooltip 裡看到 breakpoint 表。同時也把常用的 Cube 配方（符文升級、洗裝備）的資訊加進去。放到 ./mods/ 下","assertions":[]}

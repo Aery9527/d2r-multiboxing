@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "eval_name": "cube-recipes",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "modinfo.json exists", "passed": true, "evidence": "name: \"easy-cube\""},
+    {"text": "cubemain.txt with 3 recipes", "passed": true, "evidence": "3 recipe rows in cubemain.txt"},
+    {"text": "TSV tab-separated format", "passed": true, "evidence": "Tab-separated columns confirmed"},
+    {"text": "Recipe 1: perfect gems → Ist(r24)", "passed": true, "evidence": "gem4,qty=3 → r24"},
+    {"text": "Recipe 3: El(r01) qty=33 → Zod(r33)", "passed": true, "evidence": "r01,qty=33 → r33"},
+    {"text": "All recipes enabled=1", "passed": true, "evidence": "enabled=1 for all 3 recipes"},
+    {"text": "README with recipe descriptions", "passed": true, "evidence": "README lists all 3 recipes with explanations"}
+  ]
+}

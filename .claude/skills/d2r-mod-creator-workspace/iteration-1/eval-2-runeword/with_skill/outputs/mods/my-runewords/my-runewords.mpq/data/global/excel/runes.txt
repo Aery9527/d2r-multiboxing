@@ -1,0 +1,2 @@
+﻿Name	Rune Name	complete	server	itype1	itype2	itype3	itype4	itype5	itype6	etype1	etype2	etype3	Rune1	Rune2	Rune3	Rune4	Rune5	Rune6	T1Code1	T1Param1	T1Min1	T1Max1	T1Code2	T1Param2	T1Min2	T1Max2	T1Code3	T1Param3	T1Min3	T1Max3	T1Code4	T1Param4	T1Min4	T1Max4
+DragonBreath	Dragon Breath	1	0	weap									r30	r31	r32				allskills		3	3	swing2		40	40	lifesteal		15	15	dmg%		300	300

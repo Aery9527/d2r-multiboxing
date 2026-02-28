@@ -1,0 +1,59 @@
+{
+  "skill_name": "d2r-mod-offline",
+  "iteration": 1,
+  "configurations": [
+    {
+      "configuration": "with_skill",
+      "evals": [
+        {"eval_name": "drop-rate", "pass_rate": 1.0, "passed": 6, "total": 6, "duration_seconds": 330},
+        {"eval_name": "runeword", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 191},
+        {"eval_name": "cube-recipes", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 133}
+      ],
+      "aggregate": {
+        "pass_rate": 1.0,
+        "total_passed": 20,
+        "total_assertions": 20,
+        "completed_evals": 3,
+        "timed_out_evals": 0,
+        "mean_duration_seconds": 218
+      }
+    },
+    {
+      "configuration": "without_skill",
+      "evals": [
+        {"eval_name": "drop-rate", "pass_rate": null, "passed": 0, "total": 6, "duration_seconds": null, "note": "TIMED OUT after 1800s"},
+        {"eval_name": "runeword", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 127},
+        {"eval_name": "cube-recipes", "pass_rate": 1.0, "passed": 7, "total": 7, "duration_seconds": 443}
+      ],
+      "aggregate": {
+        "pass_rate_completed": 1.0,
+        "total_passed": 14,
+        "total_assertions": 14,
+        "completed_evals": 2,
+        "timed_out_evals": 1,
+        "mean_duration_seconds": 285,
+        "note": "1 of 3 evals timed out; pass rate based on 2 completed evals"
+      }
+    }
+  ],
+  "analysis": {
+    "key_differences": [
+      "Both achieve 100% pass rate on completed evals — skill doesn't improve correctness for offline mods as much",
+      "With-skill is slightly faster on average (218s vs 285s completed)",
+      "Without-skill runeword has Name/Key mismatch risk (space in Name field) — technically passes assertions but may break in-game",
+      "Without-skill cubemain.txt was more thorough (15 rows with per-gem-type variants vs 3 compact rows)",
+      "1 without-skill eval timed out (drop-rate)"
+    ],
+    "non_discriminating_assertions": [
+      "TSV format (both get this right)",
+      "Rune codes (both use correct r30/r31/r32)",
+      "Recipe structure (both produce valid cubemain.txt)"
+    ],
+    "quality_notes": [
+      "With-skill: Name field in runes.txt correctly matches Key in JSON (DragonBreath)",
+      "Without-skill: Name field has space ('Dragon Breath') — potential in-game display bug",
+      "With-skill: Consistent .mpq folder wrapper and modinfo placement",
+      "Without-skill: cubemain.txt more thorough with per-gem variants (15 vs 3 rows)"
+    ]
+  }
+}

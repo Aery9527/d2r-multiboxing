@@ -1,0 +1,1 @@
+{"eval_id":3,"eval_name":"rune-helper","prompt":"幫我建一個 D2R mod 叫 rune-helper，功能：1) 所有符文名稱後面加上編號（例如 El → El #1, Zod → Zod #33） 2) 高價符文(Ist以上)加上金色高亮 3) 每個符文的描述加上它可以組成哪些熱門符文之語的提示。放到 ./mods/","assertions":[]}

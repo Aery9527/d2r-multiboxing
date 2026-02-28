@@ -1,0 +1,1 @@
+{"eval_id":1,"eval_name":"loot-filter","prompt":"幫我做一個 D2R loot filter mod 叫 my-filter，把高階符文(Vex以上)用紅色星號標記，中階符文(Pul-Ist)用橙色標記，藥水用縮寫顯示（例如 Super Healing Potion → SHP），寶石類用藍色標記。放到 ./mods/ 下","assertions":[]}

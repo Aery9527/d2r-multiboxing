@@ -1,0 +1,19 @@
+[
+  {
+    "id": 22745,
+    "Key": "box",
+    "enUS": "Horadric Cube\n\nÿc4=== Rune Upgrades ===ÿc0\nÿc93\u00d7 Runeÿc0 \u2192 Next (El~Ort, #1~#9)\nÿc93\u00d7 Rune + Chipped Gemÿc0 \u2192 Next (Thul~Lem, #10~#20)\nÿc92\u00d7 Rune + Flawless Gemÿc0 \u2192 Next (Pul~Cham, #21~#32)\n\nÿc4=== Reroll ===ÿc0\n3\u00d7 ÿc;P.Gemÿc0 + ÿc3Magic Itemÿc0 \u2192 Reroll Magic\n6\u00d7 ÿc;P.Skullÿc0 + ÿc9Rare Itemÿc0 \u2192 Reroll Rare\n\nÿc4=== Socket ===ÿc0\nÿcNTal + Thul + P.Topazÿc0 + Normal Armor\nÿcNRal + Amn + P.Amethystÿc0 + Normal Weapon\n\nÿc4=== Upgrade ===ÿc0\nÿcNRal + Sol + P.Emeraldÿc0 + Norm Armor \u2192 Exceptional\nÿcNLum + Pul + P.Emeraldÿc0 + Excep Armor \u2192 Elite\nÿcNRal + Sol + P.Emeraldÿc0 + Norm Weapon \u2192 Exceptional\n\nÿc4=== Token ===ÿc0\n4 Essences \u2192 ÿc4Token of Absolution",
+    "zhTW": "\u8d6b\u62c9\u8fea\u514b\u65b9\u584a\n\nÿc4=== \u7b26\u6587\u5347\u7d1a ===ÿc0\nÿc93\u00d7 \u7b26\u6587ÿc0 \u2192 \u4e0b\u4e00\u968e (El~Ort, #1~#9)\nÿc93\u00d7 \u7b26\u6587 + \u788e\u88c2\u5bf6\u77f3ÿc0 \u2192 \u4e0b\u4e00\u968e (Thul~Lem, #10~#20)\nÿc92\u00d7 \u7b26\u6587 + \u7121\u7455\u5bf6\u77f3ÿc0 \u2192 \u4e0b\u4e00\u968e (Pul~Cham, #21~#32)\n\nÿc4=== \u6d17\u88dd\u5099 ===ÿc0\n3\u00d7 ÿc;\u5b8c\u7f8e\u5bf6\u77f3ÿc0 + ÿc3\u9b54\u6cd5\u88dd\u5099ÿc0 \u2192 \u91cd\u9ab2\u9b54\u6cd5\n6\u00d7 ÿc;\u5b8c\u7f8e\u982d\u9ab7ÿc0 + ÿc9\u7a00\u6709\u88dd\u5099ÿc0 \u2192 \u91cd\u9ab2\u7a00\u6709\n\nÿc4=== \u6253\u5b54 ===ÿc0\nÿcNTal + Thul + \u5b8c\u7f8e\u9ec3\u5bf6ÿc0 + \u666e\u901a\u9632\u5177\nÿcNRal + Amn + \u5b8c\u7f8e\u7d2b\u5bf6ÿc0 + \u666e\u901a\u6b66\u5668\n\nÿc4=== \u5347\u7d1a ===ÿc0\nÿcNRal + Sol + \u5b8c\u7f8e\u7da0\u5bf6ÿc0 + \u666e\u901a\u9632\u5177 \u2192 \u7cbe\u83ef\nÿcNLum + Pul + \u5b8c\u7f8e\u7da0\u5bf6ÿc0 + \u7cbe\u83ef\u9632\u5177 \u2192 \u83c1\u82f1\nÿcNRal + Sol + \u5b8c\u7f8e\u7da0\u5bf6ÿc0 + \u666e\u901a\u6b66\u5668 \u2192 \u7cbe\u83ef\n\nÿc4=== \u6d17\u9ede ===ÿc0\n4 \u7cbe\u83ef \u2192 ÿc4\u8d3e\u514d\u4e4b\u7b26",
+    "deDE": "Horadrim-W\u00FCrfel",
+    "esES": "Cubo de Horadrim",
+    "frFR": "Cube horadrique",
+    "itIT": "Cubo di Horadrim",
+    "koKR": "\uD638\uB77C\uB4DC\uB9BC \uD050\uBE0C",
+    "plPL": "Sze\u015Bcian Horadrim\u00F3w",
+    "esMX": "Cubo de Horadrim",
+    "jaJP": "\u30DB\u30E9\u30C9\u30EA\u30E0\u306E\u30AD\u30E5\u30FC\u30D6",
+    "ptBR": "Cubo Horadrim",
+    "ruRU": "\u0425\u043E\u0440\u0430\u0434\u0440\u0438\u043C\u0441\u043A\u0438\u0439 \u043A\u0443\u0431",
+    "zhCN": "\u8d6b\u62c9\u8fea\u514b\u65b9\u5757"
+  }
+]

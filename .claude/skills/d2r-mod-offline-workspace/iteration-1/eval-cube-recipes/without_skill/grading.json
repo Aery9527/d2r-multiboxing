@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "eval_name": "cube-recipes",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "modinfo.json exists", "passed": true, "evidence": "name: \"easy-cube\""},
+    {"text": "cubemain.txt with 3 recipes", "passed": true, "evidence": "15 rows: 7 per-gem variants for recipe 1, 7 for recipe 2, 1 for recipe 3 — more thorough"},
+    {"text": "TSV tab-separated format", "passed": true, "evidence": "87-column TSV with full cubemain schema"},
+    {"text": "Recipe 1: perfect gems → Ist(r24)", "passed": true, "evidence": "gpv,qty=3 → r24 (one per gem type)"},
+    {"text": "Recipe 3: El(r01) qty=33 → Zod(r33)", "passed": true, "evidence": "r01,qty=33 → r33 confirmed"},
+    {"text": "All recipes enabled=1", "passed": true, "evidence": "enabled=1 for all 15 rows"},
+    {"text": "README with recipe descriptions", "passed": true, "evidence": "README documents all 3 recipe categories"}
+  ]
+}

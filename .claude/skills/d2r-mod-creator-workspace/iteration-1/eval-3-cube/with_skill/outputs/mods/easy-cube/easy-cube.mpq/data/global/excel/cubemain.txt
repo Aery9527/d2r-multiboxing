@@ -1,0 +1,4 @@
+description	enabled	ladder	min diff	version	numinputs	input 1	input 2	input 3	output	lvl
+3 Perfect Gems -> Ist Rune	1	0		100	3	gem4,qty=3			r24	
+Unique Item + Flawless Gem -> Random Unique	1	0		100	2	any,uni	gem3		usetype,uni	
+33 El Runes -> Zod Rune	1	0		100	33	r01,qty=33			r33	

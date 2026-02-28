@@ -1,0 +1,49 @@
+{
+  "skill_name": "d2r-mod-offline",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我建一個 D2R mod，把 Hell 難度的掉落率提升 5 倍，特別是高階符文的掉落。Mod 名稱叫 high-drop，放到 ./mods/ 底下",
+      "expected_output": "生成完整 mod 目錄結構，包含 modinfo.json、修改過的 treasureclassex.txt（NoDrop 大幅降低），以及 README.md 說明",
+      "files": [],
+      "expectations": [
+        "生成了 mods/high-drop/modinfo.json 且包含正確的 name 和 savepath",
+        "生成了 mods/high-drop/high-drop.mpq/data/global/excel/treasureclassex.txt",
+        "treasureclassex.txt 是 Tab 分隔格式",
+        "NoDrop 值被降低以提升掉落率",
+        "生成了 README.md 包含安裝說明和 -mod high-drop -txt 啟動參數",
+        "有提醒使用者僅限離線使用的警告"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我想做一個 D2R 的自訂符文之語 mod，名字叫 my-runewords。新增一個符文之語叫「龍息 (Dragon Breath)」，用 Ber + Jah + Cham 三顆符文，可以裝在所有武器上。效果：+3 所有技能、40% 攻擊速度、15% 生命偷取、+300% 傷害。放到 ./mods/ 底下",
+      "expected_output": "生成完整 mod 結構，包含 modinfo.json、runes.txt 新增符文之語行、item-runes.json 新增名稱字串",
+      "files": [],
+      "expectations": [
+        "生成了 mods/my-runewords/modinfo.json",
+        "生成了 runes.txt 包含 Dragon Breath 的定義行",
+        "runes.txt 中 Rune1-Rune3 對應 Ber(r30), Jah(r31), Cham(r32)",
+        "runes.txt 中 itype1 設為 weap",
+        "屬性包含 allskills、swing2、lifesteal、dmg%",
+        "生成了 item-runes.json 包含 Dragon Breath 和龍息的中英文名稱",
+        "JSON 字串的 id 使用 90000+ 避免衝突"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "做一個 D2R mod 叫 easy-cube，新增三個 Horadric Cube 配方：1) 3個完美寶石合成1個高階符文(Ist)  2) 任何暗金物品+精煉寶石=隨機暗金物品  3) El符文x33=Zod符文。放在 ./mods/ 下",
+      "expected_output": "生成完整 mod 結構，包含 modinfo.json、cubemain.txt 包含三個新配方",
+      "files": [],
+      "expectations": [
+        "生成了 mods/easy-cube/modinfo.json",
+        "生成了 cubemain.txt 包含三個新配方",
+        "cubemain.txt 是 Tab 分隔格式",
+        "配方 1 使用完美寶石輸入和 Ist 符文(r24)輸出",
+        "配方 3 使用 El 符文(r01) qty=33 輸入和 Zod 符文(r33)輸出",
+        "所有配方的 enabled 欄位設為 1",
+        "生成了 README.md 列出所有配方說明"
+      ]
+    }
+  ]
+}

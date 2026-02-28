@@ -1,0 +1,184 @@
+{
+  "metadata": {
+    "skill_name": "d2r-mod-creator",
+    "skill_path": ".claude/skills/d2r-mod-creator",
+    "timestamp": "2026-02-28T07:30:00Z",
+    "evals_run": [1, 2, 3],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "drop-rate-mod",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 106,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "生成了 modinfo.json 且包含正確的 name 和 savepath", "passed": true, "evidence": "正確"},
+        {"text": "生成了 treasureclassex.txt 在正確 .mpq 路徑", "passed": true, "evidence": "正確"},
+        {"text": "TSV 格式", "passed": true, "evidence": "正確"},
+        {"text": "NoDrop 降低", "passed": true, "evidence": "從 ~100 降至 2"},
+        {"text": "README.md 含安裝說明", "passed": true, "evidence": "正確"},
+        {"text": "離線警告", "passed": true, "evidence": "正確"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "drop-rate-mod",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 309,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "生成了 modinfo.json 且包含正確的 name 和 savepath", "passed": true, "evidence": "正確"},
+        {"text": "生成了 treasureclassex.txt 在正確 .mpq 路徑", "passed": true, "evidence": "正確"},
+        {"text": "TSV 格式", "passed": true, "evidence": "正確"},
+        {"text": "NoDrop 降低", "passed": true, "evidence": "正確"},
+        {"text": "README.md 含安裝說明", "passed": true, "evidence": "正確"},
+        {"text": "離線警告", "passed": true, "evidence": "正確"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "custom-runeword",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 97,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "modinfo.json 存在", "passed": true, "evidence": "正確"},
+        {"text": "runes.txt 含 Dragon Breath", "passed": true, "evidence": "正確"},
+        {"text": "Rune codes 正確 (r30/r31/r32)", "passed": true, "evidence": "正確"},
+        {"text": "itype1=weap", "passed": true, "evidence": "正確"},
+        {"text": "屬性代碼正確", "passed": true, "evidence": "allskills/swing2/lifesteal/dmg%"},
+        {"text": "item-runes.json D2R 標準格式", "passed": true, "evidence": "正確路徑與格式"},
+        {"text": "id 使用 90000+", "passed": true, "evidence": "id=90001"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "custom-runeword",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.71,
+        "passed": 5,
+        "failed": 2,
+        "total": 7,
+        "time_seconds": 133,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "modinfo.json 存在", "passed": true, "evidence": "含多餘欄位"},
+        {"text": "runes.txt 含 Dragon Breath", "passed": true, "evidence": "正確但路徑不在 .mpq 下"},
+        {"text": "Rune codes 正確 (r30/r31/r32)", "passed": true, "evidence": "正確"},
+        {"text": "itype1=weap", "passed": true, "evidence": "正確"},
+        {"text": "屬性代碼正確", "passed": true, "evidence": "正確"},
+        {"text": "item-runes.json D2R 標準格式", "passed": false, "evidence": "使用自訂 JSON 而非 D2R 字串格式"},
+        {"text": "id 使用 90000+", "passed": false, "evidence": "無 id 欄位"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "cube-recipes",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 91,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "modinfo.json 存在", "passed": true, "evidence": "正確"},
+        {"text": "cubemain.txt 含 3 配方", "passed": true, "evidence": "正確"},
+        {"text": "TSV 格式", "passed": true, "evidence": "正確"},
+        {"text": "配方 1: gem4,qty=3 → r24", "passed": true, "evidence": "正確"},
+        {"text": "配方 3: r01,qty=33 → r33", "passed": true, "evidence": "正確"},
+        {"text": "enabled=1", "passed": true, "evidence": "全部 enabled"},
+        {"text": "README.md 列出配方", "passed": true, "evidence": "正確"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "cube-recipes",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 130,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "modinfo.json 存在", "passed": true, "evidence": "正確"},
+        {"text": "cubemain.txt 含 3 配方", "passed": true, "evidence": "正確"},
+        {"text": "TSV 格式", "passed": true, "evidence": "正確"},
+        {"text": "配方 1: gem4,qty=3 → r24", "passed": true, "evidence": "正確"},
+        {"text": "配方 3: r01,qty=33 → r33", "passed": true, "evidence": "正確"},
+        {"text": "enabled=1", "passed": true, "evidence": "全部 enabled"},
+        {"text": "README.md 列出配方", "passed": true, "evidence": "正確"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 98.0, "stddev": 7.5, "min": 91.0, "max": 106.0},
+      "tokens": {"mean": 0, "stddev": 0, "min": 0, "max": 0}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.90, "stddev": 0.17, "min": 0.71, "max": 1.0},
+      "time_seconds": {"mean": 190.7, "stddev": 102.3, "min": 130.0, "max": 309.0},
+      "tokens": {"mean": 0, "stddev": 0, "min": 0, "max": 0}
+    },
+    "delta": {
+      "pass_rate": "+0.10",
+      "time_seconds": "-92.7",
+      "tokens": "0"
+    }
+  },
+  "notes": [
+    "With-skill 在所有 3 個 eval 中都達到 100% pass rate；without-skill 在 runeword eval 中 JSON 字串格式錯誤（71%）",
+    "With-skill 平均執行時間 98 秒，比 without-skill 的 191 秒快了近一半",
+    "最大差異出現在 Eval 2 (runeword)：without-skill 未產出正確的 D2R JSON 字串格式，且未使用 .mpq 目錄結構",
+    "Eval 1 (drop-rate) 和 Eval 3 (cube) 在兩組中表現相近，差異較小",
+    "With-skill 產出的 modinfo.json 一致只含必要欄位；without-skill 部分包含多餘欄位",
+    "Skill 的主要價值在於確保正確的 .mpq 目錄結構和 D2R 標準 JSON 字串格式"
+  ]
+}
