@@ -3,6 +3,7 @@ package process
 import (
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,6 +17,7 @@ func LaunchD2R(d2rPath string, username string, password string, address string,
 	)
 
 	cmd := exec.Command(d2rPath, args...)
+	cmd.Dir = filepath.Dir(d2rPath)
 	fmt.Printf("  > %s %s\n", d2rPath, strings.Join(redactArgs(args), " "))
 
 	err := cmd.Start()
@@ -29,6 +31,7 @@ func LaunchD2R(d2rPath string, username string, password string, address string,
 // LaunchD2ROffline starts D2R.exe without account parameters (offline/single-player mode).
 func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
 	cmd := exec.Command(d2rPath, extraArgs...)
+	cmd.Dir = filepath.Dir(d2rPath)
 	fmt.Printf("  > %s %s\n", d2rPath, strings.Join(extraArgs, " "))
 
 	if err := cmd.Start(); err != nil {

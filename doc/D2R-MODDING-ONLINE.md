@@ -4,6 +4,10 @@
 
 > ✅ **Battle.net 安全**——僅修改客戶端顯示文字，不改變遊戲機制
 
+> ⚠️ **RotW 注意：** D2R v3.1 (Reign of the Warlock) 已禁用 `-mod` 參數。
+> 本文件中關於手動 `-mod` 啟動的說明僅適用於舊版 D2R。
+> RotW 版本請使用 [D2RMM](https://github.com/olegbl/d2rmm) 載入 Mod，詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md)。
+
 **前置知識：** 請先閱讀 [D2R Modding 共通指南](D2R-MODDING-COMMON.md)（目錄結構、工具安裝、啟動參數等）
 
 ---

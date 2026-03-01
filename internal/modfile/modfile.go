@@ -86,11 +86,19 @@ func Load(modDir string) (*Mod, error) {
 	return mod, nil
 }
 
+// utf8BOM is the UTF-8 Byte Order Mark required by D2R string JSON files.
+var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
+
 // loadStringFile reads and parses a single JSON string file.
 func loadStringFile(path string) (*StringFile, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Strip UTF-8 BOM if present
+	if len(data) >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF {
+		data = data[3:]
 	}
 
 	var entries []StringEntry
@@ -106,17 +114,20 @@ func loadStringFile(path string) (*StringFile, error) {
 	}, nil
 }
 
-// Save writes a string file back to disk, preserving JSON formatting.
+// Save writes a string file back to disk with UTF-8 BOM (required by D2R).
 func (sf *StringFile) Save() error {
 	data, err := json.MarshalIndent(sf.Entries, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
 
-	// Append newline for consistency
-	data = append(data, '\n')
+	// Prepend UTF-8 BOM + append newline
+	out := make([]byte, 0, len(utf8BOM)+len(data)+1)
+	out = append(out, utf8BOM...)
+	out = append(out, data...)
+	out = append(out, '\n')
 
-	if err := os.WriteFile(sf.Path, data, 0o644); err != nil {
+	if err := os.WriteFile(sf.Path, out, 0o644); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 

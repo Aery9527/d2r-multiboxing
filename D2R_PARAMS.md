@@ -37,12 +37,17 @@
 
 ## Mod 與資料
 
-| 參數 | 說明 |
-|------|------|
-| `-direct` | 直接讀取 `Data/` 目錄的內部資料檔 |
-| `-mod <name>` | 載入 mod 資料，路徑為 `mods/<name>/<name>.mpq`（最長 23 字元） |
-| `-txt` | 搭配 `-direct` 或 `-mod` 使用 `.txt` 檔案代替 `.bin` |
-| `-data <path>` | 自訂資料路徑（最長 259 字元） |
+> ⚠️ **D2R v3.1 (Reign of the Warlock) 已禁用 `-mod`、`-direct`、`-txt` 參數。**
+> 這些參數會被 D2R 靜默忽略，不會報錯也不會載入 Mod。
+> 目前唯一可靠的 Mod 載入方式是透過 [D2RMM](https://github.com/olegbl/d2rmm)。
+> 詳細調查記錄請參考 [doc/D2R-MOD-LOADING-ROTW.md](doc/D2R-MOD-LOADING-ROTW.md)。
+
+| 參數 | 說明 | RotW 狀態 |
+|------|------|-----------|
+| `-direct` | 直接讀取 `Data/` 目錄的內部資料檔 | ❌ 已失效 |
+| `-mod <name>` | 載入 mod 資料，路徑為 `mods/<name>/<name>.mpq`（最長 23 字元） | ❌ 已失效 |
+| `-txt` | 搭配 `-direct` 或 `-mod` 使用 `.txt` 檔案代替 `.bin` | ❌ 已失效 |
+| `-data <path>` | 自訂資料路徑（最長 259 字元） | ❓ 未測試 |
 
 ---
 

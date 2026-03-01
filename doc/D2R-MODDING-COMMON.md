@@ -5,6 +5,7 @@
 **延伸閱讀：**
 - [離線 Mod（資料表修改）](D2R-MODDING-OFFLINE.md) — 修改 `.txt` 資料表，改變遊戲機制（⚠️ 僅限離線/單人）
 - [線上安全 Mod（顯示修改）](D2R-MODDING-ONLINE.md) — 修改 JSON 字串檔，自訂物品顯示（✅ Battle.net 安全）
+- [RotW Mod 載入問題](D2R-MOD-LOADING-ROTW.md) — D2R v3.1 後 `-mod` 參數失效的調查與 D2RMM 解決方案
 
 ---
 
@@ -183,13 +184,18 @@ mods/
 
 ## 啟動參數與載入 Mod
 
+> ⚠️ **重要：D2R v3.1 (Reign of the Warlock) 已禁用 `-mod` 與 `-direct -txt` 參數。**
+> 傳統的命令列 Mod 載入方式在 RotW 版本中完全失效，D2R 會靜默忽略這些參數。
+> 目前唯一可靠的 Mod 載入方式是透過 [D2RMM](#d2rmm-mod-manager)。
+> 詳細調查記錄請參考 [D2R Mod 載入問題：RotW 版本](D2R-MOD-LOADING-ROTW.md)。
+
 ### D2R 啟動參數
 
-| 參數 | 說明 |
-|------|------|
-| `-mod <ModName>` | 載入指定 Mod（名稱對應 `mods/<ModName>/` 資料夾） |
-| `-txt` | 強制從 `.txt` 檔重新編譯 `.bin` 檔案（**離線 Mod 開發/測試時必用**） |
-| `-direct` | 直接從檔案系統載入資料（搭配 `-txt` 使用） |
+| 參數 | 說明 | RotW 狀態 |
+|------|------|-----------|
+| `-mod <ModName>` | 載入指定 Mod（名稱對應 `mods/<ModName>/` 資料夾） | ❌ 已失效 |
+| `-txt` | 強制從 `.txt` 檔重新編譯 `.bin` 檔案（**離線 Mod 開發/測試時必用**） | ❌ 已失效 |
+| `-direct` | 直接從檔案系統載入資料（搭配 `-txt` 使用） | ❌ 已失效 |
 | `-w` | 視窗化模式啟動 |
 | `-ns` / `-nosound` | 停用音效 |
 | `-noborder` | 無邊框視窗 |
@@ -287,7 +293,8 @@ mods/
 
 | 問題 | 解決方式 |
 |------|----------|
-| 遊戲啟動後 Mod 未生效 | 確認目錄結構正確、`-mod <名稱>` 與資料夾名稱一致、加上 `-txt` |
+| 遊戲啟動後 Mod 未生效（RotW 版本） | **使用 [D2RMM](#d2rmm-mod-manager)** — RotW 已禁用 `-mod` 參數，詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md) |
+| 遊戲啟動後 Mod 未生效（舊版本） | 確認目錄結構正確、`-mod <名稱>` 與資料夾名稱一致、加上 `-txt` |
 | 遊戲崩潰 | 檢查 `.txt` 是否有格式錯誤（多餘的 Tab、缺少欄位） |
 | 物品名稱顯示為 Key | 檢查 JSON 字串檔中的 `Key` 是否與 `.txt` 中的 `namestr` 對應 |
 | Mod 間衝突 | 使用 D2RMM 管理載入順序，或手動合併衝突的 `.txt` 檔案 |
