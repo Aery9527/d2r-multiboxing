@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"d2r-multiboxing/internal/modfile"
+	"d2rhl/internal/modfile"
 )
 
 // View implements tea.Model.
@@ -100,7 +100,7 @@ func (m Model) viewEditScreen() string {
 
 	// Entry info
 	b.WriteString(labelStyle.Render("  File: "))
-	b.WriteString(fileTagStyle.Render(m.editRef.File.Name+".json"))
+	b.WriteString(fileTagStyle.Render(m.editRef.File.Name + ".json"))
 	b.WriteString("\n")
 	b.WriteString(labelStyle.Render("  ID:   "))
 	b.WriteString(fmt.Sprintf("%d", m.editRef.Entry.ID))

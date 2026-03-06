@@ -1,6 +1,6 @@
 // Package config provides application configuration management.
-// All files are stored under ~/.d2r-multiboxing/ by default.
-// The directory can be overridden via the D2R_MULTIBOXING_HOME environment variable.
+// All files are stored under ~/.d2r-hyper-launcher/ by default.
+// The directory can be overridden via the D2R_HYPER_LAUNCHER_HOME environment variable.
 package config
 
 import (
@@ -9,12 +9,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"d2r-multiboxing/internal/d2r"
+	"d2rhl/internal/d2r"
 )
 
 const (
 	// configDirName is the directory name under user home.
-	configDirName = ".d2r-multiboxing"
+	configDirName = ".d2r-hyper-launcher"
 
 	// configFileName is the config file name.
 	configFileName = "config.json"
@@ -23,7 +23,7 @@ const (
 	accountsFileName = "accounts.csv"
 
 	// HomeDirEnv is the environment variable to override the config directory.
-	HomeDirEnv = "D2R_MULTIBOXING_HOME"
+	HomeDirEnv = "D2R_HYPER_LAUNCHER_HOME"
 )
 
 // SwitcherConfig holds the window switcher configuration.
@@ -62,7 +62,7 @@ func DefaultConfig() Config {
 }
 
 // Dir returns the config directory path.
-// Priority: D2R_MULTIBOXING_HOME env > ~/.d2r-multiboxing
+// Priority: D2R_HYPER_LAUNCHER_HOME env > ~/.d2r-hyper-launcher
 func Dir() (string, error) {
 	if dir := os.Getenv(HomeDirEnv); dir != "" {
 		return dir, nil

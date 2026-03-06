@@ -223,7 +223,7 @@ mods/
    -mod MyMod -txt
    ```
 
-#### 方式 3：搭配本工具 (d2r-multiboxing)
+#### 方式 3：搭配本工具 (d2r-hyper-launcher)
 
 在 [config.json](../internal/config/config.go) 中設定好 D2R 路徑後，透過本工具的帳號管理功能啟動 D2R，可在啟動參數中加入 Mod 相關旗標。
 

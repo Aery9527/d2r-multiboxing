@@ -1,4 +1,4 @@
-module d2r-multiboxing
+module d2rhl
 
 go 1.26
 

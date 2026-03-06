@@ -72,9 +72,9 @@
 
 4. 首次成功啟動後，後續可省略 `-txt` 參數以加快載入速度。
 
-## 使用 d2r-multiboxing 啟動
+## 使用 d2r-hyper-launcher 啟動
 
-如果你使用 [d2r-multiboxing](../../../../../../README.md) 工具，可在設定中加入啟動參數：
+如果你使用 [d2r-hyper-launcher](../../../../../../README.md) 工具，可在設定中加入啟動參數：
 ```
 -mod high-drop -txt
 ```

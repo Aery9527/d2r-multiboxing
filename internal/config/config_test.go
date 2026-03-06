@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"d2r-multiboxing/internal/d2r"
+	"d2rhl/internal/d2r"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +15,6 @@ func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
 	assert.Equal(t, d2r.DefaultGamePath, cfg.D2RPath)
 }
-
 func TestSaveAndLoad(t *testing.T) {
 	// 使用 temp 目錄模擬設定檔
 	tmpDir := t.TempDir()

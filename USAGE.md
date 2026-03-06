@@ -1,7 +1,7 @@
-# D2R Multiboxing — 使用說明
+# d2r-hyper-launcher — 使用說明
 
-> 本文件說明如何安裝、設定與操作 D2R Multiboxing CLI 工具。
-> 技術說明請參考 [PLAN-v1-multiboxing.md](PLAN-v1-multiboxing.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換）。
+> 本文件說明如何安裝、設定與操作 d2r-hyper-launcher CLI 工具。
+> 技術說明請參考 [PLAN-v1-hyper-launcher.md](PLAN-v1-hyper-launcher.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換）。
 
 ---
 
@@ -51,21 +51,21 @@
 
 ```powershell
 # 1. 進入專案目錄
-cd C:\Users\User\GolandProjects\d2r-multiboxing
+cd C:\Users\User\GolandProjects\d2r-hyper-launcher
 
 # 2. 編譯（開發版，版號顯示為 dev）
-go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 
 # 2. 編譯（指定版號）
-go build -ldflags "-X main.version=1.0.0" -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+go build -ldflags "-X main.version=1.0.0" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 
 # 3. 確認產出
-Get-Item .\d2r-multiboxing.exe
+Get-Item .\d2r-hyper-launcher.exe
 ```
 
 ### 方式二：直接使用已編譯的 exe
 
-將 `d2r-multiboxing.exe` 放到任意目錄即可。首次執行會自動在家目錄建立 `~/.d2r-multiboxing/` 資料目錄及預設設定檔。
+將 `d2r-hyper-launcher.exe` 放到任意目錄即可。首次執行會自動在家目錄建立 `~/.d2r-hyper-launcher/` 資料目錄及預設設定檔。
 
 ---
 
@@ -73,16 +73,16 @@ Get-Item .\d2r-multiboxing.exe
 
 ### 建立 accounts.csv
 
-1. 在資料目錄 `~/.d2r-multiboxing/` 下建立 `accounts.csv`（可複製範本）：
+1. 在資料目錄 `~/.d2r-hyper-launcher/` 下建立 `accounts.csv`（可複製範本）：
 
    ```powershell
-   Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+   Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
    ```
 
 2. 用文字編輯器（記事本、VS Code 等）打開 `accounts.csv`，填入你的帳號資訊：
 
    ```powershell
-   notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+   notepad "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
    ```
 
    ```csv
@@ -142,21 +142,21 @@ player1@gmail.com,ENC:AQAAANCMnd8BFd...（Base64 字串）,主帳號-法師
 工具的所有資料檔案統一存放在資料目錄下，預設位置為：
 
 ```
-%USERPROFILE%\.d2r-multiboxing\
+%USERPROFILE%\.d2r-hyper-launcher\
 ```
 
 目錄結構：
 
 ```
-~/.d2r-multiboxing/
+~/.d2r-hyper-launcher/
 ├── config.json      # 設定檔
 └── accounts.csv     # 帳號資料
 ```
 
-若需自訂資料目錄位置，可設定環境變數 `D2R_MULTIBOXING_HOME`：
+若需自訂資料目錄位置，可設定環境變數 `D2R_HYPER_LAUNCHER_HOME`：
 
 ```powershell
-$env:D2R_MULTIBOXING_HOME = "D:\MyD2R"
+$env:D2R_HYPER_LAUNCHER_HOME = "D:\MyD2R"
 ```
 
 > 💡 資料目錄會在首次執行時自動建立，無需手動建立。
@@ -176,7 +176,7 @@ $env:D2R_MULTIBOXING_HOME = "D:\MyD2R"
 若你的 D2R 安裝在非預設路徑，用文字編輯器修改 `d2r_path` 即可：
 
 ```powershell
-notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
+notepad "$env:USERPROFILE\.d2r-hyper-launcher\config.json"
 ```
 
 ---
@@ -186,8 +186,8 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
 以 **管理員身份** 開啟 PowerShell，然後執行：
 
 ```powershell
-cd C:\path\to\d2r-multiboxing
-.\d2r-multiboxing.exe
+cd C:\path\to\d2r-hyper-launcher
+.\d2r-hyper-launcher.exe
 ```
 
 > 💡 **管理員權限說明**：
@@ -207,10 +207,10 @@ cd C:\path\to\d2r-multiboxing
 
 ```
 ============================================
-  D2R Multiboxing Launcher
+  d2r-hyper-launcher
 ============================================
 
-  資料目錄：C:\Users\User\.d2r-multiboxing
+  資料目錄：C:\Users\User\.d2r-hyper-launcher
   D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
 
   帳號列表：
@@ -278,17 +278,17 @@ cd C:\path\to\d2r-multiboxing
 
 ```powershell
 # Step 1: 編譯工具
-cd C:\Users\User\GolandProjects\d2r-multiboxing
-go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+cd C:\Users\User\GolandProjects\d2r-hyper-launcher
+go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 
 # Step 2:建立帳號設定檔
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
 # 用編輯器填入帳號資訊
-notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+notepad "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
 
 # Step 3: 執行（若使用搖桿切換功能，請以管理員權限執行）
 # （右鍵 PowerShell → 以系統管理員身分執行）
-.\d2r-multiboxing.exe
+.\d2r-hyper-launcher.exe
 
 # Step 4: 在選單中操作
 #   輸入 1 → 啟動第一個帳號
@@ -442,16 +442,16 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
 
 ### Q: 啟動後提示「找不到 accounts.csv」
 
-**A**: 請確認 `accounts.csv` 已放在資料目錄下（預設 `~/.d2r-multiboxing/`）。可以複製範本檔案：
+**A**: 請確認 `accounts.csv` 已放在資料目錄下（預設 `~/.d2r-hyper-launcher/`）。可以複製範本檔案：
 ```powershell
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
 ```
 
 ### Q: 啟動後提示「啟動失敗」或「系統找不到指定的檔案」
 
 **A**: D2R.exe 路徑可能不正確。請修改設定檔中的 `d2r_path`：
 ```powershell
-notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
+notepad "$env:USERPROFILE\.d2r-hyper-launcher\config.json"
 ```
 
 ### Q: Handle 關閉失敗 / 權限不足
@@ -460,7 +460,7 @@ notepad "$env:USERPROFILE\.d2r-multiboxing\config.json"
 
 ### Q: 防毒軟體警告 / 誤報
 
-**A**: 本工具需要操作其他進程的 Handle，這類行為會被部分防毒軟體標記。請將 `d2r-multiboxing.exe` 加入防毒軟體的例外清單。
+**A**: 本工具需要操作其他進程的 Handle，這類行為會被部分防毒軟體標記。請將 `d2r-hyper-launcher.exe` 加入防毒軟體的例外清單。
 
 ### Q: 換電腦後密碼無法解密
 

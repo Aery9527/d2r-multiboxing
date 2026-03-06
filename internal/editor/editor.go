@@ -3,7 +3,7 @@ package editor
 import (
 	"strings"
 
-	"d2r-multiboxing/internal/modfile"
+	"d2rhl/internal/modfile"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

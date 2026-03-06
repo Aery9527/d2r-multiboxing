@@ -1,6 +1,6 @@
-# D2R Multiboxing — Phase 2：視窗切換功能（Window Switcher）
+# d2r-hyper-launcher — Phase 2：視窗切換功能（Window Switcher）
 
-> **前置**：[Phase 1 實作計畫](PLAN-v1-multiboxing.md)（多開啟動器，已完成）
+> **前置**：[Phase 1 實作計畫](PLAN-v1-hyper-launcher.md)（多開啟動器，已完成）
 > **目的**：在多個 D2R 視窗之間快速切換焦點，讓搖桿/鍵盤輸入導向正確的視窗
 
 ---
@@ -317,7 +317,7 @@ func SwitchToNextD2RWindow() error
 
 - [x] 建立 `internal/switcher/detect.go`
   - `DetectKeyPress()`：同時裝 keyboard + mouse hook + XInput 輪詢偵測一次按鍵
-- [x] 在 [main.go](cmd/d2r-multiboxing/main.go) CLI 選單新增 `s` 選項
+- [x] 在 [main.go](cmd/d2r-hyper-launcher/main.go) CLI 選單新增 `s` 選項
   - 顯示目前設定
   - 「請按下切換按鍵...」→ 偵測 → 確認 → 寫入 config
   - 「關閉切換功能」→ 設 enabled=false → 寫入 config

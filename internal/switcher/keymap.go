@@ -1,4 +1,4 @@
-// Package switcher provides window switching functionality for D2R multiboxing.
+// Package switcher provides window switching functionality for D2R 多開啟動器。
 package switcher
 
 import (

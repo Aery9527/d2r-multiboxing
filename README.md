@@ -1,4 +1,4 @@
-# D2R Multiboxing
+# d2r-hyper-launcher
 
 在同一台 Windows 電腦上同時執行多個 Diablo II: Resurrected (D2R) 實例的 CLI 輔助工具。
 
@@ -25,20 +25,20 @@
 
 ```powershell
 # 開發版
-go build -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 
 # 指定版號
-go build -ldflags "-X main.version=1.0.0" -o d2r-multiboxing.exe ./cmd/d2r-multiboxing
+go build -ldflags "-X main.version=1.0.0" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
 
 ## 使用方式
 
 ### 1. 建立帳號設定檔
 
-在資料目錄 `~/.d2r-multiboxing/` 下建立 `accounts.csv`：
+在資料目錄 `~/.d2r-hyper-launcher/` 下建立 `accounts.csv`：
 
 ```powershell
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-multiboxing\accounts.csv"
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
 ```
 
 ```csv
@@ -55,7 +55,7 @@ account2@email.com,anotherpass,副帳號-野蠻人
 
 ### 2. 設定 D2R 路徑（選用）
 
-首次執行時自動建立 `~/.d2r-multiboxing/config.json`，可自訂路徑：
+首次執行時自動建立 `~/.d2r-hyper-launcher/config.json`，可自訂路徑：
 
 ```json
 {
@@ -64,24 +64,24 @@ account2@email.com,anotherpass,副帳號-野蠻人
 }
 ```
 
-資料目錄可透過環境變數 `D2R_MULTIBOXING_HOME` 自訂。
+資料目錄可透過環境變數 `D2R_HYPER_LAUNCHER_HOME` 自訂。
 
 ### 3. 執行
 
 以 **管理員身份** 開啟 PowerShell 並執行：
 
 ```powershell
-.\d2r-multiboxing.exe
+.\d2r-hyper-launcher.exe
 ```
 
 ### 4. 操作選單
 
 ```
 ============================================
-  D2R Multiboxing Launcher  v1.0.0
+  d2r-hyper-launcher  v1.0.0
 ============================================
 
-  資料目錄：C:\Users\User\.d2r-multiboxing
+  資料目錄：C:\Users\User\.d2r-hyper-launcher
   D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
   啟動間隔：5 秒
 
@@ -134,13 +134,13 @@ account2@email.com,anotherpass,副帳號-野蠻人
 
 D2R 啟動時會建立名為 `DiabloII Check For Other Instances` 的 Windows Event Handle 來阻止多開。本工具透過 Windows NT API (`NtDuplicateObject` + `DuplicateCloseSource`) 自動關閉該 Handle，允許多個 D2R 實例同時運行。
 
-詳細技術說明請參考 [PLAN-v1-multiboxing.md](PLAN-v1-multiboxing.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換），完整使用說明請參考 [USAGE.md](USAGE.md)。
+詳細技術說明請參考 [PLAN-v1-hyper-launcher.md](PLAN-v1-hyper-launcher.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換），完整使用說明請參考 [USAGE.md](USAGE.md)。
 
 ## 專案結構
 
 ```
 ├── cmd/
-│   └── d2r-multiboxing/
+│   └── d2r-hyper-launcher/
 │       └── main.go              # CLI 互動主迴圈
 ├── internal/
 │   ├── config/config.go         # 設定檔讀寫（含 SwitcherConfig）
@@ -164,7 +164,7 @@ D2R 啟動時會建立名為 `DiabloII Check For Other Instances` 的 Windows Ev
 │       ├── keymap.go            # VK code 映射表
 │       └── gamepad.go           # XInput 搖桿偵測與輪詢
 ├── USAGE.md                     # 完整使用說明
-├── PLAN-v1-multiboxing.md       # Phase 1 實作計畫（已完成）
+├── PLAN-v1-hyper-launcher.md    # Phase 1 實作計畫（已完成）
 ├── PLAN-v2-switcher.md          # Phase 2 實作計畫（已完成）
 ├── D2R_PARAMS.md                # D2R 啟動參數一覽
 └── accounts.csv                 # 帳號 CSV 範本

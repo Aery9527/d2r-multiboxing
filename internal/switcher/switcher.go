@@ -5,9 +5,9 @@ import (
 	"sync"
 	"unsafe"
 
-	"d2r-multiboxing/internal/config"
-	"d2r-multiboxing/internal/d2r"
-	"d2r-multiboxing/internal/process"
+	"d2rhl/internal/config"
+	"d2rhl/internal/d2r"
+	"d2rhl/internal/process"
 
 	"golang.org/x/sys/windows"
 )
@@ -16,14 +16,14 @@ import (
 var (
 	user32 = windows.NewLazySystemDLL("user32.dll")
 
-	procRegisterHotKey     = user32.NewProc("RegisterHotKey")
-	procUnregisterHotKey   = user32.NewProc("UnregisterHotKey")
-	procGetMessageW        = user32.NewProc("GetMessageW")
-	procPostThreadMessageW = user32.NewProc("PostThreadMessageW")
-	procSetWindowsHookExW  = user32.NewProc("SetWindowsHookExW")
+	procRegisterHotKey      = user32.NewProc("RegisterHotKey")
+	procUnregisterHotKey    = user32.NewProc("UnregisterHotKey")
+	procGetMessageW         = user32.NewProc("GetMessageW")
+	procPostThreadMessageW  = user32.NewProc("PostThreadMessageW")
+	procSetWindowsHookExW   = user32.NewProc("SetWindowsHookExW")
 	procUnhookWindowsHookEx = user32.NewProc("UnhookWindowsHookEx")
-	procCallNextHookEx     = user32.NewProc("CallNextHookEx")
-	procGetAsyncKeyState   = user32.NewProc("GetAsyncKeyState")
+	procCallNextHookEx      = user32.NewProc("CallNextHookEx")
+	procGetAsyncKeyState    = user32.NewProc("GetAsyncKeyState")
 )
 
 // Windows constants

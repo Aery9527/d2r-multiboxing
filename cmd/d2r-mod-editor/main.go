@@ -6,10 +6,10 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"d2r-multiboxing/internal/d2r"
-	"d2r-multiboxing/internal/editor"
-	"d2r-multiboxing/internal/modfile"
-	"d2r-multiboxing/internal/process"
+	"d2rhl/internal/d2r"
+	"d2rhl/internal/editor"
+	"d2rhl/internal/modfile"
+	"d2rhl/internal/process"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
