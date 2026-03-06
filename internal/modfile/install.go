@@ -26,9 +26,21 @@ func InstallMod(srcModDir, d2rPath string) error {
 	return nil
 }
 
-// DiscoverInstalledMods scans the D2R mods directory for installed mods.
+// DiscoverInstalledMods scans the D2R mods directory for installed mod directories.
 func DiscoverInstalledMods(d2rPath string) ([]string, error) {
-	return DiscoverMods(D2RModsDir(d2rPath))
+	modsDir := D2RModsDir(d2rPath)
+	entries, err := os.ReadDir(modsDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read mods directory: %w", err)
+	}
+
+	var mods []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			mods = append(mods, entry.Name())
+		}
+	}
+	return mods, nil
 }
 
 // copyDir recursively copies a directory tree.
