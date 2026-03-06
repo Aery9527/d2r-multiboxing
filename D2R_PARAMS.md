@@ -37,16 +37,17 @@
 
 ## Mod 與資料
 
-> ⚠️ **D2R v3.1 (Reign of the Warlock) 已禁用 `-mod`、`-direct`、`-txt` 參數。**
-> 這些參數會被 D2R 靜默忽略，不會報錯也不會載入 Mod。
-> 目前唯一可靠的 Mod 載入方式是透過 [D2RMM](https://github.com/olegbl/d2rmm)。
+> ℹ️ **D2R v3.1 (Reign of the Warlock) 曾被認為完全禁用 `-mod`、`-txt` 參數。**
+> 經實測發現：**搭配 `-uid osi` 啟動時，`-mod` 參數仍然有效。**
+> 不帶 `-uid osi` 時，D2R 會靜默忽略 `-mod` 參數。
 > 詳細調查記錄請參考 [doc/D2R-MOD-LOADING-ROTW.md](doc/D2R-MOD-LOADING-ROTW.md)。
 
 | 參數 | 說明 | RotW 狀態 |
 |------|------|-----------|
-| `-direct` | 直接讀取 `Data/` 目錄的內部資料檔 | ❌ 已失效 |
-| `-mod <name>` | 載入 mod 資料，路徑為 `mods/<name>/<name>.mpq`（最長 23 字元） | ❌ 已失效 |
-| `-txt` | 搭配 `-direct` 或 `-mod` 使用 `.txt` 檔案代替 `.bin` | ❌ 已失效 |
+| `-uid osi` | 啟用 Battle.net Online Services Interface 模式，**`-mod` 需搭配此參數才有效** | ✅ 有效 |
+| `-mod <name>` | 載入 mod 資料，路徑為 `mods/<name>/<name>.mpq`（最長 23 字元） | ✅ 搭配 `-uid osi` 有效 |
+| `-txt` | 搭配 `-mod` 使用 `.txt` 檔案代替 `.bin`（離線模式用） | ✅ 搭配 `-uid osi` 有效 |
+| `-direct` | 直接讀取 `Data/` 目錄的內部資料檔 | ❓ 未測試 |
 | `-data <path>` | 自訂資料路徑（最長 259 字元） | ❓ 未測試 |
 
 ---
@@ -89,6 +90,14 @@
 | 參數 | 說明 |
 |------|------|
 | `-skiplogovideo` | 跳過開場 Logo 影片（效果未確認） |
+
+---
+
+## Battle.net 整合
+
+| 參數 | 說明 | 預設值 |
+|------|------|--------|
+| `-uid osi` | 啟用 Battle.net Online Services Interface 模式；**`-mod` 必須搭配此參數才能生效**。Battle.net 啟動器會自動帶入此參數 | 未設定 |
 
 ---
 

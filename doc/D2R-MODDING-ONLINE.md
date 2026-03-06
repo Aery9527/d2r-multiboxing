@@ -4,9 +4,9 @@
 
 > ✅ **Battle.net 安全**——僅修改客戶端顯示文字，不改變遊戲機制
 
-> ⚠️ **RotW 注意：** D2R v3.1 (Reign of the Warlock) 已禁用 `-mod` 參數。
-> 本文件中關於手動 `-mod` 啟動的說明僅適用於舊版 D2R。
-> RotW 版本請使用 [D2RMM](https://github.com/olegbl/d2rmm) 載入 Mod，詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md)。
+> ℹ️ **RotW 注意：** D2R v3.1 (Reign of the Warlock) 需搭配 `-uid osi` 才能使 `-mod` 參數生效。
+> Battle.net 啟動器會自動帶入 `-uid osi`，直接執行 `D2R.exe` 時需手動加上。
+> 詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md)。
 
 **前置知識：** 請先閱讀 [D2R Modding 共通指南](D2R-MODDING-COMMON.md)（目錄結構、工具安裝、啟動參數等）
 
@@ -259,10 +259,10 @@ D2R 使用 `ÿcX` 前綴（`ÿ` = char 255, U+00FF）來設定文字顏色：
 
 ### 啟動參數
 
-線上安全 Mod 不需要 `-txt` 參數（因為不涉及 `.txt` → `.bin` 編譯）：
+線上安全 Mod 不需要 `-txt` 參數（因為不涉及 `.txt` → `.bin` 編譯），但需要 `-uid osi`：
 
 ```
--mod MyFilter
+-uid osi -mod MyFilter
 ```
 
 首次使用時可加 `-txt` 確保載入，之後可省略。

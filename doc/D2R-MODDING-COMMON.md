@@ -5,7 +5,7 @@
 **延伸閱讀：**
 - [離線 Mod（資料表修改）](D2R-MODDING-OFFLINE.md) — 修改 `.txt` 資料表，改變遊戲機制（⚠️ 僅限離線/單人）
 - [線上安全 Mod（顯示修改）](D2R-MODDING-ONLINE.md) — 修改 JSON 字串檔，自訂物品顯示（✅ Battle.net 安全）
-- [RotW Mod 載入問題](D2R-MOD-LOADING-ROTW.md) — D2R v3.1 後 `-mod` 參數失效的調查與 D2RMM 解決方案
+- [RotW Mod 載入問題](D2R-MOD-LOADING-ROTW.md) — D2R v3.1 後 `-mod` 需搭配 `-uid osi` 才有效
 
 ---
 
@@ -184,18 +184,18 @@ mods/
 
 ## 啟動參數與載入 Mod
 
-> ⚠️ **重要：D2R v3.1 (Reign of the Warlock) 已禁用 `-mod` 與 `-direct -txt` 參數。**
-> 傳統的命令列 Mod 載入方式在 RotW 版本中完全失效，D2R 會靜默忽略這些參數。
-> 目前唯一可靠的 Mod 載入方式是透過 [D2RMM](#d2rmm-mod-manager)。
+> ℹ️ **D2R v3.1 (Reign of the Warlock) 需搭配 `-uid osi` 參數才能使 `-mod` 生效。**
+> Battle.net 啟動器會自動帶入 `-uid osi`，直接執行 `D2R.exe` 時需手動加上。
 > 詳細調查記錄請參考 [D2R Mod 載入問題：RotW 版本](D2R-MOD-LOADING-ROTW.md)。
 
 ### D2R 啟動參數
 
 | 參數 | 說明 | RotW 狀態 |
 |------|------|-----------|
-| `-mod <ModName>` | 載入指定 Mod（名稱對應 `mods/<ModName>/` 資料夾） | ❌ 已失效 |
-| `-txt` | 強制從 `.txt` 檔重新編譯 `.bin` 檔案（**離線 Mod 開發/測試時必用**） | ❌ 已失效 |
-| `-direct` | 直接從檔案系統載入資料（搭配 `-txt` 使用） | ❌ 已失效 |
+| `-uid osi` | 啟用 Battle.net Online Services Interface 模式 | ✅ 必要（`-mod` 的前提） |
+| `-mod <ModName>` | 載入指定 Mod（名稱對應 `mods/<ModName>/` 資料夾） | ✅ 搭配 `-uid osi` 有效 |
+| `-txt` | 強制從 `.txt` 檔重新編譯 `.bin` 檔案（**離線 Mod 開發/測試時必用**） | ✅ 搭配 `-uid osi` 有效 |
+| `-direct` | 直接從檔案系統載入資料（搭配 `-txt` 使用） | ❓ 未測試 |
 | `-w` | 視窗化模式啟動 |
 | `-ns` / `-nosound` | 停用音效 |
 | `-noborder` | 無邊框視窗 |
@@ -212,13 +212,13 @@ mods/
 2. 右鍵捷徑 → 內容
 3. 在「目標」欄位的路徑後方加上參數：
    ```
-   "C:\Program Files (x86)\Diablo II Resurrected\D2R.exe" -mod MyMod -txt
+   "C:\Program Files (x86)\Diablo II Resurrected\D2R.exe" -uid osi -mod MyMod -txt
    ```
 
 #### 方式 2：Battle.net 啟動器
 
 1. Battle.net → D2R → 設定（齒輪圖示）→ 遊戲設定
-2. 在「額外命令列參數」中填入：
+2. 在「額外命令列參數」中填入（Battle.net 會自動帶入 `-uid osi`）：
    ```
    -mod MyMod -txt
    ```
@@ -293,7 +293,7 @@ mods/
 
 | 問題 | 解決方式 |
 |------|----------|
-| 遊戲啟動後 Mod 未生效（RotW 版本） | **使用 [D2RMM](#d2rmm-mod-manager)** — RotW 已禁用 `-mod` 參數，詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md) |
+| 遊戲啟動後 Mod 未生效（RotW 版本） | 確認啟動時帶有 `-uid osi` 參數——不帶此參數時 `-mod` 會被靜默忽略。詳見 [RotW 載入問題](D2R-MOD-LOADING-ROTW.md) |
 | 遊戲啟動後 Mod 未生效（舊版本） | 確認目錄結構正確、`-mod <名稱>` 與資料夾名稱一致、加上 `-txt` |
 | 遊戲崩潰 | 檢查 `.txt` 是否有格式錯誤（多餘的 Tab、缺少欄位） |
 | 物品名稱顯示為 Key | 檢查 JSON 字串檔中的 `Key` 是否與 `.txt` 中的 `namestr` 對應 |

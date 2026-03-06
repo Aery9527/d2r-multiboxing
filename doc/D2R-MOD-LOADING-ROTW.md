@@ -1,7 +1,8 @@
 # D2R Mod 載入問題：Reign of the Warlock (RotW) 版本
 
-> D2R v3.1 (Reign of the Warlock 擴充) 已**禁用**傳統的 `-mod` 與 `-direct -txt` 命令列參數，
-> 目前唯一可靠的 Mod 載入方式是透過 [D2RMM](https://github.com/olegbl/d2rmm)。
+> D2R v3.1 (Reign of the Warlock 擴充) 曾被認為**禁用**傳統的 `-mod` 與 `-direct -txt` 命令列參數。
+> 經實測發現：**搭配 `-uid osi` 啟動時，`-mod` 參數仍然有效。**
+> 先前測試未帶 `-uid osi`，導致誤判為參數被禁用。
 
 **相關文件：**
 - [D2R Modding 共通指南](D2R-MODDING-COMMON.md) — 目錄結構、工具安裝
@@ -25,21 +26,24 @@
 
 ## 問題描述
 
-自 **D2R v3.1.91735 (Reign of the Warlock)** 更新後，以下啟動參數已**完全失效**：
+自 **D2R v3.1.91735 (Reign of the Warlock)** 更新後，**不帶 `-uid osi` 啟動時**，以下啟動參數會被靜默忽略：
 
-| 參數 | 原用途 | 現況 |
-|------|--------|------|
-| `-mod <name> -txt` | 載入 `mods/<name>/` 下的 Mod 檔案 | ❌ D2R 完全忽略，不讀取任何 Mod 檔案 |
-| `-direct -txt` | 從本地 `Data/` 目錄載入資料 | ❌ 同樣失效 |
-| `-mod <name>`（不帶 `-txt`） | 載入已編譯的 `.bin` 檔案 | ❌ 同樣失效 |
+| 參數 | 原用途 | 不帶 `-uid osi` | 搭配 `-uid osi` |
+|------|--------|-----------------|-----------------|
+| `-mod <name> -txt` | 載入 `mods/<name>/` 下的 Mod 檔案 | ❌ D2R 靜默忽略 | ✅ 有效 |
+| `-direct -txt` | 從本地 `Data/` 目錄載入資料 | ❌ 同樣失效 | ❓ 未測試 |
+| `-mod <name>`（不帶 `-txt`） | 載入已編譯的 `.bin` 檔案 | ❌ 同樣失效 | ✅ 有效 |
 
-D2R 不會報錯、不會崩潰，單純**靜默忽略**這些參數，載入原版遊戲內容。
+**關鍵發現：`-uid osi`（Online Services Interface）是必要條件。** Battle.net 啟動器會自動帶入此參數，因此透過 Battle.net 加上 `-mod` 能正常運作；但直接執行 `D2R.exe` 不帶 `-uid osi` 時，`-mod` 會被忽略。
 
 ---
 
 ## 驗證過程
 
 以下是我們在 D2R v3.1.91735 (Battle.net, product: osi) 上的實際測試結果：
+
+> ⚠️ **注意：以下測試 1-4 均未帶 `-uid osi` 參數，因此結論為參數失效。**
+> 後續補充測試（測試 5）確認搭配 `-uid osi` 後 `-mod` 參數恢復正常。
 
 ### 測試 1：檔案存取時間戳監控
 
@@ -70,7 +74,15 @@ D2R 不會報錯、不會崩潰，單純**靜默忽略**這些參數，載入原
 
 - [Nexus Mods D2R 討論區](https://www.nexusmods.com/diablo2resurrected) — 多名使用者回報 `-mod` 參數失效
 - [D2R Patch 3.1.1 更新說明](https://www.d2itemstore.com/blogs/d2r-news/d2r-patch-3-1-1-reign-of-the-warlock-update-breakdown) — RotW 更新後 Mod 載入方式變更
-- 社群共識：**「Only D2RMM works」**
+- 社群共識：**「Only D2RMM works」**（但未考慮 `-uid osi` 參數的影響）
+
+### 測試 5：搭配 `-uid osi` 參數（後續補充）
+
+1. 以 `-uid osi -mod MCMod` 啟動 D2R（線上模式）
+2. **結果：Mod 正常載入生效** ✅
+3. 以 `-uid osi -mod MCMod -txt` 啟動 D2R（離線模式）
+4. **結果：Mod 正常載入生效** ✅
+5. **結論：`-uid osi` 是 RotW 版本中 `-mod` 參數生效的必要條件**
 
 ---
 
@@ -214,28 +226,25 @@ D2RMM.writeJson(fileName, itemNames);
 
 ## 對本工具的影響
 
-### 已確認不可行的方式
+### 已確認的行為
 
 | 方式 | 說明 | 結果 |
 |------|------|------|
-| 手動複製 Mod 到 `mods/` + `-mod <name> -txt` | 傳統 Mod 載入方式 | ❌ D2R v3.1 完全忽略 |
-| 手動複製 Mod 到 `mods/` + `-mod <name>` | 不帶 `-txt` | ❌ 同樣失效 |
-| 完整 JSON + `-mod <name> -txt` | 使用完整原版+修改合併的 JSON | ❌ 同樣失效 |
-| UTF-8 BOM 修正 + 完整路徑 | 確保編碼正確、工作目錄正確 | ❌ 問題非編碼/路徑，而是參數被禁用 |
+| `-mod <name> -txt`（不帶 `-uid osi`） | 傳統 Mod 載入方式 | ❌ D2R v3.1 靜默忽略 |
+| `-mod <name>`（不帶 `-uid osi`） | 不帶 `-txt` | ❌ 同樣失效 |
+| `-uid osi -mod <name>` | 搭配 OSI 模式的線上 Mod 載入 | ✅ 有效 |
+| `-uid osi -mod <name> -txt` | 搭配 OSI 模式的離線 Mod 載入 | ✅ 有效 |
 
-### 本工具現有功能調整
+### 本工具已完成的調整
 
-- 離線模式（選項 0）的 `-mod <name> -txt` 啟動方式在 RotW 版本**無效**
-- Mod 安裝功能（選項 m）的檔案複製仍可正常運作，但複製後的 Mod 無法被 D2R 載入
-- 多開、帳號管理、視窗切換等核心功能**不受影響**
+- 所有啟動模式（線上/離線）均自動帶入 `-uid osi` 參數
+- 線上啟動（帳號模式）：`D2R.exe -uid osi -mod <name> -username ... -password ... -address ...`
+- 離線啟動：`D2R.exe -uid osi -mod <name> -txt`
+- 啟動流程中新增 Mod 選擇步驟（掃描 D2R `mods/` 目錄下的子資料夾）
 
-### 未來整合方向（待 D2RMM 驗證通過後決定）
+### D2RMM 仍然是有效的替代方案
 
-| 方案 | 說明 | 複雜度 |
-|------|------|--------|
-| A. 轉換為 D2RMM 格式 | 將 d2r-hyper-show 輸出為 D2RMM 的 `mod.json` + `mod.js` 格式 | 低 |
-| B. 整合 D2RMM 安裝 | 自動偵測 D2RMM 路徑，將 Mod 安裝到 D2RMM 的 mods 資料夾 | 中 |
-| C. 實作 CASC 操作 | 使用 CascLib 在 Go 中自行提取/合併/寫入 | 高 |
+[D2RMM](https://github.com/olegbl/d2rmm) 透過 CascLib 提取原版資料並合併 Mod 內容，提供更完整的 Mod 管理功能（合併多個 Mod、避免衝突等）。對於複雜的 Mod 組合，D2RMM 仍是推薦方案。
 
 ---
 

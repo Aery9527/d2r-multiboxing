@@ -9,7 +9,7 @@ import (
 
 // LaunchD2R starts D2R.exe with the given account parameters and returns the PID.
 func LaunchD2R(d2rPath string, username string, password string, address string, extraArgs ...string) (uint32, error) {
-	args := append([]string{}, extraArgs...)
+	args := append([]string{"-uid", "osi"}, extraArgs...)
 	args = append(args,
 		"-username", username,
 		"-password", password,
@@ -30,9 +30,10 @@ func LaunchD2R(d2rPath string, username string, password string, address string,
 
 // LaunchD2ROffline starts D2R.exe without account parameters (offline/single-player mode).
 func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
-	cmd := exec.Command(d2rPath, extraArgs...)
+	args := append([]string{"-uid", "osi"}, extraArgs...)
+	cmd := exec.Command(d2rPath, args...)
 	cmd.Dir = filepath.Dir(d2rPath)
-	fmt.Printf("  > %s %s\n", d2rPath, strings.Join(extraArgs, " "))
+	fmt.Printf("  > %s %s\n", d2rPath, strings.Join(args, " "))
 
 	if err := cmd.Start(); err != nil {
 		return 0, fmt.Errorf("failed to start D2R: %w", err)
