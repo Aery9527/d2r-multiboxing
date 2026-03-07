@@ -31,6 +31,12 @@ func TestPendingBatchAccountsSkipsRunningAccounts(t *testing.T) {
 	assert.Equal(t, "Charlie", pending[1].DisplayName)
 }
 
+func TestDisplayVersion(t *testing.T) {
+	assert.Equal(t, "v0.1.0", displayVersion("0.1.0"))
+	assert.Equal(t, "v0.1.0", displayVersion("v0.1.0"))
+	assert.Equal(t, "vdev", displayVersion("dev"))
+}
+
 func TestPendingBatchAccountsReturnsEmptyWhenAllRunning(t *testing.T) {
 	accounts := []account.Account{
 		{DisplayName: "Alpha"},

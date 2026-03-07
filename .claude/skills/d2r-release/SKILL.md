@@ -27,6 +27,7 @@ description: "Handle repository-specific release work in d2r-hyper-launcher. Use
 7. 每次 release 都要：
    - 覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`
    - 新增一份 release note
+   - 同步更新 `README.md` 內顯示的目前最新版本
    - 完成後 merge 到 `master`
    - 最後建立一個新的 git tag
 
@@ -119,6 +120,8 @@ release note 應該聚焦：
 - 涉及哪些 scope（例如 `multiboxing`、`switcher`、`docs`、`repo workflow`）
 - 若有必要，補充升級注意事項
 
+寫完 `docs/releases/vX.Y.Z.md` 後，要同步更新 `README.md` 裡的「目前最新版本」顯示，並直接連到對應的 `docs/releases/vX.Y.Z.md`，讓玩家在 repo 首頁就能看到並點進目前最新 release note。
+
 release note 一律使用**中文說明**，不要混用英文段落或英文條列，除非是必要的專有名詞（例如 `DisplayName`、`D2R.exe`、`switcher`）。
 
 建議結構：
@@ -177,9 +180,10 @@ git tag -a vX.Y.Z -m "release: vX.Y.Z"
 7. 在 `develop` 跑 `go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher`
 8. 決定新版本 `vX.Y.Z`
 9. 寫 release note 到 `docs/releases/vX.Y.Z.md`
-10. 用新版本 build，覆蓋 `d2r-hyper-launcher.exe`
-11. 將 release 結果 merge 到 `master`
-12. 建立 `vX.Y.Z` git tag
+10. 同步更新 `README.md` 的目前最新版本為 `vX.Y.Z`
+11. 用新版本 build，覆蓋 `d2r-hyper-launcher.exe`
+12. 將 release 結果 merge 到 `master`
+13. 建立 `vX.Y.Z` git tag
 
 ## 與 commit skill 的分工
 
@@ -196,4 +200,4 @@ git tag -a vX.Y.Z -m "release: vX.Y.Z"
 2. 明確說明建議 bump 的版本與原因
 3. 明確回報測試是否通過
 4. 說明 release build 是否已覆蓋 `d2r-hyper-launcher.exe`
-5. 提供 release note 路徑與新 tag 名稱
+5. 提供 release note 路徑、README 版本更新結果與新 tag 名稱
