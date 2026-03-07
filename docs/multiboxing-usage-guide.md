@@ -3,6 +3,8 @@
 > 這份文件專門說明玩家實際怎麼用多開啟動器。  
 > 如果你只想快速上手，先看 [README.md](../README.md)；如果你想先看整份多開文件怎麼分工，讀 [multiboxing-index.md](multiboxing-index.md)；如果你想看底層原理，再看 [multiboxing-technical-guide.md](multiboxing-technical-guide.md)。
 
+> 補充：CLI 各選單若遇到玩家輸入格式、範圍或選項錯誤，會先顯示錯誤訊息，並在同一行用約 3 秒的點點提示後再回到原流程。
+
 ## 文件導覽
 
 - 新手快速開始：[README.md](../README.md)
@@ -164,6 +166,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 - 這個功能只會改 `LaunchFlags`；帳號、密碼、DisplayName 仍建議先手動在 `accounts.csv` 裡建立
 - `-lq` 在最新版本仍可列為候選，但本文與工具介面都會標註「效果依版本而定」
 - 如果你手動把 `LaunchFlags` 填成亂數、負數或文字，工具會在讀取時自動 fallback 成 `0`，並把 CSV 回寫成乾淨值
+- 如果你輸入的編號範圍或格式有誤，工具會先顯示錯誤訊息，接著在同一行用約 3 秒的點點提示再回到上一層，避免訊息瞬間被主選單蓋掉
 - 如果你想知道某個 flag 對應的 D2R 參數實際是什麼，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)
 
 ## 啟動單一帳號

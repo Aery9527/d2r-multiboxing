@@ -145,7 +145,7 @@ func main() {
 		default:
 			id, err := strconv.Atoi(input)
 			if err != nil || id < 1 || id > len(accounts) {
-				fmt.Println("  無效輸入，請重試。")
+				showInvalidInputAndPause()
 				continue
 			}
 			acc := &accounts[id-1]
@@ -204,7 +204,7 @@ func launchAccount(acc *account.Account, cfg *config.Config, scanner *bufio.Scan
 	}
 	region := parseRegionInput(input)
 	if region == nil {
-		fmt.Println("  無效的區域選擇。")
+		showInputErrorAndPause("無效的區域選擇。")
 		return
 	}
 
@@ -276,7 +276,7 @@ func launchAll(accounts []account.Account, cfg *config.Config, scanner *bufio.Sc
 	}
 	region := parseRegionInput(input)
 	if region == nil {
-		fmt.Println("  無效的區域選擇。")
+		showInputErrorAndPause("無效的區域選擇。")
 		return
 	}
 
@@ -492,7 +492,7 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, scanner *bufio.Scanne
 			continue
 		}
 
-		fmt.Println("  無效輸入，請輸入 p / b / h / q。")
+		showInputErrorAndPause("無效輸入，請輸入 p / b / h / q。")
 	}
 }
 
@@ -623,7 +623,7 @@ func selectLaunchMod(d2rPath string, scanner *bufio.Scanner) ([]string, bool) {
 
 		selected, err := strconv.Atoi(input)
 		if err != nil || selected < 0 || selected > len(installedMods) {
-			fmt.Println("  無效輸入，請重試。")
+			showInvalidInputAndPause()
 			continue
 		}
 
@@ -679,8 +679,7 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string, sc
 		setMode = false
 		actionLabel = "取消"
 	default:
-		fmt.Println("  無效輸入，請重試。")
-		fmt.Println()
+		showInvalidInputAndPause()
 		return
 	}
 
@@ -705,8 +704,7 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string, sc
 	case "2":
 		configureFlagsByAccount(accounts, accountsFile, scanner, setMode)
 	default:
-		fmt.Println("  無效輸入，請重試。")
-		fmt.Println()
+		showInvalidInputAndPause()
 	}
 }
 
@@ -728,8 +726,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, scann
 
 	selected, err := strconv.Atoi(input)
 	if err != nil || selected < 1 || selected > len(options) {
-		fmt.Println("  無效的 flag 編號。")
-		fmt.Println()
+		showInputErrorAndPause("無效的 flag 編號。")
 		return
 	}
 
@@ -751,8 +748,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, scann
 
 	accountIndexes, err := parseSelectionInput(input, len(accounts))
 	if err != nil {
-		fmt.Printf("  解析失敗：%v\n", err)
-		fmt.Println()
+		showInputErrorAndPause(fmt.Sprintf("解析失敗：%v", err))
 		return
 	}
 
@@ -769,8 +765,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, scann
 	}
 
 	if err := applyLaunchFlagChanges(accounts, accountsFile, accountIndexes, option.Bit, setMode); err != nil {
-		fmt.Printf("  儲存失敗：%v\n", err)
-		fmt.Println()
+		showInputErrorAndPause(fmt.Sprintf("儲存失敗：%v", err))
 		return
 	}
 
@@ -796,8 +791,7 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, sc
 
 	selected, err := strconv.Atoi(input)
 	if err != nil || selected < 1 || selected > len(accounts) {
-		fmt.Println("  無效的帳號編號。")
-		fmt.Println()
+		showInputErrorAndPause("無效的帳號編號。")
 		return
 	}
 
@@ -820,8 +814,7 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, sc
 
 	flagIndexes, err := parseSelectionInput(input, len(options))
 	if err != nil {
-		fmt.Printf("  解析失敗：%v\n", err)
-		fmt.Println()
+		showInputErrorAndPause(fmt.Sprintf("解析失敗：%v", err))
 		return
 	}
 
@@ -839,8 +832,7 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, sc
 	}
 
 	if err := applyLaunchFlagChanges(accounts, accountsFile, []int{accountIndex}, mask, setMode); err != nil {
-		fmt.Printf("  儲存失敗：%v\n", err)
-		fmt.Println()
+		showInputErrorAndPause(fmt.Sprintf("儲存失敗：%v", err))
 		return
 	}
 
@@ -1078,6 +1070,8 @@ func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {
 			return
 		}
 		fmt.Println("  ✔ 已關閉切換功能")
+	default:
+		showInvalidInputAndPause()
 	}
 
 	fmt.Println()

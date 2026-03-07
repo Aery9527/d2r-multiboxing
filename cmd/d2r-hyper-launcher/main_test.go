@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"d2rhl/internal/account"
 	"d2rhl/internal/config"
@@ -202,6 +203,66 @@ func TestPrintAccountLaunchFlagSummary(t *testing.T) {
 
 	assert.Contains(t, output, "[1] Alpha (alpha@example.com)  flag：關閉聲音")
 	assert.Contains(t, output, "[2] Bravo (bravo@example.com)  flag：無")
+}
+
+func TestShowInputErrorAndPause(t *testing.T) {
+	originalSleep := cliInputErrorPauseSleep
+	originalStep := cliInputErrorPauseStep
+	originalCount := cliInputErrorPauseCount
+	t.Cleanup(func() {
+		cliInputErrorPauseSleep = originalSleep
+		cliInputErrorPauseStep = originalStep
+		cliInputErrorPauseCount = originalCount
+	})
+
+	var sleeps []time.Duration
+	cliInputErrorPauseStep = 10 * time.Millisecond
+	cliInputErrorPauseCount = 6
+	cliInputErrorPauseSleep = func(d time.Duration) {
+		sleeps = append(sleeps, d)
+	}
+
+	output := captureStdout(t, func() {
+		showInputErrorAndPause(`解析失敗：區間 "1-4" 超出可選範圍 1-2`)
+	})
+
+	assert.Contains(t, output, `解析失敗：區間 "1-4" 超出可選範圍 1-2`)
+	assert.Contains(t, output, "\r  .")
+	assert.Contains(t, output, "\r  ..")
+	assert.Contains(t, output, "\r  ...")
+	assert.Contains(t, output, "\r  ....")
+	assert.Contains(t, output, "\r  .....")
+	assert.Contains(t, output, "\r  ......")
+	assert.Equal(t, []time.Duration{
+		10 * time.Millisecond,
+		10 * time.Millisecond,
+		10 * time.Millisecond,
+		10 * time.Millisecond,
+		10 * time.Millisecond,
+		10 * time.Millisecond,
+	}, sleeps)
+}
+
+func TestShowInvalidInputAndPause(t *testing.T) {
+	originalSleep := cliInputErrorPauseSleep
+	originalStep := cliInputErrorPauseStep
+	originalCount := cliInputErrorPauseCount
+	t.Cleanup(func() {
+		cliInputErrorPauseSleep = originalSleep
+		cliInputErrorPauseStep = originalStep
+		cliInputErrorPauseCount = originalCount
+	})
+
+	cliInputErrorPauseStep = 1 * time.Millisecond
+	cliInputErrorPauseCount = 1
+	cliInputErrorPauseSleep = func(time.Duration) {}
+
+	output := captureStdout(t, func() {
+		showInvalidInputAndPause()
+	})
+
+	assert.Contains(t, output, "無效輸入，請重試。")
+	assert.Contains(t, output, "\r  .")
 }
 
 func captureStdout(t *testing.T, fn func()) string {
