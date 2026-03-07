@@ -23,6 +23,13 @@ import (
 // version is set at build time via -ldflags "-X main.version=x.y.z".
 var version = "dev"
 
+func displayVersion(version string) string {
+	if strings.HasPrefix(version, "v") {
+		return version
+	}
+	return "v" + version
+}
+
 // 子選單統一導航指令（所有子選單必須支援這三個選項）
 const (
 	menuBack = "b" // 回上一層
@@ -36,7 +43,7 @@ func main() {
 	_ = windows.SetConsoleOutputCP(65001)
 
 	fmt.Println("============================================")
-	fmt.Printf("  d2r-hyper-launcher  v%s\n", version)
+	fmt.Printf("  d2r-hyper-launcher  %s\n", displayVersion(version))
 	fmt.Println("============================================")
 	fmt.Println()
 
@@ -152,8 +159,10 @@ func printMenu(accounts []account.Account) {
 		fmt.Printf("  [%d] %-15s (%s)  [%s]\n",
 			i+1, acc.DisplayName, acc.Email, status)
 	}
-	fmt.Println("  提示：是否已啟動是用 account.csv 裡的 DisplayName 來對應視窗。")
-	fmt.Println("        如果 D2R 還開著就先關掉工具再去改 DisplayName，之後這裡的啟動狀態偵測可能會不正確。")
+
+	fmt.Println()
+	fmt.Println("  *是否已啟動的判斷基準是用 account.csv 裡的 DisplayName 來對應視窗名稱。")
+	fmt.Println("   如果 D2R 還開著就先關掉工具再去改 DisplayName，之後這裡的啟動狀態偵測可能會不正確。")
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
