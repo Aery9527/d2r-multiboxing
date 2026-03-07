@@ -122,6 +122,8 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 
 `[未啟動]` / `[已啟動]` 會根據目前視窗狀態更新。
 
+注意：這個狀態判斷是用 `account.csv` 裡的 `DisplayName` 去對應 `D2R-<DisplayName>` 視窗標題。如果 D2R 還在執行中時，你先關掉 launcher 再去修改 `DisplayName`，重新開回來後這裡的狀態偵測就可能暫時不正確。
+
 ## 啟動單一帳號
 
 1. 在主選單輸入帳號前面的數字，例如 `1`

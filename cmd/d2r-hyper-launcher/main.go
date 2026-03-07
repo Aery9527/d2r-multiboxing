@@ -152,6 +152,8 @@ func printMenu(accounts []account.Account) {
 		fmt.Printf("  [%d] %-15s (%s)  [%s]\n",
 			i+1, acc.DisplayName, acc.Email, status)
 	}
+	fmt.Println("  提示：是否已啟動是用 account.csv 裡的 DisplayName 來對應視窗。")
+	fmt.Println("        如果 D2R 還開著就先關掉工具再去改 DisplayName，之後這裡的啟動狀態偵測可能會不正確。")
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
