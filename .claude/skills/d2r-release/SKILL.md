@@ -18,15 +18,17 @@ description: "Handle repository-specific release work in d2r-hyper-launcher. Use
 
 ## release 前一定要做的事
 
-1. 確認工作樹是否乾淨，避免把未整理好的變更混進 release。
-2. 找出上一個 release tag；若沒有 tag，視為第一次 release。
-3. 彙整「上一個 tag 到目前 HEAD」之間所有 commit，先理解這次 release 的高階變更主題。
-4. **一定要先跑測試，測試通過後才能 build release。**
-5. 先決定新版本號，再用新版本 build。
-6. 每次 release 都要：
+1. 先確認目前位於 `develop` branch；若不在 `develop`，先回到正確分支再繼續。
+2. 確認工作樹是否乾淨，避免把未整理好的變更混進 release。
+3. 找出上一個 release tag；若沒有 tag，視為第一次 release。
+4. 彙整「上一個 tag 到目前 HEAD」之間所有 commit，先理解這次 release 的高階變更主題。
+5. **一定要先在 `develop` 上跑測試，測試通過後才能 build release。**
+6. 先決定新版本號，再用新版本 build。
+7. 每次 release 都要：
    - 覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`
    - 新增一份 release note
-   - 建立一個新的 git tag
+   - 完成後 merge 到 `master`
+   - 最後建立一個新的 git tag
 
 ## 測試規則
 
@@ -159,18 +161,22 @@ git tag -a vX.Y.Z -m "release: vX.Y.Z"
 
 建立前先確認同名 tag 不存在。
 
+另外，tag 時機要放在 release 完成並 merge 到 `master` 之後，不要在尚未完成 release 或尚未 merge 前提早下 tag。
+
 ## 建議的完整流程
 
 1. `git status`
-2. 找上一個 tag
-3. 看 `git log <last-tag>..HEAD --oneline`
-4. 彙整 commit 並決定 bump 等級
-5. 跑 `.\scripts\go-test.ps1`
-6. 跑 `go build ./cmd/d2r-hyper-launcher`
-7. 決定新版本 `vX.Y.Z`
-8. 寫 release note 到 `docs/releases/vX.Y.Z.md`
-9. 用新版本 build，覆蓋 `d2r-hyper-launcher.exe`
-10. 建立 `vX.Y.Z` git tag
+2. 確認目前在 `develop`
+3. 找上一個 tag
+4. 看 `git log <last-tag>..HEAD --oneline`
+5. 彙整 commit 並決定 bump 等級
+6. 在 `develop` 跑 `.\scripts\go-test.ps1`
+7. 在 `develop` 跑 `go build ./cmd/d2r-hyper-launcher`
+8. 決定新版本 `vX.Y.Z`
+9. 寫 release note 到 `docs/releases/vX.Y.Z.md`
+10. 用新版本 build，覆蓋 `d2r-hyper-launcher.exe`
+11. 將 release 結果 merge 到 `master`
+12. 建立 `vX.Y.Z` git tag
 
 ## 與 commit skill 的分工
 

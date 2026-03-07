@@ -44,6 +44,12 @@
   - `q`：離開程式
 - 相關共用邏輯集中在 [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go)
 
+## Git / 分支流程
+
+- 進行任何修改前，先確認目前位於 `develop` branch；日常開發預設都應在 `develop`
+- release 流程開始前，先在 `develop` 上確認測試通過，之後才進行版本決策、release build、release note 與其他 release 步驟
+- release 全部完成後，才將結果 merge 到 `master`，並在最後建立 release tag
+
 ## Go 開發慣例
 
 - 若 struct 明確實作某個介面，請在 struct 宣告上方加入 `var _ InterfaceName = (*StructName)(nil)` 做靜態驗證與意圖標示
