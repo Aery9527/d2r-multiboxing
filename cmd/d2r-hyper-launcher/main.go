@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -13,7 +12,6 @@ import (
 	"d2rhl/internal/config"
 	"d2rhl/internal/d2r"
 	"d2rhl/internal/handle"
-	"d2rhl/internal/modfile"
 	"d2rhl/internal/process"
 	"d2rhl/internal/switcher"
 
@@ -117,13 +115,10 @@ func main() {
 			}
 			continue
 		case "0":
-			launchOffline(cfg.D2RPath, scanner)
+			launchOffline(cfg.D2RPath)
 			continue
 		case "a":
 			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
-			continue
-		case "m":
-			installMods(cfg.D2RPath, scanner)
 			continue
 		case "s":
 			setupSwitcher(cfg, scanner)
@@ -154,7 +149,6 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("  <數字>  啟動指定帳號")
 	fmt.Println("  0       離線遊玩（不需帳密）")
 	fmt.Println("  a       啟動所有帳號（只啟動未啟動的）")
-	fmt.Println("  m       安裝 Mod 到 D2R")
 	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
@@ -180,12 +174,6 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 		return
 	}
 
-	// 選擇 Mod（線上模式不加 -txt）
-	modArgs, cancelled := selectMod(d2rPath, scanner, false)
-	if cancelled {
-		return
-	}
-
 	// 解密密碼
 	password, err := account.GetDecryptedPassword(acc)
 	if err != nil {
@@ -196,15 +184,12 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 	fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
 
 	// 啟動 D2R
-	pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address, modArgs...)
+	pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
 	}
 	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
-	if len(modArgs) > 0 {
-		fmt.Printf("  ✔ 使用 Mod: %s\n", modArgs[1])
-	}
 
 	// 等待進程初始化後關閉 Handle
 	time.Sleep(2 * time.Second)
@@ -246,12 +231,6 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		return
 	}
 
-	// 選擇 Mod（線上模式不加 -txt）
-	modArgs, cancelled := selectMod(d2rPath, scanner, false)
-	if cancelled {
-		return
-	}
-
 	for i := range accounts {
 		acc := &accounts[i]
 
@@ -272,7 +251,7 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		}
 
 		fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
-		pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address, modArgs...)
+		pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 啟動失敗：%v\n", acc.DisplayName, err)
 			continue
@@ -286,10 +265,6 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 			fmt.Printf("  ⚠ %s Handle 關閉失敗：%v\n", acc.DisplayName, err)
 		} else if closed > 0 {
 			fmt.Printf("  ✔ %s 已關閉 %d 個 Handle\n", acc.DisplayName, closed)
-		}
-
-		if len(modArgs) > 0 {
-			fmt.Printf("  ✔ %s 使用 Mod: %s\n", acc.DisplayName, modArgs[1])
 		}
 
 		// 背景重命名視窗
@@ -338,48 +313,6 @@ func handleMonitor() {
 	}
 }
 
-// selectMod prompts the user to choose an installed mod.
-// offline=true adds "-txt" flag (loose text files); online mode only uses "-mod".
-// Returns the extra CLI args and whether the selection was cancelled.
-func selectMod(d2rPath string, scanner *bufio.Scanner, offline bool) (extraArgs []string, cancelled bool) {
-	installedMods, _ := modfile.DiscoverInstalledMods(d2rPath)
-
-	fmt.Println()
-	fmt.Println("  選擇 Mod：")
-	fmt.Println("  [0] 不使用 Mod（原版）")
-	for i, name := range installedMods {
-		fmt.Printf("  [%d] %s\n", i+1, name)
-	}
-	printSubMenuNav()
-	fmt.Print("  > 請選擇：")
-
-	if !scanner.Scan() {
-		return nil, true
-	}
-	choice := strings.TrimSpace(scanner.Text())
-
-	if isMenuNav(choice) != "" {
-		return nil, true
-	}
-
-	if choice == "0" || choice == "" {
-		return nil, false
-	}
-
-	idx, err := strconv.Atoi(choice)
-	if err != nil || idx < 1 || idx > len(installedMods) {
-		fmt.Println("  無效選擇。")
-		return nil, true
-	}
-
-	modName := installedMods[idx-1]
-	args := []string{"-mod", modName}
-	if offline {
-		args = append(args, "-txt")
-	}
-	return args, false
-}
-
 func parseRegionInput(input string) *d2r.Region {
 	input = strings.TrimSpace(strings.ToUpper(input))
 	switch input {
@@ -423,109 +356,17 @@ func isMenuNav(input string) string {
 	}
 }
 
-// localModsDir returns the mods/ directory next to the running executable.
-func localModsDir() string {
-	exe, err := os.Executable()
-	if err != nil {
-		return "mods"
-	}
-	dir := filepath.Join(filepath.Dir(exe), "mods")
-	if info, err := os.Stat(dir); err == nil && info.IsDir() {
-		return dir
-	}
-	// Fallback to current directory
-	return "mods"
-}
-
-func launchOffline(d2rPath string, scanner *bufio.Scanner) {
+func launchOffline(d2rPath string) {
 	fmt.Println()
 	fmt.Println("  === 離線遊玩模式 ===")
 
-	// 選擇 Mod（離線模式加 -txt）
-	modArgs, cancelled := selectMod(d2rPath, scanner, true)
-	if cancelled {
-		return
-	}
-
 	fmt.Println("  正在啟動 D2R（離線模式）...")
-	pid, err := process.LaunchD2ROffline(d2rPath, modArgs...)
+	pid, err := process.LaunchD2ROffline(d2rPath)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
 	}
 	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
-	if len(modArgs) > 0 {
-		fmt.Printf("  ✔ 使用 Mod: %s\n", modArgs[1])
-	}
-	fmt.Println()
-}
-
-func installMods(d2rPath string, scanner *bufio.Scanner) {
-	fmt.Println()
-	fmt.Println("  === 安裝 Mod 到 D2R ===")
-
-	modsDir := localModsDir()
-	availableMods, err := modfile.DiscoverMods(modsDir)
-	if err != nil {
-		fmt.Printf("  掃描 mods/ 目錄失敗：%v\n", err)
-		return
-	}
-
-	if len(availableMods) == 0 {
-		fmt.Println("  mods/ 目錄下沒有找到任何 Mod。")
-		return
-	}
-
-	// 掃描已安裝
-	installedMods, _ := modfile.DiscoverInstalledMods(d2rPath)
-	installedSet := make(map[string]bool)
-	for _, m := range installedMods {
-		installedSet[m] = true
-	}
-
-	fmt.Println("  可用 Mod：")
-	for i, name := range availableMods {
-		status := ""
-		if installedSet[name] {
-			status = " ✔ 已安裝"
-		}
-		fmt.Printf("  [%d] %s%s\n", i+1, name, status)
-	}
-	fmt.Println("  a       安裝全部")
-	printSubMenuNav()
-	fmt.Print("  > 請選擇：")
-
-	if !scanner.Scan() {
-		return
-	}
-	choice := strings.TrimSpace(strings.ToLower(scanner.Text()))
-
-	if choice == "" || isMenuNav(choice) != "" {
-		return
-	}
-
-	var toInstall []string
-	if choice == "a" {
-		toInstall = availableMods
-	} else {
-		idx, err := strconv.Atoi(choice)
-		if err != nil || idx < 1 || idx > len(availableMods) {
-			fmt.Println("  無效選擇。")
-			return
-		}
-		toInstall = []string{availableMods[idx-1]}
-	}
-
-	d2rModsDir := modfile.D2RModsDir(d2rPath)
-	for _, name := range toInstall {
-		srcDir := filepath.Join(modsDir, name)
-		fmt.Printf("  正在安裝 %s → %s...\n", name, d2rModsDir)
-		if err := modfile.InstallMod(srcDir, d2rPath); err != nil {
-			fmt.Printf("  ⚠ %s 安裝失敗：%v\n", name, err)
-			continue
-		}
-		fmt.Printf("  ✔ %s 安裝完成\n", name)
-	}
 	fmt.Println()
 }
 

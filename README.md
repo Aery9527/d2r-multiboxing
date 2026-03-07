@@ -1,184 +1,125 @@
 # d2r-hyper-launcher
 
-在同一台 Windows 電腦上同時執行多個 Diablo II: Resurrected (D2R) 實例的 CLI 輔助工具。
+Windows 上給 D2R（Diablo II: Resurrected）玩家使用的 CLI 工具，目前提供兩個主要功能：
 
-## 功能
+- **multiboxing**：多帳號啟動、單實例鎖處理、視窗辨識
+- **switcher**：鍵盤／滑鼠側鍵／搖桿切換 D2R 視窗
 
-- **帳號管理** — 透過 CSV 檔案管理多個 Battle.net 帳號
-- **密碼加密** — 使用 Windows DPAPI 自動加密儲存密碼
-- **一鍵啟動** — 透過參數方式直接啟動 D2R，支援單一帳號或全部帳號
-- **自動多開** — 自動偵測並關閉 D2R 的單實例鎖定 Event Handle
-- **視窗辨識** — 將各 D2R 視窗標題重命名為帳號暱稱（D2R- 前綴）
-- **背景監控** — 持續監控新啟動的 D2R 進程，自動解除多開限制
-- **視窗切換** — 透過快捷鍵、滑鼠側鍵或搖桿按鈕在 D2R 視窗之間快速切換焦點
+## 給玩家的快速開始
 
-## 安裝
+這一段是給「只想直接玩」的玩家看的，不需要先懂 Go 或程式碼。
 
-### 前置需求
+### 1. 先下載這兩個檔案
 
-- Windows 10/11
-- Go 1.26+（僅編譯時需要）
-- 必須以 **管理員權限** 執行（僅**首次設定搖桿切換按鍵**時需要，設定完成後日常使用無需）
-- 請先手動在遊戲內將顯示模式設為「視窗化」
+- [d2r-hyper-launcher.exe](d2r-hyper-launcher.exe)
+- [accounts.csv](accounts.csv)
 
-### 編譯
+建議把 `d2r-hyper-launcher.exe` 放在你方便執行的位置，例如桌面上的 `D2R-Hyper-Launcher` 資料夾。
 
-```powershell
-# 開發版
-go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
+### 2. 把 `accounts.csv` 複製到資料目錄
 
-# 指定版號
-go build -ldflags "-X main.version=1.0.0" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
+本工具會固定讀取下面這個位置的帳號檔：
+
+```text
+%USERPROFILE%\.d2r-hyper-launcher\accounts.csv
 ```
 
-## 使用方式
+如果你不知道 `%USERPROFILE%` 是哪裡，也沒關係：先執行一次 `d2r-hyper-launcher.exe`，畫面上會直接顯示實際的「資料目錄」完整路徑，你再把 `accounts.csv` 複製進去即可。
 
-### 1. 建立帳號設定檔
-
-在資料目錄 `~/.d2r-hyper-launcher/` 下建立 `accounts.csv`：
+你可以直接用 PowerShell 建立資料夾並複製範本：
 
 ```powershell
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv"
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.d2r-hyper-launcher" | Out-Null
+Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Force
 ```
+
+### 3. 編輯 `accounts.csv`
+
+打開 `%USERPROFILE%\.d2r-hyper-launcher\accounts.csv`，照這個格式填入 Battle.net 帳號：
 
 ```csv
 Email,Password,DisplayName
-account1@email.com,mypassword123,主帳號-法師
-account2@email.com,anotherpass,副帳號-野蠻人
+your-account1@example.com,your-password-here,主帳號-法師
+your-account2@example.com,your-password-here,副帳號-野蠻人
 ```
 
-| 欄位 | 說明 |
-|------|------|
-| `Email` | Battle.net 登入信箱 |
-| `Password` | 帳號密碼（首次執行後自動加密） |
-| `DisplayName` | 顯示名稱（用於視窗標題與選單） |
+欄位說明：
 
-### 2. 設定 D2R 路徑（選用）
+- `Email`：Battle.net 登入信箱
+- `Password`：Battle.net 密碼
+- `DisplayName`：工具內顯示名稱，也是視窗切換時看到的名稱
 
-首次執行時自動建立 `~/.d2r-hyper-launcher/config.json`，可自訂路徑：
+> 第一次執行後，明文密碼會自動改寫成 `ENC:` 開頭的加密字串。  
+> 這是用 Windows DPAPI 加密，之後不用自己手動加密；若換電腦或換 Windows 使用者，請再填一次明文密碼。
 
-```json
-{
-  "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
-  "launch_delay": 5
-}
-```
+### 4. 執行 `d2r-hyper-launcher.exe`
 
-資料目錄可透過環境變數 `D2R_HYPER_LAUNCHER_HOME` 自訂。
-
-### 3. 執行
-
-以 **管理員身份** 開啟 PowerShell 並執行：
+你可以直接雙擊 `d2r-hyper-launcher.exe`，或在 PowerShell 執行：
 
 ```powershell
 .\d2r-hyper-launcher.exe
 ```
 
-### 4. 操作選單
+第一次啟動時，工具也會自動建立這個設定檔：
 
-```
-============================================
-  d2r-hyper-launcher  v1.0.0
-============================================
-
-  資料目錄：C:\Users\User\.d2r-hyper-launcher
-  D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
-  啟動間隔：5 秒
-
-  帳號列表：
-  [1] 主帳號-法師      (account1@email.com)  [未啟動]
-  [2] 副帳號-野蠻人    (account2@email.com)  [已啟動]
-
---------------------------------------------
-  <數字>  啟動指定帳號
-  a       啟動所有帳號（只啟動未啟動的）
-  s       視窗切換設定
-  r       重新整理狀態
-  q       退出
---------------------------------------------
+```text
+%USERPROFILE%\.d2r-hyper-launcher\config.json
 ```
 
-### 5. 設定視窗切換
+如果你的 D2R 不在預設路徑 `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`，請打開 `config.json`，把 `d2r_path` 改成你的實際路徑：
 
-輸入 `s` 進入設定引導，按下想用的按鍵組合即可自動偵測並記錄：
-
-```
-  === 視窗切換設定 ===
-  目前狀態：未啟用
-
-  [1] 設定切換按鍵
-  [0] 關閉切換功能
-  [Enter] 返回
-  > 請選擇：1
-
-  請按下想用來切換視窗的按鍵組合...
-  偵測到：Ctrl+Tab（Tab 鍵）
-  確認使用此組合？(Y/n)：
-
-  ✔ 已儲存切換設定：Ctrl+Tab（Tab 鍵）
+```json
+{
+  "d2r_path": "D:\\Games\\Diablo II Resurrected\\D2R.exe",
+  "launch_delay": 5
+}
 ```
 
-**搖桿偵測範例**：
+### 5. 主選單最常用功能
 
-```
-  偵測到：搖桿 #2 A 按鈕
-  確認使用此組合？(Y/n)：
+啟動後，最常用的是這幾個選項：
 
-  ✔ 已儲存切換設定：搖桿 #2 A 按鈕
-```
+- `<數字>`：啟動指定帳號
+- `a`：依序啟動所有尚未開啟的帳號
+- `0`：直接進離線模式
+- `s`：設定視窗切換快捷鍵／滑鼠側鍵／搖桿按鍵
+- `r`：重新讀取 `accounts.csv` 並刷新狀態
+- `q`：離開工具
 
-支援鍵盤快捷鍵（如 `Ctrl+Tab`、`Alt+F1`）、滑鼠側鍵（`XButton1`、`XButton2`）與搖桿按鈕（XInput）。
-設定存入 `config.json` 後自動載入。
+### 6. 想看更仔細的操作說明
 
-## 技術原理
+如果你想看每個選單怎麼用、每個步驟會看到什麼畫面，請直接讀：
 
-D2R 啟動時會建立名為 `DiabloII Check For Other Instances` 的 Windows Event Handle 來阻止多開。本工具透過 Windows NT API (`NtDuplicateObject` + `DuplicateCloseSource`) 自動關閉該 Handle，允許多個 D2R 實例同時運行。
+- [docs/multiboxing-usage-guide.md](docs/multiboxing-usage-guide.md) — 多開啟動、帳號檔、區域選擇、離線模式
+- [docs/switcher-usage-guide.md](docs/switcher-usage-guide.md) — 視窗切換設定、支援按鍵類型、常見問題
 
-詳細技術說明請參考 [PLAN-v1-hyper-launcher.md](PLAN-v1-hyper-launcher.md)（多開啟動器）與 [PLAN-v2-switcher.md](PLAN-v2-switcher.md)（視窗切換），完整使用說明請參考 [USAGE.md](USAGE.md)。
+如果你想看底層實作與技術原理，再讀：
 
-## 專案結構
+- [docs/multiboxing-technical-guide.md](docs/multiboxing-technical-guide.md)
+- [docs/switcher-technical-guide.md](docs/switcher-technical-guide.md)
+- [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md)
 
-```
-├── cmd/
-│   └── d2r-hyper-launcher/
-│       └── main.go              # CLI 互動主迴圈
-├── internal/
-│   ├── config/config.go         # 設定檔讀寫（含 SwitcherConfig）
-│   ├── d2r/constants.go         # D2R 相關常數
-│   ├── account/
-│   │   ├── account.go           # 帳號 CSV 讀寫
-│   │   └── crypto.go            # DPAPI 密碼加密
-│   ├── handle/
-│   │   ├── winapi.go            # Windows NT API 封裝
-│   │   ├── enumerator.go        # Handle 列舉搜尋
-│   │   └── closer.go            # Handle 關閉操作
-│   ├── process/
-│   │   ├── finder.go            # 進程搜尋
-│   │   ├── launcher.go          # D2R 啟動
-│   │   └── window.go            # 視窗操作（重命名、切換）
-│   └── switcher/
-│       ├── switcher.go          # Start/Stop、視窗切換核心邏輯
-│       ├── hotkey.go            # RegisterHotKey 鍵盤快捷鍵
-│       ├── mousehook.go         # WH_MOUSE_LL 滑鼠側鍵
-│       ├── detect.go            # CLI 設定用按鍵偵測
-│       ├── keymap.go            # VK code 映射表
-│       └── gamepad.go           # XInput 搖桿偵測與輪詢
-├── USAGE.md                     # 完整使用說明
-├── PLAN-v1-hyper-launcher.md    # Phase 1 實作計畫（已完成）
-├── PLAN-v2-switcher.md          # Phase 2 實作計畫（已完成）
-├── D2R_PARAMS.md                # D2R 啟動參數一覽
-└── accounts.csv                 # 帳號 CSV 範本
+## 給想自己編譯的人
+
+### 前置需求
+
+- Windows 10 / 11
+- Go 1.26+
+- Battle.net 版 D2R
+
+### 編譯
+
+```powershell
+go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
 
 ## 注意事項
 
-- ⚠️ **首次設定搖桿切換按鍵**時需以管理員權限執行（XInput 按鈕偵測需要）；設定完成後日常使用無需管理員權限
-- ⚠️ 部分防毒軟體可能誤報（操作進程 handle 為正常行為）
-- ⚠️ 使用此工具可能違反 Blizzard 服務條款，風險自負
-- ⚠️ 短時間內重複啟動過多次可能被 Battle.net 擋住，請保持適當間隔
-- 僅支援 Battle.net 帳號（不支援 Steam 版本）
-- 密碼加密綁定當前 Windows 使用者，換機器需重新設定
-- 本工具不會修改遊戲檔案、注入程式碼或自動化任何遊戲操作
+- 建議先把 D2R 設成「視窗化」或「無邊框視窗」
+- 首次設定搖桿切換按鍵時，建議以管理員權限執行
+- 僅支援 Battle.net 版 D2R
+- 操作進程 Handle 可能被部分防毒軟體誤報
+- 本工具不會修改遊戲檔案、注入遊戲程式或自動化遊戲操作
 
 ## 授權
 

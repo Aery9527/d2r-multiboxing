@@ -33,8 +33,8 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 
 ## 技術參考
 
-- [PLAN-v1-hyper-launcher.md](../../PLAN-v1-hyper-launcher.md) - Phase 1 多開啟動器實作計畫
-- [PLAN-v2-switcher.md](../../PLAN-v2-switcher.md) - Phase 2 視窗切換功能實作計畫
+- [docs/multiboxing-technical-guide.md](../../docs/multiboxing-technical-guide.md) - 多開啟動器技術導覽
+- [docs/switcher-technical-guide.md](../../docs/switcher-technical-guide.md) - 視窗切換技術導覽
 - [chenwei791129/multiablo](https://github.com/chenwei791129/multiablo) - Go handle 關閉參考
 - [shupershuff/Diablo2RLoader](https://github.com/shupershuff/Diablo2RLoader) - 功能參考
 
@@ -53,3 +53,4 @@ D2R 啟動時建立名為 `DiabloII Check For Other Instances` 的 Windows Event
 - 編譯產物若被防毒軟體誤判，應優先透過排除清單或簽章解決，不以修改核心機制為手段
 
 ---
+
