@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -67,9 +68,7 @@ func main() {
 	}
 
 	if !fileExists(accountsFile) {
-		fmt.Printf("  找不到 %s，請先建立帳號設定檔。\n", accountsFile)
-		fmt.Println("  CSV 格式：Email,Password,DisplayName")
-		fmt.Println("  範例：account@email.com,password123,主帳號")
+		handleMissingAccountsFile(cfgDir, accountsFile)
 		return
 	}
 
@@ -335,6 +334,48 @@ func parseRegionInput(input string) *d2r.Region {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func handleMissingAccountsFile(cfgDir, accountsFile string) {
+	fmt.Println("  ⚠ 找不到帳號設定檔 accounts.csv。")
+	fmt.Printf("  預期位置：%s\n", accountsFile)
+	fmt.Println("  第一次使用時，請把 repo 內附的 accounts.csv 複製到上面的資料夾。")
+	fmt.Println("  CSV 格式：Email,Password,DisplayName")
+	fmt.Println("  範例：account@email.com,password123,主帳號")
+	fmt.Println()
+	fmt.Println("  按任意鍵後，會自動開啟資料目錄，方便你直接把 accounts.csv 貼進去。")
+
+	if err := waitForAnyKey(); err != nil {
+		fmt.Printf("  ⚠ 等待按鍵失敗：%v\n", err)
+		return
+	}
+
+	if err := openFolder(cfgDir); err != nil {
+		fmt.Printf("  ⚠ 無法自動開啟資料目錄：%v\n", err)
+	}
+}
+
+func waitForAnyKey() error {
+	fmt.Print("  > 請按任意鍵繼續...")
+
+	cmd := exec.Command(
+		"powershell.exe",
+		"-NoProfile",
+		"-ExecutionPolicy", "Bypass",
+		"-Command",
+		"$Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown') | Out-Null",
+	)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	fmt.Println()
+	return err
+}
+
+func openFolder(path string) error {
+	cmd := exec.Command("explorer.exe", path)
+	return cmd.Start()
 }
 
 // printSubMenuNav prints the standard sub-menu navigation options.

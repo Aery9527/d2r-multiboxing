@@ -28,6 +28,8 @@
 
 如果你看不懂 `%USERPROFILE%` 代表哪個資料夾，可以先執行一次 `d2r-hyper-launcher.exe`。工具一啟動就會顯示「資料目錄：...」的完整路徑，你照著那個位置去放 `accounts.csv` 與查看 `config.json` 就可以了。
 
+如果第一次執行時 `accounts.csv` 還不存在，工具會明確提示缺少帳號檔，並在你按任意鍵後自動開啟資料目錄，方便你直接把 `accounts.csv` 複製進去。
+
 裡面最常看到這兩個檔案：
 
 ```text
