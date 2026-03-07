@@ -9,15 +9,18 @@ description: "Handle repository-specific D2R window-switcher work in d2r-hyper-l
 
 ## 先看哪些檔案
 
-- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 啟動 switcher、`setupSwitcher()` 設定流程
+- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - switcher bootstrap 與主選單 dispatch
+- [cmd/d2r-hyper-launcher/cli_switcher.go](../../../cmd/d2r-hyper-launcher/cli_switcher.go) - `setupSwitcher()` 與 switcher 設定流程
+- [cmd/d2r-hyper-launcher/feedback.go](../../../cmd/d2r-hyper-launcher/feedback.go) 與 [cmd/d2r-hyper-launcher/menu.go](../../../cmd/d2r-hyper-launcher/menu.go) - 共用錯誤回饋與子選單導航
 - [internal/switcher/switcher.go](../../../internal/switcher/switcher.go) - `Start()` / `Stop()` / `IsRunning()` 與視窗切換主邏輯
 - [internal/switcher/detect.go](../../../internal/switcher/detect.go) - CLI 互動式按鍵偵測
 - [internal/switcher/hotkey.go](../../../internal/switcher/hotkey.go) - 鍵盤快捷鍵
 - [internal/switcher/mousehook.go](../../../internal/switcher/mousehook.go) - 滑鼠側鍵
 - [internal/switcher/gamepad.go](../../../internal/switcher/gamepad.go) - XInput 偵測與輪詢
 - [internal/switcher/keymap.go](../../../internal/switcher/keymap.go) - VK / 顯示名稱 / modifier 對應
-- [internal/process/window.go](../../../internal/process/window.go) - 枚舉 `D2R-` 視窗、切換前景視窗
-- [internal/config/config.go](../../../internal/config/config.go) - `SwitcherConfig`
+- [internal/common/process/window.go](../../../internal/common/process/window.go) - 枚舉 `D2R-` 視窗、切換前景視窗
+- [internal/common/config/config.go](../../../internal/common/config/config.go) - `SwitcherConfig`
+- [internal/common/d2r/constants.go](../../../internal/common/d2r/constants.go) - `WindowTitlePrefix`
 - [docs/switcher-usage-guide.md](../../../docs/switcher-usage-guide.md) - 使用者可見設定流程
 
 ## 核心事實
@@ -30,11 +33,12 @@ description: "Handle repository-specific D2R window-switcher work in d2r-hyper-l
 
 ## 修改時要守住的規則
 
-- 若調整視窗切換條件，確認 [internal/d2r/constants.go](../../../internal/d2r/constants.go) 的 `WindowTitlePrefix` 與多開重命名邏輯仍一致。
+- 若調整視窗切換條件，確認 [internal/common/d2r/constants.go](../../../internal/common/d2r/constants.go) 的 `WindowTitlePrefix` 與多開重命名邏輯仍一致。
 - `Start()` / `Stop()` 的全域狀態由 mutex 保護，不要繞過這層直接改 `running` 或 `stopFunc`。
 - `config.Switcher` 的 JSON 欄位名稱要保持相容：`enabled`、`modifiers`、`key`、`gamepad_index`。
 - 滑鼠與鍵盤 hook 需要 message loop；gamepad 走 XInput polling。修改時不要把這三種觸發混成同一路徑。
 - 子選單導航一樣要維持 `b` / `h` / `q`。
+- switcher 的 CLI 設定 flow 現在集中在 `cli_switcher.go`；不要再把互動細節塞回 `main.go`。
 
 ## 常見任務做法
 
@@ -47,7 +51,7 @@ description: "Handle repository-specific D2R window-switcher work in d2r-hyper-l
 ### 修正切換失效或焦點切不過去
 
 1. 看 [internal/switcher/switcher.go](../../../internal/switcher/switcher.go) 的 `switchToNext()`
-2. 再看 [internal/process/window.go](../../../internal/process/window.go) 的 `FindWindowsByTitlePrefix()` 與 `SwitchToWindow()`
+2. 再看 [internal/common/process/window.go](../../../internal/common/process/window.go) 的 `FindWindowsByTitlePrefix()` 與 `SwitchToWindow()`
 3. 確認多開流程是否仍正確把 D2R 視窗重命名為 `D2R-<DisplayName>`
 
 ### 修正搖桿問題

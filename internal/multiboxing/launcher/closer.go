@@ -1,6 +1,5 @@
-// Package handle provides utilities for enumerating and manipulating
-// Windows handles in remote processes.
-package handle
+// Package launcher provides D2R launch-time helpers, including remote handle cleanup.
+package launcher
 
 import (
 	"fmt"

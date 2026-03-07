@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"d2rhl/internal/d2r"
+	"d2rhl/internal/common/d2r"
 )
 
 const (

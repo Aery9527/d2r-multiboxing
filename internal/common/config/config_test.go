@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"d2rhl/internal/d2r"
+	"d2rhl/internal/common/d2r"
 
 	"github.com/stretchr/testify/assert"
 )

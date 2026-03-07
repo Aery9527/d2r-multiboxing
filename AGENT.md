@@ -18,12 +18,9 @@
 
 ## 高層架構
 
-- [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go) - CLI 入口與互動流程
-- [internal/config/](internal/config/) - 設定與資料目錄管理
-- [internal/d2r/](internal/d2r/) - D2R 相關常數與共用定義
-- [internal/account/](internal/account/) - 帳號資料與密碼處理
-- [internal/process/](internal/process/) - D2R 啟動、進程與視窗操作
-- [internal/handle/](internal/handle/) - 核心 Windows handle 處理
+- [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go) 與同目錄 `cli_*.go` / `menu.go` - CLI 入口、主選單 dispatch 與互動流程
+- [internal/common/](internal/common/) - 跨功能共用基礎（設定、D2R 常數、通用進程/視窗操作）
+- [internal/multiboxing/](internal/multiboxing/) - 多開 domain（帳號、啟動器、mods、背景 handle monitor）
 - [internal/switcher/](internal/switcher/) - 視窗切換功能
 
 ## 文件入口
@@ -42,7 +39,7 @@
   - `b`：回上一層
   - `h`：回主選單
   - `q`：離開程式
-- 相關共用邏輯集中在 [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go)
+- 相關共用邏輯集中在 `cmd/d2r-hyper-launcher` 下的 CLI 檔案群，不要再把所有選單與互動流程塞回單一 `main.go`
 - 玩家在 CLI 內任何可預期的輸入錯誤（格式錯誤、超出範圍、無效選項）都要走共用 helper，先顯示錯誤訊息，再在同一行每 0.5 秒累加一個點，直到 `......` 後才回到原流程；不要再直接瞬間跳回選單
 - 不要要求玩家手動修改 `config.json`；玩家可見設定應優先提供 CLI 內可操作流程，例如用檔案選擇器設定 `D2R.exe` 路徑
 

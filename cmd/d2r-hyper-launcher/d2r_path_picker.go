@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"d2rhl/internal/common/config"
 )
 
 // PickD2RPath opens a Windows file picker and returns the selected D2R.exe path.
@@ -27,7 +29,7 @@ func PickD2RPath(currentPath string) (string, error) {
 		return "", nil
 	}
 
-	if err := ValidateD2RPath(selectedPath); err != nil {
+	if err := config.ValidateD2RPath(selectedPath); err != nil {
 		return "", err
 	}
 	return selectedPath, nil
@@ -70,27 +72,4 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
 
 func powerShellSingleQuote(value string) string {
 	return strings.ReplaceAll(value, "'", "''")
-}
-
-// ValidateD2RPath verifies that the configured path points to an existing D2R.exe file.
-func ValidateD2RPath(path string) error {
-	return validateSelectedD2RPath(path)
-}
-
-func validateSelectedD2RPath(path string) error {
-	if strings.TrimSpace(path) == "" {
-		return fmt.Errorf("selected D2R path is empty")
-	}
-	if !strings.EqualFold(filepath.Base(path), "D2R.exe") {
-		return fmt.Errorf("selected file must be D2R.exe")
-	}
-
-	info, err := os.Stat(path)
-	if err != nil {
-		return fmt.Errorf("selected D2R.exe does not exist: %w", err)
-	}
-	if info.IsDir() {
-		return fmt.Errorf("selected D2R path points to a directory")
-	}
-	return nil
 }

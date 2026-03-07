@@ -1,5 +1,5 @@
 //nolint:govet // unsafe pointer operations required for Windows API interop with variable-length structures
-package handle
+package launcher
 
 import (
 	"fmt"

@@ -1,9 +1,11 @@
-package config
+package main
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"d2rhl/internal/common/config"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,12 +17,12 @@ func TestValidateSelectedD2RPath(t *testing.T) {
 	err := os.WriteFile(exePath, []byte("binary"), 0o600)
 	assert.NoError(t, err)
 
-	err = validateSelectedD2RPath(exePath)
+	err = config.ValidateD2RPath(exePath)
 	assert.NoError(t, err)
 }
 
 func TestValidateD2RPathRejectsMissingPath(t *testing.T) {
-	err := ValidateD2RPath(`C:\missing\D2R.exe`)
+	err := config.ValidateD2RPath(`C:\missing\D2R.exe`)
 	assert.ErrorContains(t, err, "selected D2R.exe does not exist")
 }
 
@@ -31,7 +33,7 @@ func TestValidateSelectedD2RPathRejectsNonD2RExecutable(t *testing.T) {
 	err := os.WriteFile(exePath, []byte("binary"), 0o600)
 	assert.NoError(t, err)
 
-	err = validateSelectedD2RPath(exePath)
+	err = config.ValidateD2RPath(exePath)
 	assert.EqualError(t, err, "selected file must be D2R.exe")
 }
 

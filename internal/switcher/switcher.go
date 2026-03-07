@@ -5,9 +5,9 @@ import (
 	"sync"
 	"unsafe"
 
-	"d2rhl/internal/config"
-	"d2rhl/internal/d2r"
-	"d2rhl/internal/process"
+	"d2rhl/internal/common/config"
+	"d2rhl/internal/common/d2r"
+	"d2rhl/internal/common/process"
 
 	"golang.org/x/sys/windows"
 )

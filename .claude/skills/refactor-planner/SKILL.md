@@ -167,6 +167,90 @@ refactor-plan/<core-scope>-refactor.md
 4. 若使用者批准實作，再建立對應的 `refactor/<task-scope>` branch
 5. 然後才開始真正的 refactor
 
+## 當使用者確認這個 refactor 已完成
+
+如果使用者表示這輪 refactor 已經做完，接下來不要只是停在「branch 上有改完」；要把可追溯紀錄也一起收尾。
+
+預設做法：
+
+1. 確認對應的 `refactor-plan/<core-scope>-refactor.md` 已能反映最終實作結果
+   - 若方案有調整，先更新 plan
+   - 讓之後回看的人知道：原本要解什麼、最後實際做了什麼
+2. 用一致的 scope 字串整理整段紀錄
+   - plan 檔名
+   - branch 名稱
+   - commit subject
+   - PR 標題
+   - merge commit
+3. 引導使用者把 refactor 透過 PR / merge 收斂回 `develop` 或主線
+4. merge 完成後，**預設刪除 refactor branch**
+   - branch 是隔離工作與 review 的地方，不是長期保存歷史的主要載體
+5. 保留可搜尋的長期痕跡在：
+   - `refactor-plan/<core-scope>-refactor.md`
+   - PR 記錄
+   - merge commit / squash commit
+   - 若有 issue，也要互相連結
+
+核心觀念：
+
+- **不要因為想保留歷史就長期保留一堆 refactor branch**
+- refactor 是否曾存在，應該主要從 **plan + PR + merge commit** 追溯，而不是依賴 branch 一直掛在遠端
+- branch 刪掉不代表歷史消失；只要 merge commit 與 PR 命名清楚，仍然很好追
+
+### merge / PR 追蹤原則
+
+完成 refactor 後，優先把以下資訊串起來：
+
+1. `refactor-plan/<core-scope>-refactor.md`
+2. `refactor/<task-scope>` branch
+3. PR 標題
+4. 最終 merge commit 或 squash commit
+
+建議這些地方都盡量包含同一個核心 scope 名稱，例如：
+
+- `refactor-plan/cli-refactor.md`
+- `refactor/cli-internal-boundaries`
+- PR: `refactor(repo): realign CLI and feature boundaries`
+- merge commit: `refactor(repo): realign CLI and feature boundaries`
+
+這樣之後可以靠：
+
+- `git log --grep=refactor`
+- GitHub PR 搜尋
+- `refactor-plan/` 目錄
+
+快速追到這次 refactor 的完整脈絡。
+
+### tag 原則
+
+tag **不是預設的 refactor 追蹤主體**。
+
+原因：
+
+- 若每個 refactor 都打開始 / 結束 tag，長期也會堆出另一種噪音
+- tag 比較適合 release、少數重要里程碑、或使用者明確要求保留的架構節點
+
+預設建議：
+
+- **不要**為每個 refactor 都建立開始 tag 與結束 tag
+- 只有在下列情況才考慮建立 **單一 annotated tag**
+  - 使用者明確要求
+  - 這是一個特別重要、跨越多輪的大型架構轉折
+  - 團隊真的需要把這個節點當成長期里程碑
+
+如果要打 tag，優先在「最終完成並 merge 之後」建立，而不是一開始就成對建立開始 / 結束 tag。
+
+### 使用者確認完成時的建議收尾節奏
+
+1. 確認 refactor 已完成且必要驗證通過
+2. 更新 `refactor-plan/<core-scope>-refactor.md`，讓內容能對應最終結果
+3. 整理 commit / PR 標題，確保命名可搜尋
+4. merge 回 `develop` 或主線
+5. 刪除 refactor branch
+6. 只有在真的有里程碑需求時，才補一個 annotated tag
+
+若使用者問「之後怎麼知道這個 refactor 曾經存在過」，請明確回答：主要從 **plan、PR、merge commit、issue** 追，而不是靠保留 branch。
+
 建議格式：
 
 ```markdown
