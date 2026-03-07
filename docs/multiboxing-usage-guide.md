@@ -93,7 +93,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 - `d2r_path`：`D2R.exe` 的路徑
 - `launch_delay`：使用 `a` 啟動全部帳號時，每個帳號之間的等待秒數
 
-如果你的遊戲不是裝在預設路徑，請手動修改 `d2r_path`。
+一般玩家不需要手動修改 `config.json`。如果你的遊戲不是裝在預設路徑，請在主選單輸入 `p`，工具會直接開啟 Windows 檔案選擇視窗，讓你選擇正確的 `D2R.exe`。
 
 ## 啟動後主選單怎麼看
 
@@ -116,6 +116,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
   <數字>  啟動指定帳號
   0       離線遊玩（可選 mod，不需帳密）
   a       啟動所有帳號（可選 mod，只啟動未啟動的）
+  p       選擇 D2R.exe 路徑
   s       視窗切換設定
   r       重新整理狀態
   q       退出
@@ -166,8 +167,6 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 3. 工具會逐一啟動所有尚未開啟的帳號
 4. 已經開啟的帳號會跳過
 5. 每次啟動之間會等待 `launch_delay` 秒
-
-如果你想讓 Battle.net 啟動節奏更慢一點，可以把 `config.json` 裡的 `launch_delay` 調大。
 
 ## 離線模式
 
@@ -247,15 +246,11 @@ Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Fo
 
 ### 顯示找不到 `D2R.exe`
 
-請打開 `%USERPROFILE%\.d2r-hyper-launcher\config.json`，檢查 `d2r_path` 是否正確。
+請在主選單輸入 `p`，重新選一次正確的 `D2R.exe` 路徑。
 
 ### 換電腦後密碼失效
 
 這是正常現象，因為 DPAPI 會綁定目前 Windows 使用者。請直接把 `accounts.csv` 的密碼欄位改回明文，再重新執行工具。
-
-### 啟動太快被 Battle.net 擋住
-
-請把 `config.json` 的 `launch_delay` 調大，讓每次登入間隔更長。
 
 ## 延伸閱讀
 

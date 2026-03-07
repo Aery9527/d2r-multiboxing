@@ -35,6 +35,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 - 子選單必須保留 `b` / `h` / `q` 導航，沿用 `printSubMenuNav()` 與 `isMenuNav()`。
 - `enumerator.go` 只對 `Event` 類型查詢 object name，避免對 pipe/file handle 查詢造成 hang。
 - 啟動後仍需要等待遊戲初始化，再執行 `CloseHandlesByName()` 與 `RenameWindow()`。
+- 不要把玩家導回手動修改 `config.json`；像 `d2r_path` 這類玩家可見設定，優先提供 CLI 內可操作流程。
 - 若調整帳號或設定流程，要同步更新 [README.md](../../../README.md) 與 [docs/multiboxing-usage-guide.md](../../../docs/multiboxing-usage-guide.md)。
 - 若改動會影響視窗標題或前景行為，要檢查是否連帶影響 switcher。
 

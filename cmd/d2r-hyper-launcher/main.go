@@ -121,6 +121,9 @@ func main() {
 		case "a":
 			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
 			continue
+		case "p":
+			setupD2RPath(cfg)
+			continue
 		case "s":
 			setupSwitcher(cfg, scanner)
 			continue
@@ -150,6 +153,7 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("  <數字>  啟動指定帳號")
 	fmt.Println("  0       離線遊玩（可選 mod，不需帳密）")
 	fmt.Println("  a       啟動所有帳號（可選 mod，只啟動未啟動的）")
+	fmt.Println("  p       選擇 D2R.exe 路徑")
 	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
@@ -378,6 +382,34 @@ func launchOffline(d2rPath string, scanner *bufio.Scanner) {
 		return
 	}
 	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
+	fmt.Println()
+}
+
+func setupD2RPath(cfg *config.Config) {
+	fmt.Println()
+	fmt.Println("  === 設定 D2R 路徑 ===")
+	fmt.Println("  即將開啟 Windows 檔案選擇視窗，請選擇 D2R.exe。")
+
+	selectedPath, err := config.PickD2RPath(cfg.D2RPath)
+	if err != nil {
+		fmt.Printf("  ⚠ D2R 路徑設定失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+	if selectedPath == "" {
+		fmt.Println("  已取消。")
+		fmt.Println()
+		return
+	}
+
+	cfg.D2RPath = selectedPath
+	if err := config.Save(cfg); err != nil {
+		fmt.Printf("  ⚠ 設定儲存失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+
+	fmt.Printf("  ✔ 已更新 D2R 路徑：%s\n", cfg.D2RPath)
 	fmt.Println()
 }
 

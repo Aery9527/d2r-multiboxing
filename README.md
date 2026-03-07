@@ -35,7 +35,8 @@ Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Fo
 
 ### 3. 編輯 `accounts.csv`
 
-打開 `%USERPROFILE%\.d2r-hyper-launcher\accounts.csv`，照這個格式填入 Battle.net 帳號：
+建議優先用 Excel 開啟 `%USERPROFILE%\.d2r-hyper-launcher\accounts.csv` 後再編輯，避免手動修改時不小心破壞 CSV 格式。  
+打開後，照這個格式填入 Battle.net 帳號：
 
 ```csv
 Email,Password,DisplayName
@@ -66,14 +67,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人
 %USERPROFILE%\.d2r-hyper-launcher\config.json
 ```
 
-如果你的 D2R 不在預設路徑 `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`，請打開 `config.json`，把 `d2r_path` 改成你的實際路徑：
-
-```json
-{
-  "d2r_path": "D:\\Games\\Diablo II Resurrected\\D2R.exe",
-  "launch_delay": 5
-}
-```
+如果你的 D2R 不在預設路徑 `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`，請在主選單輸入 `p`，工具會直接開啟 Windows 檔案選擇視窗，讓你選擇正確的 `D2R.exe`。一般玩家不需要手動修改 `config.json`。
 
 ### 5. 主選單最常用功能
 
@@ -82,6 +76,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人
 - `<數字>`：啟動指定帳號
 - `a`：先選區域，再選一次要套用的已安裝 mod，接著依序啟動所有尚未開啟的帳號
 - `0`：先選一次要套用的已安裝 mod，再進離線模式
+- `p`：開啟 Windows 檔案選擇視窗，設定 `D2R.exe` 路徑
 - `s`：設定視窗切換快捷鍵／滑鼠側鍵／搖桿按鍵
 - `r`：重新讀取 `accounts.csv` 並刷新狀態
 - `q`：離開工具

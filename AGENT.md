@@ -43,6 +43,7 @@
   - `h`：回主選單
   - `q`：離開程式
 - 相關共用邏輯集中在 [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go)
+- 不要要求玩家手動修改 `config.json`；玩家可見設定應優先提供 CLI 內可操作流程，例如用檔案選擇器設定 `D2R.exe` 路徑
 
 ## Git / 分支流程
 
