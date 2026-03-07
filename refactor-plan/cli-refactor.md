@@ -1,5 +1,34 @@
 # CLI and Internal Boundary Refactor Plan
 
+## 完成狀態
+
+這份 refactor plan 已完成實作，實際結果已在 `refactor/cli-internal-boundaries` branch 收斂，並準備併回 `develop`。
+
+已完成重點：
+
+- 將 `cmd/d2r-hyper-launcher/main.go` 拆成較薄的 bootstrap / dispatch 入口
+- 將 CLI 互動流程拆到 `menu.go`、`feedback.go`、`cli_launch.go`、`cli_flags.go`、`cli_switcher.go`、`cli_d2r_path.go` 等專責檔案
+- 將 `internal/` 重組為：
+  - `internal/common`
+  - `internal/multiboxing`
+  - `internal/switcher`
+- 把多開相關的 account / launcher / mods / monitor 邏輯收斂到 `internal/multiboxing`
+- 把共用的 config / d2r / process helper 收斂到 `internal/common`
+- 同步更新相關 skill，讓後續工作流程與新結構一致
+
+驗證結果：
+
+- `.\scripts\go-test.ps1`
+- `go build -o .\.tmp\d2r-hyper-launcher-dev.exe .\cmd\d2r-hyper-launcher`
+
+追蹤方式：
+
+- plan：`refactor-plan/cli-refactor.md`
+- branch：`refactor/cli-internal-boundaries`
+- 主要實作 commit：`0926411` `refactor(repo): realign CLI and feature boundaries`
+- skill 同步 commit：`6c7a6ae` `docs(skills): align D2R workflows with new boundaries`
+- 收尾流程 commit：`3d01be4` `docs(skills): formalize refactor completion tracking`
+
 ## 為什麼這次要把 CLI 與 `internal\` 一起整理
 
 - 原本的 CLI refactor 方案三，核心是在解決 `cmd/d2r-hyper-launcher/main.go` 同時承擔 menu renderer、selector、validator、feedback、domain coordinator 的問題
