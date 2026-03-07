@@ -9,12 +9,7 @@ import (
 
 // LaunchD2R starts D2R.exe with the given account parameters and returns the PID.
 func LaunchD2R(d2rPath string, username string, password string, address string, extraArgs ...string) (uint32, error) {
-	args := append([]string{"-uid", "osi"}, extraArgs...)
-	args = append(args,
-		"-username", username,
-		"-password", password,
-		"-address", address,
-	)
+	args := buildOnlineArgs(username, password, address, extraArgs...)
 
 	cmd := exec.Command(d2rPath, args...)
 	cmd.Dir = filepath.Dir(d2rPath)
@@ -30,7 +25,7 @@ func LaunchD2R(d2rPath string, username string, password string, address string,
 
 // LaunchD2ROffline starts D2R.exe without account parameters (offline/single-player mode).
 func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
-	args := append([]string{"-uid", "osi"}, extraArgs...)
+	args := buildOfflineArgs(extraArgs...)
 	cmd := exec.Command(d2rPath, args...)
 	cmd.Dir = filepath.Dir(d2rPath)
 	fmt.Printf("  > %s %s\n", d2rPath, strings.Join(args, " "))
@@ -40,6 +35,22 @@ func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
 	}
 
 	return uint32(cmd.Process.Pid), nil
+}
+
+func buildOnlineArgs(username string, password string, address string, extraArgs ...string) []string {
+	args := buildOfflineArgs(extraArgs...)
+	args = append(args,
+		"-username", username,
+		"-password", password,
+		"-address", address,
+	)
+	return args
+}
+
+func buildOfflineArgs(extraArgs ...string) []string {
+	args := []string{"-uid", "osi"}
+	args = append(args, extraArgs...)
+	return args
 }
 
 // redactArgs masks the value after -password to avoid leaking credentials in console output.

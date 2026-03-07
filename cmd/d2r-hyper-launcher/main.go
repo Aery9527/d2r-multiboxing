@@ -12,6 +12,7 @@ import (
 	"d2rhl/internal/config"
 	"d2rhl/internal/d2r"
 	"d2rhl/internal/handle"
+	"d2rhl/internal/mods"
 	"d2rhl/internal/process"
 	"d2rhl/internal/switcher"
 
@@ -115,7 +116,7 @@ func main() {
 			}
 			continue
 		case "0":
-			launchOffline(cfg.D2RPath)
+			launchOffline(cfg.D2RPath, scanner)
 			continue
 		case "a":
 			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
@@ -147,8 +148,8 @@ func printMenu(accounts []account.Account) {
 	fmt.Println()
 	fmt.Println("--------------------------------------------")
 	fmt.Println("  <數字>  啟動指定帳號")
-	fmt.Println("  0       離線遊玩（不需帳密）")
-	fmt.Println("  a       啟動所有帳號（只啟動未啟動的）")
+	fmt.Println("  0       離線遊玩（可選 mod，不需帳密）")
+	fmt.Println("  a       啟動所有帳號（可選 mod，只啟動未啟動的）")
 	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
 	fmt.Println("  q       退出")
@@ -231,6 +232,11 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		return
 	}
 
+	modArgs, ok := selectLaunchMod(d2rPath, scanner)
+	if !ok {
+		return
+	}
+
 	for i := range accounts {
 		acc := &accounts[i]
 
@@ -251,7 +257,7 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		}
 
 		fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
-		pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address)
+		pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address, modArgs...)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 啟動失敗：%v\n", acc.DisplayName, err)
 			continue
@@ -356,18 +362,70 @@ func isMenuNav(input string) string {
 	}
 }
 
-func launchOffline(d2rPath string) {
+func launchOffline(d2rPath string, scanner *bufio.Scanner) {
 	fmt.Println()
 	fmt.Println("  === 離線遊玩模式 ===")
 
+	modArgs, ok := selectLaunchMod(d2rPath, scanner)
+	if !ok {
+		return
+	}
+
 	fmt.Println("  正在啟動 D2R（離線模式）...")
-	pid, err := process.LaunchD2ROffline(d2rPath)
+	pid, err := process.LaunchD2ROffline(d2rPath, modArgs...)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
 	}
 	fmt.Printf("  ✔ D2R 已啟動 (PID: %d)\n", pid)
 	fmt.Println()
+}
+
+func selectLaunchMod(d2rPath string, scanner *bufio.Scanner) ([]string, bool) {
+	installedMods, err := mods.DiscoverInstalled(d2rPath)
+	if err != nil {
+		fmt.Printf("  讀取 mods 失敗：%v\n", err)
+		return nil, false
+	}
+
+	if len(installedMods) == 0 {
+		fmt.Println("  找不到已安裝 mod，將以原版啟動。")
+		return nil, true
+	}
+
+	fmt.Println()
+	fmt.Println("  選擇 mod")
+	for {
+		fmt.Println("  [0] 不使用 mod")
+		for i, modName := range installedMods {
+			fmt.Printf("  [%d] %s\n", i+1, modName)
+		}
+		printSubMenuNav()
+		fmt.Print("  > 請選擇：")
+
+		if !scanner.Scan() {
+			return nil, false
+		}
+		input := strings.TrimSpace(scanner.Text())
+		if nav := isMenuNav(input); nav != "" {
+			return nil, false
+		}
+
+		selected, err := strconv.Atoi(input)
+		if err != nil || selected < 0 || selected > len(installedMods) {
+			fmt.Println("  無效輸入，請重試。")
+			continue
+		}
+
+		if selected == 0 {
+			fmt.Println("  本次啟動不使用 mod。")
+			return nil, true
+		}
+
+		modName := installedMods[selected-1]
+		fmt.Printf("  本次使用 mod：%s\n", modName)
+		return mods.BuildLaunchArgs(modName), true
+	}
 }
 
 func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {

@@ -17,6 +17,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 - [internal/handle/winapi.go](../../../internal/handle/winapi.go) - NT API 封裝
 - [internal/account/account.go](../../../internal/account/account.go) 與 [internal/account/crypto.go](../../../internal/account/crypto.go) - CSV / DPAPI
 - [internal/config/config.go](../../../internal/config/config.go) - `d2r_path`、`launch_delay`、資料目錄
+- [internal/mods/](../../../internal/mods/) - 已安裝 mod 掃描與 `-mod` / `-txt` 參數組裝
 - [internal/d2r/constants.go](../../../internal/d2r/constants.go) - 進程名、Event 名稱、區域常數、視窗標題前綴
 - [README.md](../../../README.md) 與 [docs/multiboxing-usage-guide.md](../../../docs/multiboxing-usage-guide.md) - 使用者可見行為
 
@@ -27,6 +28,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 3. 線上帳號啟動由 `LaunchD2R()` 組出 `-uid osi -username -password -address`；不要移除 `-uid osi`。
 4. 視窗標題需維持 `D2R-<DisplayName>` 格式，這也是 switcher 用來找視窗的依據。
 5. 背景 monitor 會每 2 秒掃描 D2R 行程，替新 PID 再做一次 handle 關閉。
+6. `0` 與 `a` 啟動流程會先掃描 `D2R.exe` 同層 `mods\` 目錄；只要 mod 資料夾內有 `modinfo.json`，或有同名 `<mod>.mpq`，就會出現在選單中，並轉成 `-mod <name> -txt` 參數。
 
 ## 修改時要守住的規則
 
@@ -42,7 +44,8 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 
 1. 先看 [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) 的 `launchAccount()`、`launchAll()`、`launchOffline()`
 2. 再看 [internal/process/launcher.go](../../../internal/process/launcher.go) 是否需要新增或調整參數
-3. 檢查密碼是否仍經過 `redactArgs()` 遮罩
+3. 若有 mod 選擇流程，再檢查 [internal/mods/](../../../internal/mods/) 與 `-mod <name> -txt` 是否仍正確串接
+4. 檢查密碼是否仍經過 `redactArgs()` 遮罩
 
 ### 修正多開失敗
 
