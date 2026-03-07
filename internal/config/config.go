@@ -57,7 +57,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		D2RPath:     d2r.DefaultGamePath,
-		LaunchDelay: 5,
+		LaunchDelay: 30,
 	}
 }
 

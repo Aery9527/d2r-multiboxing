@@ -106,7 +106,7 @@
 ```json
 {
   "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
-  "launch_delay": 5,
+  "launch_delay": 30,
   "switcher": {
     "enabled": true,
     "modifiers": ["ctrl"],

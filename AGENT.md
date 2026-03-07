@@ -43,6 +43,7 @@
   - `h`：回主選單
   - `q`：離開程式
 - 相關共用邏輯集中在 [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go)
+- 不要要求玩家手動修改 `config.json`；玩家可見設定應優先提供 CLI 內可操作流程，例如用檔案選擇器設定 `D2R.exe` 路徑
 
 ## Git / 分支流程
 
@@ -58,6 +59,7 @@
 - 撰寫 Go 測試時，優先使用 `github.com/stretchr/testify/assert` 進行驗證
 - 每次修改若有合理切點，優先補上或擴充測試，避免只改功能不驗證行為
 - 在這台 Windows 開發環境中，若 `go test ./...` 受到 Application Control 阻擋，改用 [scripts/go-test.ps1](scripts/go-test.ps1) 執行整體測試
+- 在這台 Windows 開發環境中，若要本機執行 launcher，優先使用 `go run ./cmd/d2r-hyper-launcher` 或 [scripts/go-run.ps1](scripts/go-run.ps1)；不要用本機 build 直接覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`
 
 ## Windows 安全原則
 

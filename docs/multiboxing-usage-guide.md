@@ -14,7 +14,7 @@
 ## 第一次使用前要準備什麼
 
 1. 下載 [d2r-hyper-launcher.exe](../d2r-hyper-launcher.exe)
-2. 準備 [accounts.csv](../accounts.csv)
+2. 第一次執行時讓工具自動建立 `accounts.csv`
 3. 確認 D2R 是 Battle.net 版本
 4. 建議先把遊戲顯示模式設成「視窗化」或「無邊框視窗」
 
@@ -26,7 +26,9 @@
 %USERPROFILE%\.d2r-hyper-launcher\
 ```
 
-如果你看不懂 `%USERPROFILE%` 代表哪個資料夾，可以先執行一次 `d2r-hyper-launcher.exe`。工具一啟動就會顯示「資料目錄：...」的完整路徑，你照著那個位置去放 `accounts.csv` 與查看 `config.json` 就可以了。
+如果你看不懂 `%USERPROFILE%` 代表哪個資料夾，可以先執行一次 `d2r-hyper-launcher.exe`。工具一啟動就會顯示「資料目錄：...」的完整路徑，並在缺少 `accounts.csv` 時自動建立範本檔。
+
+如果第一次執行時 `accounts.csv` 還不存在，工具會自動建立一份含範例資料的 `accounts.csv`，並在你按任意鍵後結束程式、自動開啟資料目錄，方便你直接修改內容。
 
 裡面最常看到這兩個檔案：
 
@@ -38,19 +40,14 @@
 
 ## `accounts.csv` 怎麼準備
 
-先把範本複製過去：
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.d2r-hyper-launcher" | Out-Null
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Force
-```
+最簡單的做法是先執行一次 launcher，讓它自動產生範本；之後工具在離開時會自動開啟資料目錄，方便你直接修改這份檔案。
 
 範例內容：
 
 ```csv
 Email,Password,DisplayName
-player1@gmail.com,mypassword123,主帳號-法師
-player2@gmail.com,anotherpass456,副帳號-野蠻人
+your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品)
+your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 ```
 
 欄位說明：
@@ -84,7 +81,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 ```json
 {
   "d2r_path": "C:\\Program Files (x86)\\Diablo II Resurrected\\D2R.exe",
-  "launch_delay": 5
+  "launch_delay": 30
 }
 ```
 
@@ -93,7 +90,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 - `d2r_path`：`D2R.exe` 的路徑
 - `launch_delay`：使用 `a` 啟動全部帳號時，每個帳號之間的等待秒數
 
-如果你的遊戲不是裝在預設路徑，請手動修改 `d2r_path`。
+一般玩家不需要手動修改 `config.json`。如果你的遊戲不是裝在預設路徑，請在主選單輸入 `p`，工具會直接開啟 Windows 檔案選擇視窗，讓你選擇正確的 `D2R.exe`；如果你直接按 `<數字>`、`a` 或 `0` 啟動時發現目前路徑失效，工具也會先攔下來並立即提供同樣的 `p` 設定流程。
 
 ## 啟動後主選單怎麼看
 
@@ -106,7 +103,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 
   資料目錄：C:\Users\User\.d2r-hyper-launcher
   D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
-  啟動間隔：5 秒
+  啟動間隔：30 秒
 
   帳號列表：
   [1] 主帳號-法師      (player1@gmail.com)  [未啟動]
@@ -116,6 +113,7 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
   <數字>  啟動指定帳號
   0       離線遊玩（可選 mod，不需帳密）
   a       啟動所有帳號（可選 mod，只啟動未啟動的）
+  p       選擇 D2R.exe 路徑
   s       視窗切換設定
   r       重新整理狀態
   q       退出
@@ -124,11 +122,16 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 
 `[未啟動]` / `[已啟動]` 會根據目前視窗狀態更新。
 
+注意：這個狀態判斷是用 `account.csv` 裡的 `DisplayName` 去對應 `D2R-<DisplayName>` 視窗標題。如果 D2R 還在執行中時，你先關掉 launcher 再去修改 `DisplayName`，重新開回來後這裡的狀態偵測就可能暫時不正確。
+
 ## 啟動單一帳號
 
 1. 在主選單輸入帳號前面的數字，例如 `1`
-2. 選擇區域：`1=NA`、`2=EU`、`3=Asia`
-3. 工具會自動：
+2. 工具會先檢查目前設定的 `D2R.exe` 是否真的存在；如果路徑失效，會直接提示你輸入 `p` 重新選路徑
+3. 如果這個帳號對應的 `D2R-<DisplayName>` 視窗已經存在，工具會直接阻止重複啟動，避免同一帳號被連續再開一次
+4. 選擇區域：`1=NA`、`2=EU`、`3=Asia`
+5. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具也會讓你選擇這次單帳號啟動要套用哪一個 mod
+6. 工具會自動：
    - 解密帳號密碼
    - 啟動 D2R
    - 嘗試關閉單實例鎖的 Event Handle
@@ -161,17 +164,17 @@ player2@gmail.com,anotherpass456,副帳號-野蠻人
 
 在主選單輸入 `a` 之後：
 
-1. 一樣先選區域
-2. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具會先讓你選擇這次批次啟動要套用哪一個 mod
-3. 工具會逐一啟動所有尚未開啟的帳號
-4. 已經開啟的帳號會跳過
-5. 每次啟動之間會等待 `launch_delay` 秒
-
-如果你想讓 Battle.net 啟動節奏更慢一點，可以把 `config.json` 裡的 `launch_delay` 調大。
+1. 工具會先檢查目前設定的 `D2R.exe` 是否真的存在；如果路徑失效，會直接提示你輸入 `p` 重新選路徑
+2. 工具會先預掃描目前已開啟的 D2R 視窗，並把整份帳號清單明確列出成 `[已啟動]` / `[未啟動]`
+3. 如果全部帳號都已經在執行中，就會直接結束，不再多問區域或 mod
+4. 確定還有待啟動帳號時，才會再讓你選區域
+5. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具會先讓你選擇這次批次啟動要套用哪一個 mod
+6. 每次啟動時只會處理上面標示為 `[未啟動]` 的帳號，不會把等待時間浪費在已經開啟的帳號上
+7. 每次啟動之間只會在「下一個真的還沒啟動的帳號」之前等待 `launch_delay` 秒
 
 ## 離線模式
 
-在主選單輸入 `0`，工具會先檢查 `D2R.exe` 同層的 `mods\` 目錄是否有已安裝 mod；如果有，你可以先選這次離線啟動要使用哪個 mod，之後再啟動 D2R 離線模式，不需要讀取帳號密碼。
+在主選單輸入 `0`，工具會先檢查目前設定的 `D2R.exe` 是否存在；如果路徑失效，會直接提示你輸入 `p` 重新選路徑。確認路徑有效後，工具會再檢查 `D2R.exe` 同層的 `mods\` 目錄是否有已安裝 mod；如果有，你可以先選這次離線啟動要使用哪個 mod，之後再啟動 D2R 離線模式，不需要讀取帳號密碼。
 
 這個模式適合：
 
@@ -232,30 +235,21 @@ C:\Program Files (x86)\Diablo II Resurrected\mods\
 
 ### 找不到 `accounts.csv`
 
-請確認檔案真的放在：
+請直接重新執行 `d2r-hyper-launcher.exe`。工具會自動在下面位置建立新的範本檔：
 
 ```text
 %USERPROFILE%\.d2r-hyper-launcher\accounts.csv
 ```
 
-如果沒有，就重新執行：
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.d2r-hyper-launcher" | Out-Null
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Force
-```
+建立完成後，畫面會停住提示你；當你按任意鍵離開時，工具會自動開啟資料目錄，方便你直接修改這份 `accounts.csv`。
 
 ### 顯示找不到 `D2R.exe`
 
-請打開 `%USERPROFILE%\.d2r-hyper-launcher\config.json`，檢查 `d2r_path` 是否正確。
+當你按 `<數字>`、`a` 或 `0` 啟動時，工具會先攔下來並直接顯示 `p / b / h / q` 選項。通常只要輸入 `p`，重新選一次正確的 `D2R.exe` 路徑即可。
 
 ### 換電腦後密碼失效
 
 這是正常現象，因為 DPAPI 會綁定目前 Windows 使用者。請直接把 `accounts.csv` 的密碼欄位改回明文，再重新執行工具。
-
-### 啟動太快被 Battle.net 擋住
-
-請把 `config.json` 的 `launch_delay` 調大，讓每次登入間隔更長。
 
 ## 延伸閱讀
 

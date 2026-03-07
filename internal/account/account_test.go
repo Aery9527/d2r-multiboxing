@@ -1,6 +1,7 @@
 package account
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -21,6 +22,10 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 	err := SaveAccounts(csvPath, accounts)
 	assert.NoError(t, err)
 
+	data, err := os.ReadFile(csvPath)
+	assert.NoError(t, err)
+	assert.True(t, bytes.HasPrefix(data, utf8BOM))
+
 	// 讀取
 	loaded, err := LoadAccounts(csvPath)
 	assert.NoError(t, err)
@@ -32,6 +37,39 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 
 	assert.Equal(t, "test2@email.com", loaded[1].Email)
 	assert.Equal(t, "Account2", loaded[1].DisplayName)
+}
+
+func TestEnsureAccountsFileCreatesTemplate(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "nested", "accounts.csv")
+
+	created, err := EnsureAccountsFile(csvPath)
+	assert.NoError(t, err)
+	assert.True(t, created)
+
+	data, err := os.ReadFile(csvPath)
+	assert.NoError(t, err)
+	assert.True(t, bytes.HasPrefix(data, utf8BOM))
+	assert.Equal(t, string(accountsCSVTemplate), string(data))
+}
+
+func TestEnsureAccountsFileDoesNotOverwriteExistingFile(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+	original := []Account{
+		{Email: "keep@example.com", Password: "keep", DisplayName: "Keep"},
+	}
+
+	err := SaveAccounts(csvPath, original)
+	assert.NoError(t, err)
+
+	created, err := EnsureAccountsFile(csvPath)
+	assert.NoError(t, err)
+	assert.False(t, created)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Equal(t, original, loaded)
 }
 
 func TestLoadAccounts_FileNotFound(t *testing.T) {
