@@ -14,7 +14,7 @@
 ## 第一次使用前要準備什麼
 
 1. 下載 [d2r-hyper-launcher.exe](../d2r-hyper-launcher.exe)
-2. 準備 [accounts.csv](../accounts.csv)
+2. 第一次執行時讓工具自動建立 `accounts.csv`
 3. 確認 D2R 是 Battle.net 版本
 4. 建議先把遊戲顯示模式設成「視窗化」或「無邊框視窗」
 
@@ -26,9 +26,9 @@
 %USERPROFILE%\.d2r-hyper-launcher\
 ```
 
-如果你看不懂 `%USERPROFILE%` 代表哪個資料夾，可以先執行一次 `d2r-hyper-launcher.exe`。工具一啟動就會顯示「資料目錄：...」的完整路徑，你照著那個位置去放 `accounts.csv` 與查看 `config.json` 就可以了。
+如果你看不懂 `%USERPROFILE%` 代表哪個資料夾，可以先執行一次 `d2r-hyper-launcher.exe`。工具一啟動就會顯示「資料目錄：...」的完整路徑，並在缺少 `accounts.csv` 時自動建立範本檔。
 
-如果第一次執行時 `accounts.csv` 還不存在，工具會明確提示缺少帳號檔，並在你按任意鍵後自動開啟資料目錄，方便你直接把 `accounts.csv` 複製進去。
+如果第一次執行時 `accounts.csv` 還不存在，工具會自動建立一份含範例資料的 `accounts.csv`，並在你按任意鍵後結束程式、自動開啟資料目錄，方便你直接修改內容。
 
 裡面最常看到這兩個檔案：
 
@@ -40,19 +40,14 @@
 
 ## `accounts.csv` 怎麼準備
 
-先把範本複製過去：
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.d2r-hyper-launcher" | Out-Null
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Force
-```
+最簡單的做法是先執行一次 launcher，讓它自動產生範本；之後工具在離開時會自動開啟資料目錄，方便你直接修改這份檔案。
 
 範例內容：
 
 ```csv
 Email,Password,DisplayName
-player1@gmail.com,mypassword123,主帳號-法師
-player2@gmail.com,anotherpass456,副帳號-野蠻人
+your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品)
+your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 ```
 
 欄位說明：
@@ -233,18 +228,13 @@ C:\Program Files (x86)\Diablo II Resurrected\mods\
 
 ### 找不到 `accounts.csv`
 
-請確認檔案真的放在：
+請直接重新執行 `d2r-hyper-launcher.exe`。工具會自動在下面位置建立新的範本檔：
 
 ```text
 %USERPROFILE%\.d2r-hyper-launcher\accounts.csv
 ```
 
-如果沒有，就重新執行：
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.d2r-hyper-launcher" | Out-Null
-Copy-Item .\accounts.csv "$env:USERPROFILE\.d2r-hyper-launcher\accounts.csv" -Force
-```
+建立完成後，畫面會停住提示你；當你按任意鍵離開時，工具會自動開啟資料目錄，方便你直接修改這份 `accounts.csv`。
 
 ### 顯示找不到 `D2R.exe`
 

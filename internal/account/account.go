@@ -6,8 +6,11 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
 
 const encryptedPrefix = "ENC:"
 
@@ -60,11 +63,19 @@ func LoadAccounts(path string) ([]Account, error) {
 
 // SaveAccounts writes accounts to a CSV file.
 func SaveAccounts(path string, accounts []Account) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return fmt.Errorf("failed to create accounts directory: %w", err)
+	}
+
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return fmt.Errorf("failed to create accounts file: %w", err)
 	}
 	defer f.Close()
+
+	if _, err := f.Write(utf8BOM); err != nil {
+		return fmt.Errorf("failed to write UTF-8 BOM: %w", err)
+	}
 
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
@@ -86,6 +97,25 @@ func SaveAccounts(path string, accounts []Account) error {
 	}
 
 	return nil
+}
+
+// EnsureAccountsFile creates accounts.csv with default template rows when it does not exist yet.
+func EnsureAccountsFile(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return false, nil
+	}
+	if !os.IsNotExist(err) {
+		return false, fmt.Errorf("failed to stat accounts file: %w", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return false, fmt.Errorf("failed to create accounts directory: %w", err)
+	}
+	if err := os.WriteFile(path, accountsCSVTemplate, 0o600); err != nil {
+		return false, fmt.Errorf("failed to create default accounts file: %w", err)
+	}
+	return true, nil
 }
 
 // EncryptPlaintextPasswords encrypts any plaintext passwords in-place

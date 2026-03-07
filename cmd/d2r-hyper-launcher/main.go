@@ -67,8 +67,13 @@ func main() {
 		return
 	}
 
-	if !fileExists(accountsFile) {
-		handleMissingAccountsFile(cfgDir, accountsFile)
+	createdAccountsFile, err := account.EnsureAccountsFile(accountsFile)
+	if err != nil {
+		fmt.Printf("  建立帳號檔案失敗：%v\n", err)
+		return
+	}
+	if createdAccountsFile {
+		handleCreatedAccountsFile(cfgDir, accountsFile)
 		return
 	}
 
@@ -331,19 +336,14 @@ func parseRegionInput(input string) *d2r.Region {
 	}
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func handleMissingAccountsFile(cfgDir, accountsFile string) {
-	fmt.Println("  ⚠ 找不到帳號設定檔 accounts.csv。")
-	fmt.Printf("  預期位置：%s\n", accountsFile)
-	fmt.Println("  第一次使用時，請把 repo 內附的 accounts.csv 複製到上面的資料夾。")
+func handleCreatedAccountsFile(cfgDir, accountsFile string) {
+	fmt.Println("  ✔ 已自動建立帳號設定檔 accounts.csv。")
+	fmt.Printf("  建立位置：%s\n", accountsFile)
+	fmt.Println("  工具已先幫你放入兩筆範例資料，請把它們改成你自己的 Battle.net 帳號。")
 	fmt.Println("  CSV 格式：Email,Password,DisplayName")
-	fmt.Println("  範例：account@email.com,password123,主帳號")
+	fmt.Println("  範例：your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品)")
 	fmt.Println()
-	fmt.Println("  按任意鍵後，會自動開啟資料目錄，方便你直接把 accounts.csv 貼進去。")
+	fmt.Println("  按任意鍵後，程式會結束並自動開啟資料目錄，方便你直接修改剛建立好的 accounts.csv。")
 
 	if err := waitForAnyKey(); err != nil {
 		fmt.Printf("  ⚠ 等待按鍵失敗：%v\n", err)
