@@ -61,6 +61,13 @@ your-account2@example.com,your-password-here,副帳號-野蠻人
 .\d2r-hyper-launcher.exe
 ```
 
+如果你是自己在這台 Windows 開發環境修改程式後要本機執行，**不要用 `go build` 直接覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe` 再執行**。  
+這裡的 Windows Application Control 會擋掉本機重新編出來的 exe；開發時請改用：
+
+```powershell
+.\scripts\go-run.ps1
+```
+
 第一次啟動時，工具也會自動建立這個設定檔：
 
 ```text
@@ -104,6 +111,21 @@ your-account2@example.com,your-password-here,副帳號-野蠻人
 
 ### 編譯
 
+若你只是要在本機驗證程式可正常啟動，請優先使用：
+
+```powershell
+.\scripts\go-run.ps1
+```
+
+若你只是要驗證能否成功編譯，建議把輸出放到暫存位置，避免覆蓋 repo 根目錄的 release exe：
+
+```powershell
+New-Item -ItemType Directory -Force .\.tmp | Out-Null
+go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
+```
+
+只有在 release 流程要更新正式產物時，才覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`：
+
 ```powershell
 go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
@@ -114,7 +136,7 @@ go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 
 ```powershell
 .\scripts\go-test.ps1
-go build ./cmd/d2r-hyper-launcher
+go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 ```
 
 ## 注意事項

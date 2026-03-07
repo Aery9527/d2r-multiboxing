@@ -66,7 +66,8 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 
 ```powershell
 .\scripts\go-test.ps1
-go build ./cmd/d2r-hyper-launcher
+New-Item -ItemType Directory -Force .\.tmp | Out-Null
+go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 ```
 
 若改到啟動流程或視窗標題，還要人工確認：

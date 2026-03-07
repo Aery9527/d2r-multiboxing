@@ -36,14 +36,15 @@ release 前最低限度一定要跑：
 
 ```powershell
 .\scripts\go-test.ps1
-go build ./cmd/d2r-hyper-launcher
+New-Item -ItemType Directory -Force .\.tmp | Out-Null
+go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 ```
 
 若目前環境沒有遭遇 Windows Application Control 阻擋，也可以直接使用 `go test ./...`；但在這台 repo 常見的 Windows 環境，請優先使用 `.\scripts\go-test.ps1`。
 
 注意：
 
-- 第一個 `go build ./cmd/d2r-hyper-launcher` 是驗證目前程式可成功編譯
+- 第一個 `go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher` 是驗證目前程式可成功編譯，同時避免覆蓋 repo 根目錄 exe
 - 真正 release build 要在版本號決定後，再用帶版本的 `-ldflags` 重跑一次
 - 若測試或 build 失敗，不要繼續 release
 
@@ -171,7 +172,7 @@ git tag -a vX.Y.Z -m "release: vX.Y.Z"
 4. 看 `git log <last-tag>..HEAD --oneline`
 5. 彙整 commit 並決定 bump 等級
 6. 在 `develop` 跑 `.\scripts\go-test.ps1`
-7. 在 `develop` 跑 `go build ./cmd/d2r-hyper-launcher`
+7. 在 `develop` 跑 `go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher`
 8. 決定新版本 `vX.Y.Z`
 9. 寫 release note 到 `docs/releases/vX.Y.Z.md`
 10. 用新版本 build，覆蓋 `d2r-hyper-launcher.exe`

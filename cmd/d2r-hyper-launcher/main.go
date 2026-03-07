@@ -205,15 +205,7 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 		fmt.Printf("  ✔ 已關閉 %d 個 Event Handle\n", closed)
 	}
 
-	// 重命名視窗
-	go func() {
-		err := process.RenameWindow(pid, d2r.WindowTitle(acc.DisplayName), 15, 2*time.Second)
-		if err != nil {
-			fmt.Printf("  ⚠ 視窗重命名失敗 (%s)：%v\n", acc.DisplayName, err)
-		} else {
-			fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(acc.DisplayName))
-		}
-	}()
+	renameLaunchedWindow(pid, acc.DisplayName)
 
 	fmt.Println()
 }
@@ -250,10 +242,6 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 			continue
 		}
 
-		if i > 0 && launchDelay > 0 {
-			fmt.Printf("  等待 %d 秒...\n", launchDelay)
-			time.Sleep(time.Duration(launchDelay) * time.Second)
-		}
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 密碼解密失敗：%v\n", acc.DisplayName, err)
@@ -277,14 +265,15 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 			fmt.Printf("  ✔ %s 已關閉 %d 個 Handle\n", acc.DisplayName, closed)
 		}
 
-		// 背景重命名視窗
-		displayName := acc.DisplayName
-		go func() {
-			err := process.RenameWindow(pid, d2r.WindowTitle(displayName), 15, 2*time.Second)
-			if err == nil {
-				fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(displayName))
-			}
-		}()
+		renameLaunchedWindow(pid, acc.DisplayName)
+
+		nextDisplayName := nextPendingAccountDisplayName(accounts, i+1, func(displayName string) bool {
+			return process.FindWindowByTitle(d2r.WindowTitle(displayName))
+		})
+		if launchDelay > 0 && nextDisplayName != "" {
+			fmt.Println(formatLaunchDelayMessage(launchDelay, nextDisplayName))
+			time.Sleep(time.Duration(launchDelay) * time.Second)
+		}
 	}
 	fmt.Println()
 }
@@ -411,6 +400,33 @@ func setupD2RPath(cfg *config.Config) {
 
 	fmt.Printf("  ✔ 已更新 D2R 路徑：%s\n", cfg.D2RPath)
 	fmt.Println()
+}
+
+func renameLaunchedWindow(pid uint32, displayName string) {
+	fmt.Printf("  正在準備重命名視窗：%s\n", displayName)
+	err := process.RenameWindow(pid, d2r.WindowTitle(displayName), 15, 2*time.Second)
+	if err != nil {
+		fmt.Printf("  ⚠ 視窗重命名失敗 (%s)：%v\n", displayName, err)
+		return
+	}
+
+	fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(displayName))
+}
+
+func nextPendingAccountDisplayName(accounts []account.Account, start int, isRunning func(string) bool) string {
+	for i := start; i < len(accounts); i++ {
+		displayName := accounts[i].DisplayName
+		if isRunning(displayName) {
+			continue
+		}
+		return displayName
+	}
+
+	return ""
+}
+
+func formatLaunchDelayMessage(delaySeconds int, nextDisplayName string) string {
+	return fmt.Sprintf("  等待 %d 秒後啟動下一個帳號：%s", delaySeconds, nextDisplayName)
 }
 
 func selectLaunchMod(d2rPath string, scanner *bufio.Scanner) ([]string, bool) {

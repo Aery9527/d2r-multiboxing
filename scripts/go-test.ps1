@@ -9,10 +9,12 @@ if (-not (Test-Path $runner)) {
 }
 
 $resolvedArgs = if ($GoTestArgs -and $GoTestArgs.Length -gt 0) { $GoTestArgs } else { @("./...") }
+$execWrapper = "-exec=powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$runner`""
+$goArgs = @("test", $execWrapper) + $resolvedArgs
 
 Push-Location $repoRoot
 try {
-    & go test -exec "powershell -ExecutionPolicy Bypass -File $runner" @resolvedArgs
+    & go @goArgs
     exit $LASTEXITCODE
 }
 finally {

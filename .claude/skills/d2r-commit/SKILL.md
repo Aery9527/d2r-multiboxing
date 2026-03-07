@@ -29,14 +29,15 @@ description: "Handle repository-specific git commit work in d2r-hyper-launcher. 
 
 ```powershell
 .\scripts\go-test.ps1
-go build ./cmd/d2r-hyper-launcher
+New-Item -ItemType Directory -Force .\.tmp | Out-Null
+go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 ```
 
 若目前環境沒有遭遇 Windows Application Control 阻擋，也可以直接使用 `go test ./...`；但在這台 repo 常見的 Windows 環境，請優先使用 `.\scripts\go-test.ps1`。
 
 執行原則：
 
-- 一般 Go 程式碼變更：`.\scripts\go-test.ps1` 與 `go build ./cmd/d2r-hyper-launcher`
+- 一般 Go 程式碼變更：`.\scripts\go-test.ps1` 與 `go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher`
 - 只改文件時：至少確認是否有需要同步更新其他 scope 文件與 skill；若使用者要求 commit，預設仍優先跑 `.\scripts\go-test.ps1`
 - 若變更集中在特定套件，也可以先補跑較小範圍測試，但 **不能取代** commit 前的整體驗證
 
