@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,6 +36,17 @@ func TestDisplayVersion(t *testing.T) {
 	assert.Equal(t, "v0.1.0", displayVersion("0.1.0"))
 	assert.Equal(t, "v0.1.0", displayVersion("v0.1.0"))
 	assert.Equal(t, "vdev", displayVersion("dev"))
+}
+
+func TestAccountLaunchArgsIncludesPerAccountFlagsAfterMods(t *testing.T) {
+	acc := account.Account{
+		DisplayName: "Alpha",
+		LaunchFlags: account.LaunchFlagNoSound | account.LaunchFlagSkipLogoVideo,
+	}
+
+	args := accountLaunchArgs(acc, []string{"-mod", "sample", "-txt"})
+
+	assert.Equal(t, []string{"-mod", "sample", "-txt", "-ns", "-skiplogovideo"}, args)
 }
 
 func TestPendingBatchAccountsReturnsEmptyWhenAllRunning(t *testing.T) {
@@ -140,4 +152,77 @@ func TestEnsureLaunchReadyD2RPathWithSetupAllowsBackNavigation(t *testing.T) {
 	})
 
 	assert.False(t, ok)
+}
+
+func TestParseSelectionInput(t *testing.T) {
+	indexes, err := parseSelectionInput("1-3,5,7-8", 8)
+	assert.NoError(t, err)
+	assert.Equal(t, []int{0, 1, 2, 4, 6, 7}, indexes)
+}
+
+func TestParseSelectionInputRejectsReverseRange(t *testing.T) {
+	_, err := parseSelectionInput("5-3", 8)
+	assert.EqualError(t, err, `區間 "5-3" 起點不可大於終點`)
+}
+
+func TestParseSelectionInputRejectsOutOfRange(t *testing.T) {
+	_, err := parseSelectionInput("1,9", 8)
+	assert.EqualError(t, err, "編號 9 超出可選範圍 1-8")
+}
+
+func TestSelectedLaunchFlagMask(t *testing.T) {
+	options := account.LaunchFlagOptions()
+	mask := selectedLaunchFlagMask([]int{0, 2, 4}, options)
+
+	assert.Equal(t, uint32(account.LaunchFlagNoSound|account.LaunchFlagLowQuality|account.LaunchFlagNoRumble), mask)
+}
+
+func TestHasConflictingLaunchFlags(t *testing.T) {
+	assert.True(t, hasConflictingLaunchFlags(account.LaunchFlagNoSound|account.LaunchFlagSoundInBackground))
+	assert.False(t, hasConflictingLaunchFlags(account.LaunchFlagNoSound|account.LaunchFlagSkipLogoVideo))
+}
+
+func TestNormalizeLaunchFlags(t *testing.T) {
+	flags := normalizeLaunchFlags(account.LaunchFlagNoSound|account.LaunchFlagSoundInBackground, account.LaunchFlagNoSound)
+	assert.Equal(t, uint32(account.LaunchFlagNoSound), flags)
+
+	flags = normalizeLaunchFlags(account.LaunchFlagNoSound|account.LaunchFlagSoundInBackground, account.LaunchFlagSoundInBackground)
+	assert.Equal(t, uint32(account.LaunchFlagSoundInBackground), flags)
+}
+
+func TestPrintAccountLaunchFlagSummary(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", LaunchFlags: account.LaunchFlagNoSound},
+		{DisplayName: "Bravo", Email: "bravo@example.com"},
+	}
+
+	output := captureStdout(t, func() {
+		printAccountLaunchFlagSummary(accounts)
+	})
+
+	assert.Contains(t, output, "[1] Alpha (alpha@example.com)  flag：關閉聲音")
+	assert.Contains(t, output, "[2] Bravo (bravo@example.com)  flag：無")
+}
+
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+
+	original := os.Stdout
+	r, w, err := os.Pipe()
+	assert.NoError(t, err)
+	os.Stdout = w
+
+	done := make(chan string, 1)
+	go func() {
+		data, _ := io.ReadAll(r)
+		done <- string(data)
+	}()
+
+	fn()
+
+	assert.NoError(t, w.Close())
+	os.Stdout = original
+	output := <-done
+	assert.NoError(t, r.Close())
+	return output
 }

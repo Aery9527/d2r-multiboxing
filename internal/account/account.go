@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -19,6 +20,7 @@ type Account struct {
 	Email       string
 	Password    string // 加密後以 "ENC:" 前綴標記
 	DisplayName string
+	LaunchFlags uint32
 }
 
 // IsPasswordEncrypted checks if the password is already encrypted.
@@ -27,7 +29,7 @@ func IsPasswordEncrypted(password string) bool {
 }
 
 // LoadAccounts reads accounts from a CSV file.
-// CSV format: Email,Password,DisplayName (first row is header).
+// CSV format: Email,Password,DisplayName[,LaunchFlags] (first row is header).
 func LoadAccounts(path string) ([]Account, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -45,17 +47,40 @@ func LoadAccounts(path string) ([]Account, error) {
 		return nil, fmt.Errorf("accounts file is empty (only header or no data)")
 	}
 
-	var accounts []Account
+	var (
+		accounts         []Account
+		sanitizedInvalid bool
+	)
 	for i, record := range records[1:] { // 跳過 header
 		if len(record) < 3 {
 			return nil, fmt.Errorf("invalid record at line %d: expected 3 fields, got %d", i+2, len(record))
+		}
+
+		var launchFlags uint32
+		if len(record) >= 4 {
+			value := strings.TrimSpace(record[3])
+			if value != "" {
+				parsed, err := strconv.ParseUint(value, 10, 32)
+				if err != nil {
+					sanitizedInvalid = true
+				} else {
+					launchFlags = uint32(parsed)
+				}
+			}
 		}
 
 		accounts = append(accounts, Account{
 			Email:       strings.TrimSpace(record[0]),
 			Password:    strings.TrimSpace(record[1]),
 			DisplayName: strings.TrimSpace(record[2]),
+			LaunchFlags: launchFlags,
 		})
+	}
+
+	if sanitizedInvalid {
+		if err := SaveAccounts(path, accounts); err != nil {
+			return nil, fmt.Errorf("failed to reset invalid LaunchFlags to 0: %w", err)
+		}
 	}
 
 	return accounts, nil
@@ -81,7 +106,7 @@ func SaveAccounts(path string, accounts []Account) error {
 	defer writer.Flush()
 
 	// header
-	if err := writer.Write([]string{"Email", "Password", "DisplayName"}); err != nil {
+	if err := writer.Write([]string{"Email", "Password", "DisplayName", "LaunchFlags"}); err != nil {
 		return fmt.Errorf("failed to write header: %w", err)
 	}
 
@@ -90,6 +115,7 @@ func SaveAccounts(path string, accounts []Account) error {
 			acc.Email,
 			acc.Password,
 			acc.DisplayName,
+			strconv.FormatUint(uint64(acc.LaunchFlags), 10),
 		}
 		if err := writer.Write(record); err != nil {
 			return fmt.Errorf("failed to write account #%d: %w", i+1, err)

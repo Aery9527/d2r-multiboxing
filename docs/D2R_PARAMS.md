@@ -3,6 +3,7 @@
 > 主要整理自 [D2R Command Line Options](https://gist.github.com/heinermann/788470a5fedb1c437c1c570fe46cdb57)，
 > 並交叉參考 Blizzard 論壇與社群討論；若某些參數缺乏官方說明，會明確標示為「社群觀察」或「用途不明」。
 > 標記為 `(Defunct?)` 的參數可能已在新版本中失效。
+> 如果你是從多開文件進來，建議先搭配 [multiboxing-index.md](multiboxing-index.md) 與 [multiboxing-usage-guide.md](multiboxing-usage-guide.md) 一起看。
 
 ---
 
@@ -23,6 +24,21 @@
 
 - `-sndbkg`、`-skiplogovideo`、`-countrycode`、`-data` 這類參數，目前能找到的多半仍是社群整理或玩家經驗，缺乏 Blizzard 正式參數文件，因此本文對這些項目刻意保留不確定性描述
 - 若未來 Blizzard patch 導致行為改變，建議優先回頭檢查上面的 gist 與論壇討論，再配合實機測試更新本文
+
+---
+
+## 這份文件在多開文件中的位置
+
+- 玩家快速開始與主選單入口：看 [README.md](../README.md)
+- 完整操作流程、`LaunchFlags` 設定畫面與常見問題：看 [multiboxing-usage-guide.md](multiboxing-usage-guide.md)
+- 多開底層原理、單實例 handle、背景 monitor：看 [multiboxing-technical-guide.md](multiboxing-technical-guide.md)
+- 這份文件則專門負責：**D2R 啟動參數本身的用途、來源與不確定性標註**
+
+目前 launcher 直接 expose 給多開玩家的，主要是：
+
+- Battle.net 直接登入需要的 `-uid osi`、`-username`、`-password`、`-address`
+- 每帳號 `LaunchFlags` 會用到的 `-ns`、`-sndbkg`、`-lq`、`-skiplogovideo`、`-norumble`
+- mod 啟動會用到的 `-mod <name> -txt`
 
 ---
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -138,6 +139,9 @@ func main() {
 		case "s":
 			setupSwitcher(cfg, scanner)
 			continue
+		case "f":
+			setupAccountLaunchFlags(accounts, accountsFile, scanner)
+			continue
 		default:
 			id, err := strconv.Atoi(input)
 			if err != nil || id < 1 || id > len(accounts) {
@@ -168,6 +172,7 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("  <數字>  啟動指定帳號")
 	fmt.Println("  0       離線遊玩（可選 mod，不需帳密）")
 	fmt.Println("  a       啟動所有帳號（可選 mod，只啟動未啟動的）")
+	fmt.Println("  f       設定帳號啟動 flag")
 	fmt.Println("  p       選擇 D2R.exe 路徑")
 	fmt.Println("  s       視窗切換設定")
 	fmt.Println("  r       重新整理狀態")
@@ -207,6 +212,7 @@ func launchAccount(acc *account.Account, cfg *config.Config, scanner *bufio.Scan
 	if !ok {
 		return
 	}
+	launchArgs := accountLaunchArgs(*acc, modArgs)
 
 	// 解密密碼
 	password, err := account.GetDecryptedPassword(acc)
@@ -218,7 +224,7 @@ func launchAccount(acc *account.Account, cfg *config.Config, scanner *bufio.Scan
 	fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
 
 	// 啟動 D2R
-	pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, modArgs...)
+	pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, launchArgs...)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
@@ -280,6 +286,7 @@ func launchAll(accounts []account.Account, cfg *config.Config, scanner *bufio.Sc
 	}
 
 	for i, acc := range pendingAccounts {
+		launchArgs := accountLaunchArgs(*acc, modArgs)
 
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
@@ -288,7 +295,7 @@ func launchAll(accounts []account.Account, cfg *config.Config, scanner *bufio.Sc
 		}
 
 		fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
-		pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, modArgs...)
+		pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, launchArgs...)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 啟動失敗：%v\n", acc.DisplayName, err)
 			continue
@@ -366,8 +373,9 @@ func handleCreatedAccountsFile(cfgDir, accountsFile string) {
 	fmt.Println("  ✔ 已自動建立帳號設定檔 accounts.csv。")
 	fmt.Printf("  建立位置：%s\n", accountsFile)
 	fmt.Println("  工具已先幫你放入兩筆範例資料，請把它們改成你自己的 Battle.net 帳號。")
-	fmt.Println("  CSV 格式：Email,Password,DisplayName")
-	fmt.Println("  範例：your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品)")
+	fmt.Println("  CSV 格式：Email,Password,DisplayName,LaunchFlags")
+	fmt.Println("  範例：your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),")
+	fmt.Println("  LaunchFlags 可先留空；之後可回到工具主選單用 f 再設定各帳號的啟動旗標。")
 	fmt.Println()
 	fmt.Println("  按任意鍵後，程式會結束並自動開啟資料目錄，方便你直接修改剛建立好的 accounts.csv。")
 
@@ -628,6 +636,354 @@ func selectLaunchMod(d2rPath string, scanner *bufio.Scanner) ([]string, bool) {
 		fmt.Printf("  本次使用 mod：%s\n", modName)
 		return mods.BuildLaunchArgs(modName), true
 	}
+}
+
+func accountLaunchArgs(acc account.Account, modArgs []string) []string {
+	args := make([]string, 0, len(modArgs)+4)
+	args = append(args, modArgs...)
+	args = append(args, account.LaunchArgs(acc.LaunchFlags)...)
+	return args
+}
+
+func setupAccountLaunchFlags(accounts []account.Account, accountsFile string, scanner *bufio.Scanner) {
+	if len(accounts) == 0 {
+		fmt.Println("  目前沒有可設定的帳號。")
+		fmt.Println()
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("  === 帳號啟動 flag 設定 ===")
+	printAccountLaunchFlagSummary(accounts)
+	fmt.Println()
+	fmt.Println("  [1] 設定 flag")
+	fmt.Println("  [2] 取消 flag")
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
+
+	if !scanner.Scan() {
+		return
+	}
+	choice := strings.TrimSpace(scanner.Text())
+	if isMenuNav(choice) != "" {
+		return
+	}
+
+	var setMode bool
+	var actionLabel string
+	switch choice {
+	case "1":
+		setMode = true
+		actionLabel = "設定"
+	case "2":
+		setMode = false
+		actionLabel = "取消"
+	default:
+		fmt.Println("  無效輸入，請重試。")
+		fmt.Println()
+		return
+	}
+
+	fmt.Println()
+	fmt.Printf("  這次要如何%s flag？\n", actionLabel)
+	fmt.Println("  [1] 以 flag 為維度")
+	fmt.Println("  [2] 以帳號為維度")
+	printSubMenuNav()
+	fmt.Print("  > 請選擇：")
+
+	if !scanner.Scan() {
+		return
+	}
+	modeChoice := strings.TrimSpace(scanner.Text())
+	if isMenuNav(modeChoice) != "" {
+		return
+	}
+
+	switch modeChoice {
+	case "1":
+		configureFlagsByFlag(accounts, accountsFile, scanner, setMode)
+	case "2":
+		configureFlagsByAccount(accounts, accountsFile, scanner, setMode)
+	default:
+		fmt.Println("  無效輸入，請重試。")
+		fmt.Println()
+	}
+}
+
+func configureFlagsByFlag(accounts []account.Account, accountsFile string, scanner *bufio.Scanner, setMode bool) {
+	options := account.LaunchFlagOptions()
+	fmt.Println()
+	fmt.Println("  可用 flag：")
+	printLaunchFlagOptions(options)
+	printSubMenuNav()
+	fmt.Print("  > 請選擇 flag 編號：")
+
+	if !scanner.Scan() {
+		return
+	}
+	input := strings.TrimSpace(scanner.Text())
+	if isMenuNav(input) != "" {
+		return
+	}
+
+	selected, err := strconv.Atoi(input)
+	if err != nil || selected < 1 || selected > len(options) {
+		fmt.Println("  無效的 flag 編號。")
+		fmt.Println()
+		return
+	}
+
+	option := options[selected-1]
+	actionLabel := flagActionLabel(setMode)
+	fmt.Println()
+	fmt.Printf("  請輸入要%s「%s」的帳號編號，可用 2,4,6 或 1-3,5-7：\n", actionLabel, option.Name)
+	printAccountLaunchFlagSummary(accounts)
+	printSubMenuNav()
+	fmt.Print("  > 請輸入：")
+
+	if !scanner.Scan() {
+		return
+	}
+	input = strings.TrimSpace(scanner.Text())
+	if isMenuNav(input) != "" {
+		return
+	}
+
+	accountIndexes, err := parseSelectionInput(input, len(accounts))
+	if err != nil {
+		fmt.Printf("  解析失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+
+	fmt.Println()
+	fmt.Printf("  即將%s以下帳號的 flag「%s」：\n", actionLabel, option.Name)
+	for _, idx := range accountIndexes {
+		acc := accounts[idx]
+		fmt.Printf("  [%d] %s (%s)  目前：%s\n", idx+1, acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags))
+	}
+	if !confirmChanges(scanner) {
+		fmt.Println("  已取消。")
+		fmt.Println()
+		return
+	}
+
+	if err := applyLaunchFlagChanges(accounts, accountsFile, accountIndexes, option.Bit, setMode); err != nil {
+		fmt.Printf("  儲存失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+
+	fmt.Printf("  ✔ 已完成%s。\n", actionLabel)
+	fmt.Println()
+}
+
+func configureFlagsByAccount(accounts []account.Account, accountsFile string, scanner *bufio.Scanner, setMode bool) {
+	options := account.LaunchFlagOptions()
+	fmt.Println()
+	fmt.Println("  帳號列表：")
+	printAccountLaunchFlagSummary(accounts)
+	printSubMenuNav()
+	fmt.Print("  > 請選擇帳號編號：")
+
+	if !scanner.Scan() {
+		return
+	}
+	input := strings.TrimSpace(scanner.Text())
+	if isMenuNav(input) != "" {
+		return
+	}
+
+	selected, err := strconv.Atoi(input)
+	if err != nil || selected < 1 || selected > len(accounts) {
+		fmt.Println("  無效的帳號編號。")
+		fmt.Println()
+		return
+	}
+
+	accountIndex := selected - 1
+	acc := accounts[accountIndex]
+	actionLabel := flagActionLabel(setMode)
+	fmt.Println()
+	fmt.Printf("  請輸入要對帳號「%s」%s的 flag 編號，可用 1,3 或 2-4：\n", acc.DisplayName, actionLabel)
+	printLaunchFlagOptions(options)
+	printSubMenuNav()
+	fmt.Print("  > 請輸入：")
+
+	if !scanner.Scan() {
+		return
+	}
+	input = strings.TrimSpace(scanner.Text())
+	if isMenuNav(input) != "" {
+		return
+	}
+
+	flagIndexes, err := parseSelectionInput(input, len(options))
+	if err != nil {
+		fmt.Printf("  解析失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+
+	mask := selectedLaunchFlagMask(flagIndexes, options)
+	fmt.Println()
+	fmt.Printf("  即將對帳號「%s」%s以下 flag：\n", acc.DisplayName, actionLabel)
+	for _, idx := range flagIndexes {
+		option := options[idx]
+		fmt.Printf("  [%d] %s（%s）\n", idx+1, option.Name, option.Description)
+	}
+	if !confirmChanges(scanner) {
+		fmt.Println("  已取消。")
+		fmt.Println()
+		return
+	}
+
+	if err := applyLaunchFlagChanges(accounts, accountsFile, []int{accountIndex}, mask, setMode); err != nil {
+		fmt.Printf("  儲存失敗：%v\n", err)
+		fmt.Println()
+		return
+	}
+
+	fmt.Printf("  ✔ 已完成%s。\n", actionLabel)
+	fmt.Println()
+}
+
+func applyLaunchFlagChanges(accounts []account.Account, accountsFile string, accountIndexes []int, mask uint32, setMode bool) error {
+	if setMode && hasConflictingLaunchFlags(mask) {
+		return fmt.Errorf("關閉聲音與背景保留聲音不可同時設定，請分開操作")
+	}
+
+	previous := make(map[int]uint32, len(accountIndexes))
+	for _, idx := range accountIndexes {
+		previous[idx] = accounts[idx].LaunchFlags
+		if setMode {
+			accounts[idx].LaunchFlags |= mask
+			accounts[idx].LaunchFlags = normalizeLaunchFlags(accounts[idx].LaunchFlags, mask)
+			continue
+		}
+		accounts[idx].LaunchFlags &^= mask
+	}
+
+	if err := account.SaveAccounts(accountsFile, accounts); err != nil {
+		for idx, flags := range previous {
+			accounts[idx].LaunchFlags = flags
+		}
+		return err
+	}
+	return nil
+}
+
+func printAccountLaunchFlagSummary(accounts []account.Account) {
+	for i, acc := range accounts {
+		fmt.Printf("  [%d] %s (%s)  flag：%s\n", i+1, acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags))
+	}
+}
+
+func printLaunchFlagOptions(options []account.LaunchFlagOption) {
+	for i, option := range options {
+		fmt.Printf("  [%d] %s", i+1, option.Name)
+		if option.Description != "" {
+			fmt.Printf("（%s）", option.Description)
+		}
+		if option.Experimental {
+			fmt.Print("，效果依版本而定")
+		}
+		fmt.Println()
+	}
+}
+
+func parseSelectionInput(input string, max int) ([]int, error) {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return nil, fmt.Errorf("請至少輸入一個編號")
+	}
+
+	selected := make(map[int]bool)
+	for _, part := range strings.Split(input, ",") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			return nil, fmt.Errorf("輸入中有空白項目")
+		}
+
+		if strings.Contains(part, "-") {
+			rangeParts := strings.Split(part, "-")
+			if len(rangeParts) != 2 {
+				return nil, fmt.Errorf("無法辨識區間 %q", part)
+			}
+			start, err := strconv.Atoi(strings.TrimSpace(rangeParts[0]))
+			if err != nil {
+				return nil, fmt.Errorf("無法辨識區間起點 %q", part)
+			}
+			end, err := strconv.Atoi(strings.TrimSpace(rangeParts[1]))
+			if err != nil {
+				return nil, fmt.Errorf("無法辨識區間終點 %q", part)
+			}
+			if start > end {
+				return nil, fmt.Errorf("區間 %q 起點不可大於終點", part)
+			}
+			if start < 1 || end > max {
+				return nil, fmt.Errorf("區間 %q 超出可選範圍 1-%d", part, max)
+			}
+			for i := start; i <= end; i++ {
+				selected[i-1] = true
+			}
+			continue
+		}
+
+		value, err := strconv.Atoi(part)
+		if err != nil {
+			return nil, fmt.Errorf("無法辨識編號 %q", part)
+		}
+		if value < 1 || value > max {
+			return nil, fmt.Errorf("編號 %d 超出可選範圍 1-%d", value, max)
+		}
+		selected[value-1] = true
+	}
+
+	indexes := make([]int, 0, len(selected))
+	for idx := range selected {
+		indexes = append(indexes, idx)
+	}
+	sort.Ints(indexes)
+	return indexes, nil
+}
+
+func selectedLaunchFlagMask(flagIndexes []int, options []account.LaunchFlagOption) uint32 {
+	var mask uint32
+	for _, idx := range flagIndexes {
+		mask |= options[idx].Bit
+	}
+	return mask
+}
+
+func hasConflictingLaunchFlags(mask uint32) bool {
+	return mask&account.LaunchFlagNoSound != 0 && mask&account.LaunchFlagSoundInBackground != 0
+}
+
+func normalizeLaunchFlags(flags uint32, changedMask uint32) uint32 {
+	if changedMask&account.LaunchFlagNoSound != 0 {
+		flags &^= account.LaunchFlagSoundInBackground
+	}
+	if changedMask&account.LaunchFlagSoundInBackground != 0 {
+		flags &^= account.LaunchFlagNoSound
+	}
+	return flags
+}
+
+func confirmChanges(scanner *bufio.Scanner) bool {
+	fmt.Print("  > 確認套用？(Y/n)：")
+	if !scanner.Scan() {
+		return false
+	}
+	answer := strings.ToLower(strings.TrimSpace(scanner.Text()))
+	return answer == "" || answer == "y"
+}
+
+func flagActionLabel(setMode bool) string {
+	if setMode {
+		return "設定"
+	}
+	return "取消"
 }
 
 func setupSwitcher(cfg *config.Config, scanner *bufio.Scanner) {

@@ -1,7 +1,14 @@
 # Multiboxing 使用導覽
 
 > 這份文件專門說明玩家實際怎麼用多開啟動器。  
-> 如果你只想快速上手，先看 [README.md](../README.md)；如果你想看底層原理，再看 [multiboxing-technical-guide.md](multiboxing-technical-guide.md)。
+> 如果你只想快速上手，先看 [README.md](../README.md)；如果你想先看整份多開文件怎麼分工，讀 [multiboxing-index.md](multiboxing-index.md)；如果你想看底層原理，再看 [multiboxing-technical-guide.md](multiboxing-technical-guide.md)。
+
+## 文件導覽
+
+- 新手快速開始：[README.md](../README.md)
+- 多開文件總覽：[multiboxing-index.md](multiboxing-index.md)
+- 技術原理：[multiboxing-technical-guide.md](multiboxing-technical-guide.md)
+- D2R 參數參考：[D2R_PARAMS.md](D2R_PARAMS.md)
 
 ## 這份文件會講什麼
 
@@ -45,9 +52,9 @@
 範例內容：
 
 ```csv
-Email,Password,DisplayName
-your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品)
-your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
+Email,Password,DisplayName,LaunchFlags
+your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),
+your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 ```
 
 欄位說明：
@@ -57,6 +64,19 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 | `Email` | ✅ | Battle.net 登入信箱 |
 | `Password` | ✅ | 帳號密碼；第一次啟動後會自動改寫成加密字串 |
 | `DisplayName` | ✅ | 主選單顯示名稱，也是視窗標題後綴 |
+| `LaunchFlags` | 可先留空 | 這個帳號額外要帶的啟動旗標 bitflag；一般玩家可先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定 |
+
+`LaunchFlags` 目前常見對應如下：
+
+| 旗標 | 用途 |
+|------|------|
+| `-ns` | 關閉聲音 |
+| `-sndbkg` | 背景保留聲音 |
+| `-lq` | 低畫質 / Large Font Mode（效果依版本而定） |
+| `-skiplogovideo` | 跳過 Logo 影片 |
+| `-norumble` | 停用手把震動 |
+
+更完整的參數說明、來源與不確定性標註，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)。
 
 ### 密碼加密會發生什麼事
 
@@ -113,6 +133,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
   <數字>  啟動指定帳號
   0       離線遊玩（可選 mod，不需帳密）
   a       啟動所有帳號（可選 mod，只啟動未啟動的）
+  f       設定帳號啟動 flag
   p       選擇 D2R.exe 路徑
   s       視窗切換設定
   r       重新整理狀態
@@ -122,7 +143,28 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 
 `[未啟動]` / `[已啟動]` 會根據目前視窗狀態更新。
 
-注意：這個狀態判斷是用 `account.csv` 裡的 `DisplayName` 去對應 `D2R-<DisplayName>` 視窗標題。如果 D2R 還在執行中時，你先關掉 launcher 再去修改 `DisplayName`，重新開回來後這裡的狀態偵測就可能暫時不正確。
+注意：這個狀態判斷是用 `accounts.csv` 裡的 `DisplayName` 去對應 `D2R-<DisplayName>` 視窗標題。如果 D2R 還在執行中時，你先關掉 launcher 再去修改 `DisplayName`，重新開回來後這裡的狀態偵測就可能暫時不正確。若你已經改了名稱，可以先在主選單輸入 `r` 重新整理狀態；更穩妥的做法，仍是等所有遊戲視窗關閉後再修改 `DisplayName`。
+
+## 設定帳號啟動 flag
+
+在主選單輸入 `f` 後，工具會先列出目前每個帳號已啟用的 flag 摘要，接著你可以：
+
+1. 先選這次要「設定 flag」還是「取消 flag」
+2. 再選操作維度：
+   - 以 flag 為維度：先選某個 flag，再輸入要套用到哪些帳號
+   - 以帳號為維度：先選某個帳號，再輸入要調整哪些 flag
+3. 帳號或 flag 編號都支援：
+   - `2,4,6`
+   - `1-3,5-7`
+4. 工具會先把解析後的結果重新列出來給你確認，確認後才會回寫到 `accounts.csv`
+
+注意：
+
+- `5-3` 這種反向區間會直接被視為錯誤，不會套用
+- 這個功能只會改 `LaunchFlags`；帳號、密碼、DisplayName 仍建議先手動在 `accounts.csv` 裡建立
+- `-lq` 在最新版本仍可列為候選，但本文與工具介面都會標註「效果依版本而定」
+- 如果你手動把 `LaunchFlags` 填成亂數、負數或文字，工具會在讀取時自動 fallback 成 `0`，並把 CSV 回寫成乾淨值
+- 如果你想知道某個 flag 對應的 D2R 參數實際是什麼，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)
 
 ## 啟動單一帳號
 
@@ -131,7 +173,8 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 3. 如果這個帳號對應的 `D2R-<DisplayName>` 視窗已經存在，工具會直接阻止重複啟動，避免同一帳號被連續再開一次
 4. 選擇區域：`1=NA`、`2=EU`、`3=Asia`
 5. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具也會讓你選擇這次單帳號啟動要套用哪一個 mod
-6. 工具會自動：
+6. 如果這個帳號在 `LaunchFlags` 已設定額外旗標，工具會一併帶入這些啟動參數
+7. 工具會自動：
    - 解密帳號密碼
    - 啟動 D2R
    - 嘗試關閉單實例鎖的 Event Handle
@@ -170,7 +213,8 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 4. 確定還有待啟動帳號時，才會再讓你選區域
 5. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具會先讓你選擇這次批次啟動要套用哪一個 mod
 6. 每次啟動時只會處理上面標示為 `[未啟動]` 的帳號，不會把等待時間浪費在已經開啟的帳號上
-7. 每次啟動之間只會在「下一個真的還沒啟動的帳號」之前等待 `launch_delay` 秒
+7. 每個帳號若已設定自己的 `LaunchFlags`，工具也會在該帳號啟動時一併帶入
+8. 每次啟動之間只會在「下一個真的還沒啟動的帳號」之前等待 `launch_delay` 秒
 
 ## 離線模式
 
@@ -253,6 +297,8 @@ C:\Program Files (x86)\Diablo II Resurrected\mods\
 
 ## 延伸閱讀
 
+- [multiboxing-index.md](multiboxing-index.md) — 多開文件總覽與閱讀順序
 - [README.md](../README.md) — 新手快速開始
+- [D2R_PARAMS.md](D2R_PARAMS.md) — `LaunchFlags`、`-uid osi`、mod 參數參考
 - [switcher-usage-guide.md](switcher-usage-guide.md) — 視窗切換功能教學
 - [multiboxing-technical-guide.md](multiboxing-technical-guide.md) — multiboxing 技術原理

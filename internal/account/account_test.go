@@ -15,8 +15,8 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 
 	// 建立測試 CSV
 	accounts := []Account{
-		{Email: "test1@email.com", Password: "pass1", DisplayName: "Account1"},
-		{Email: "test2@email.com", Password: "pass2", DisplayName: "Account2"},
+		{Email: "test1@email.com", Password: "pass1", DisplayName: "Account1", LaunchFlags: LaunchFlagNoSound},
+		{Email: "test2@email.com", Password: "pass2", DisplayName: "Account2", LaunchFlags: LaunchFlagLowQuality | LaunchFlagSkipLogoVideo},
 	}
 
 	err := SaveAccounts(csvPath, accounts)
@@ -34,9 +34,11 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 	assert.Equal(t, "test1@email.com", loaded[0].Email)
 	assert.Equal(t, "pass1", loaded[0].Password)
 	assert.Equal(t, "Account1", loaded[0].DisplayName)
+	assert.Equal(t, uint32(LaunchFlagNoSound), loaded[0].LaunchFlags)
 
 	assert.Equal(t, "test2@email.com", loaded[1].Email)
 	assert.Equal(t, "Account2", loaded[1].DisplayName)
+	assert.Equal(t, uint32(LaunchFlagLowQuality|LaunchFlagSkipLogoVideo), loaded[1].LaunchFlags)
 }
 
 func TestEnsureAccountsFileCreatesTemplate(t *testing.T) {
@@ -81,12 +83,43 @@ func TestLoadAccounts_EmptyFile(t *testing.T) {
 	dir := t.TempDir()
 	csvPath := filepath.Join(dir, "accounts.csv")
 
-	err := os.WriteFile(csvPath, []byte("Email,Password,DisplayName\n"), 0644)
+	err := os.WriteFile(csvPath, []byte("Email,Password,DisplayName,LaunchFlags\n"), 0644)
 	assert.NoError(t, err)
 
 	_, err = LoadAccounts(csvPath)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "empty")
+}
+
+func TestLoadAccounts_BackwardCompatibleWithoutLaunchFlagsColumn(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+
+	err := os.WriteFile(csvPath, append(utf8BOM, []byte("Email,Password,DisplayName\nlegacy@example.com,plain,Legacy\n")...), 0o644)
+	assert.NoError(t, err)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Len(t, loaded, 1)
+	assert.Equal(t, uint32(0), loaded[0].LaunchFlags)
+}
+
+func TestLoadAccounts_InvalidLaunchFlagsFallsBackToZeroAndRewritesFile(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+
+	content := append(utf8BOM, []byte("Email,Password,DisplayName,LaunchFlags\nlegacy@example.com,plain,Legacy,abc\n")...)
+	err := os.WriteFile(csvPath, content, 0o644)
+	assert.NoError(t, err)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Len(t, loaded, 1)
+	assert.Equal(t, uint32(0), loaded[0].LaunchFlags)
+
+	data, err := os.ReadFile(csvPath)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), "legacy@example.com,plain,Legacy,0")
 }
 
 func TestIsPasswordEncrypted(t *testing.T) {
