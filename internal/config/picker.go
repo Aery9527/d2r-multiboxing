@@ -27,7 +27,7 @@ func PickD2RPath(currentPath string) (string, error) {
 		return "", nil
 	}
 
-	if err := validateSelectedD2RPath(selectedPath); err != nil {
+	if err := ValidateD2RPath(selectedPath); err != nil {
 		return "", err
 	}
 	return selectedPath, nil
@@ -70,6 +70,11 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
 
 func powerShellSingleQuote(value string) string {
 	return strings.ReplaceAll(value, "'", "''")
+}
+
+// ValidateD2RPath verifies that the configured path points to an existing D2R.exe file.
+func ValidateD2RPath(path string) error {
+	return validateSelectedD2RPath(path)
 }
 
 func validateSelectedD2RPath(path string) error {

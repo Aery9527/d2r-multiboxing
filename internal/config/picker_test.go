@@ -19,6 +19,11 @@ func TestValidateSelectedD2RPath(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestValidateD2RPathRejectsMissingPath(t *testing.T) {
+	err := ValidateD2RPath(`C:\missing\D2R.exe`)
+	assert.ErrorContains(t, err, "selected D2R.exe does not exist")
+}
+
 func TestValidateSelectedD2RPathRejectsNonD2RExecutable(t *testing.T) {
 	tmpDir := t.TempDir()
 	exePath := filepath.Join(tmpDir, "not-d2r.exe")

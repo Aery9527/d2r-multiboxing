@@ -36,6 +36,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 - `enumerator.go` 只對 `Event` 類型查詢 object name，避免對 pipe/file handle 查詢造成 hang。
 - 啟動後仍需要等待遊戲初始化，再執行 `CloseHandlesByName()` 與 `RenameWindow()`。
 - 不要把玩家導回手動修改 `config.json`；像 `d2r_path` 這類玩家可見設定，優先提供 CLI 內可操作流程。
+- 若 `d2r_path` 已失效，單帳號 / 批次 / 離線啟動都應先攔下來，明確提示找不到 `D2R.exe`，並直接提供與主選單 `p` 相同的設定入口。
 - 若調整帳號或設定流程，要同步更新 [README.md](../../../README.md) 與 [docs/multiboxing-usage-guide.md](../../../docs/multiboxing-usage-guide.md)。
 - 若改動會影響視窗標題或前景行為，要檢查是否連帶影響 switcher。
 

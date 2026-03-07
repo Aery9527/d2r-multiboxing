@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bufio"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"d2rhl/internal/account"
+	"d2rhl/internal/config"
 	"d2rhl/internal/d2r"
 
 	"github.com/stretchr/testify/assert"
@@ -43,4 +48,51 @@ func TestPendingBatchAccountsReturnsEmptyWhenAllRunning(t *testing.T) {
 
 func TestFormatLaunchDelayMessage(t *testing.T) {
 	assert.Equal(t, "  等待 30 秒後啟動下一個帳號：VoidLife", formatLaunchDelayMessage(30, "VoidLife"))
+}
+
+func TestEnsureLaunchReadyD2RPathWithSetupAcceptsExistingPath(t *testing.T) {
+	tmpDir := t.TempDir()
+	d2rPath := filepath.Join(tmpDir, "D2R.exe")
+	assert.NoError(t, os.WriteFile(d2rPath, []byte("binary"), 0o600))
+
+	cfg := &config.Config{D2RPath: d2rPath}
+	called := false
+	scanner := bufio.NewScanner(strings.NewReader(""))
+
+	ok := ensureLaunchReadyD2RPathWithSetup(cfg, scanner, func(*config.Config) bool {
+		called = true
+		return true
+	})
+
+	assert.True(t, ok)
+	assert.False(t, called)
+}
+
+func TestEnsureLaunchReadyD2RPathWithSetupRunsPathSetup(t *testing.T) {
+	tmpDir := t.TempDir()
+	validPath := filepath.Join(tmpDir, "D2R.exe")
+	assert.NoError(t, os.WriteFile(validPath, []byte("binary"), 0o600))
+
+	cfg := &config.Config{D2RPath: filepath.Join(tmpDir, "missing", "D2R.exe")}
+	scanner := bufio.NewScanner(strings.NewReader("p\n"))
+
+	ok := ensureLaunchReadyD2RPathWithSetup(cfg, scanner, func(cfg *config.Config) bool {
+		cfg.D2RPath = validPath
+		return true
+	})
+
+	assert.True(t, ok)
+	assert.Equal(t, validPath, cfg.D2RPath)
+}
+
+func TestEnsureLaunchReadyD2RPathWithSetupAllowsBackNavigation(t *testing.T) {
+	cfg := &config.Config{D2RPath: `C:\missing\D2R.exe`}
+	scanner := bufio.NewScanner(strings.NewReader("b\n"))
+
+	ok := ensureLaunchReadyD2RPathWithSetup(cfg, scanner, func(*config.Config) bool {
+		t.Fatal("setup should not be called")
+		return false
+	})
+
+	assert.False(t, ok)
 }

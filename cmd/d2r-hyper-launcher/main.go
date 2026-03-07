@@ -120,10 +120,10 @@ func main() {
 			}
 			continue
 		case "0":
-			launchOffline(cfg.D2RPath, scanner)
+			launchOffline(cfg, scanner)
 			continue
 		case "a":
-			launchAll(accounts, cfg.D2RPath, cfg.LaunchDelay, scanner)
+			launchAll(accounts, cfg, scanner)
 			continue
 		case "p":
 			setupD2RPath(cfg)
@@ -138,7 +138,7 @@ func main() {
 				continue
 			}
 			acc := &accounts[id-1]
-			launchAccount(acc, cfg.D2RPath, scanner)
+			launchAccount(acc, cfg, scanner)
 		}
 	}
 }
@@ -164,7 +164,11 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("--------------------------------------------")
 }
 
-func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner) {
+func launchAccount(acc *account.Account, cfg *config.Config, scanner *bufio.Scanner) {
+	if !ensureLaunchReadyD2RPath(cfg, scanner) {
+		return
+	}
+
 	// 選擇區域
 	fmt.Println()
 	fmt.Println("  選擇區域 (1=NA, 2=EU, 3=Asia)")
@@ -193,7 +197,7 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 	fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
 
 	// 啟動 D2R
-	pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address)
+	pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
@@ -214,7 +218,11 @@ func launchAccount(acc *account.Account, d2rPath string, scanner *bufio.Scanner)
 	fmt.Println()
 }
 
-func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scanner *bufio.Scanner) {
+func launchAll(accounts []account.Account, cfg *config.Config, scanner *bufio.Scanner) {
+	if !ensureLaunchReadyD2RPath(cfg, scanner) {
+		return
+	}
+
 	fmt.Println()
 	fmt.Println("  選擇區域 (1=NA, 2=EU, 3=Asia)")
 	printSubMenuNav()
@@ -232,7 +240,7 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		return
 	}
 
-	modArgs, ok := selectLaunchMod(d2rPath, scanner)
+	modArgs, ok := selectLaunchMod(cfg.D2RPath, scanner)
 	if !ok {
 		return
 	}
@@ -262,7 +270,7 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		}
 
 		fmt.Printf("  正在啟動 %s (%s)...\n", acc.DisplayName, region.Name)
-		pid, err := process.LaunchD2R(d2rPath, acc.Email, password, region.Address, modArgs...)
+		pid, err := process.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, modArgs...)
 		if err != nil {
 			fmt.Printf("  ⚠ 帳號 %s 啟動失敗：%v\n", acc.DisplayName, err)
 			continue
@@ -280,9 +288,9 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 
 		renameLaunchedWindow(pid, acc.DisplayName)
 
-		if launchDelay > 0 && i+1 < len(pendingAccounts) {
-			fmt.Println(formatLaunchDelayMessage(launchDelay, pendingAccounts[i+1].DisplayName))
-			time.Sleep(time.Duration(launchDelay) * time.Second)
+		if cfg.LaunchDelay > 0 && i+1 < len(pendingAccounts) {
+			fmt.Println(formatLaunchDelayMessage(cfg.LaunchDelay, pendingAccounts[i+1].DisplayName))
+			time.Sleep(time.Duration(cfg.LaunchDelay) * time.Second)
 		}
 	}
 	fmt.Println()
@@ -402,17 +410,21 @@ func isMenuNav(input string) string {
 	}
 }
 
-func launchOffline(d2rPath string, scanner *bufio.Scanner) {
+func launchOffline(cfg *config.Config, scanner *bufio.Scanner) {
+	if !ensureLaunchReadyD2RPath(cfg, scanner) {
+		return
+	}
+
 	fmt.Println()
 	fmt.Println("  === 離線遊玩模式 ===")
 
-	modArgs, ok := selectLaunchMod(d2rPath, scanner)
+	modArgs, ok := selectLaunchMod(cfg.D2RPath, scanner)
 	if !ok {
 		return
 	}
 
 	fmt.Println("  正在啟動 D2R（離線模式）...")
-	pid, err := process.LaunchD2ROffline(d2rPath, modArgs...)
+	pid, err := process.LaunchD2ROffline(cfg.D2RPath, modArgs...)
 	if err != nil {
 		fmt.Printf("  啟動失敗：%v\n", err)
 		return
@@ -421,7 +433,44 @@ func launchOffline(d2rPath string, scanner *bufio.Scanner) {
 	fmt.Println()
 }
 
-func setupD2RPath(cfg *config.Config) {
+func ensureLaunchReadyD2RPath(cfg *config.Config, scanner *bufio.Scanner) bool {
+	return ensureLaunchReadyD2RPathWithSetup(cfg, scanner, setupD2RPath)
+}
+
+func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, scanner *bufio.Scanner, setup func(*config.Config) bool) bool {
+	for {
+		err := config.ValidateD2RPath(cfg.D2RPath)
+		if err == nil {
+			return true
+		}
+
+		fmt.Println()
+		fmt.Printf("  ⚠ 找不到可啟動的 D2R.exe：%s\n", cfg.D2RPath)
+		fmt.Printf("  原因：%v\n", err)
+		fmt.Println("  請先設定正確的 D2R.exe 路徑，完成後再繼續啟動。")
+		fmt.Println("  p       立即設定 D2R.exe 路徑")
+		printSubMenuNav()
+		fmt.Print("  > 請選擇：")
+		if !scanner.Scan() {
+			return false
+		}
+
+		input := strings.TrimSpace(scanner.Text())
+		if nav := isMenuNav(input); nav != "" {
+			return false
+		}
+		if strings.EqualFold(input, "p") {
+			if !setup(cfg) {
+				return false
+			}
+			continue
+		}
+
+		fmt.Println("  無效輸入，請輸入 p / b / h / q。")
+	}
+}
+
+func setupD2RPath(cfg *config.Config) bool {
 	fmt.Println()
 	fmt.Println("  === 設定 D2R 路徑 ===")
 	fmt.Println("  即將開啟 Windows 檔案選擇視窗，請選擇 D2R.exe。")
@@ -430,23 +479,24 @@ func setupD2RPath(cfg *config.Config) {
 	if err != nil {
 		fmt.Printf("  ⚠ D2R 路徑設定失敗：%v\n", err)
 		fmt.Println()
-		return
+		return false
 	}
 	if selectedPath == "" {
 		fmt.Println("  已取消。")
 		fmt.Println()
-		return
+		return false
 	}
 
 	cfg.D2RPath = selectedPath
 	if err := config.Save(cfg); err != nil {
 		fmt.Printf("  ⚠ 設定儲存失敗：%v\n", err)
 		fmt.Println()
-		return
+		return false
 	}
 
 	fmt.Printf("  ✔ 已更新 D2R 路徑：%s\n", cfg.D2RPath)
 	fmt.Println()
+	return true
 }
 
 func renameLaunchedWindow(pid uint32, displayName string) {

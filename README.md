@@ -68,7 +68,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材)
 %USERPROFILE%\.d2r-hyper-launcher\config.json
 ```
 
-如果你的 D2R 不在預設路徑 `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`，請在主選單輸入 `p`，工具會直接開啟 Windows 檔案選擇視窗，讓你選擇正確的 `D2R.exe`。一般玩家不需要手動修改 `config.json`。
+如果你的 D2R 不在預設路徑 `C:\Program Files (x86)\Diablo II Resurrected\D2R.exe`，請在主選單輸入 `p`，工具會直接開啟 Windows 檔案選擇視窗，讓你選擇正確的 `D2R.exe`。如果你直接按 `<數字>`、`a` 或 `0` 啟動時發現目前路徑失效，工具也會先攔下來並立即提供同樣的 `p` 設定流程。一般玩家不需要手動修改 `config.json`。
 
 ### 5. 主選單最常用功能
 
