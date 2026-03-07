@@ -4,35 +4,41 @@ import (
 	"testing"
 
 	"d2rhl/internal/account"
+	"d2rhl/internal/d2r"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNextPendingAccountDisplayNameSkipsRunningAccounts(t *testing.T) {
+func TestPendingBatchAccountsSkipsRunningAccounts(t *testing.T) {
 	accounts := []account.Account{
 		{DisplayName: "Alpha"},
 		{DisplayName: "Bravo"},
 		{DisplayName: "Charlie"},
 	}
+	runningTitles := map[string]bool{
+		d2r.WindowTitle("Bravo"): true,
+	}
 
-	next := nextPendingAccountDisplayName(accounts, 1, func(displayName string) bool {
-		return displayName == "Bravo"
-	})
+	pending := pendingBatchAccounts(accounts, runningTitles)
 
-	assert.Equal(t, "Charlie", next)
+	assert.Len(t, pending, 2)
+	assert.Equal(t, "Alpha", pending[0].DisplayName)
+	assert.Equal(t, "Charlie", pending[1].DisplayName)
 }
 
-func TestNextPendingAccountDisplayNameReturnsEmptyWhenNoPendingAccount(t *testing.T) {
+func TestPendingBatchAccountsReturnsEmptyWhenAllRunning(t *testing.T) {
 	accounts := []account.Account{
 		{DisplayName: "Alpha"},
 		{DisplayName: "Bravo"},
 	}
+	runningTitles := map[string]bool{
+		d2r.WindowTitle("Alpha"): true,
+		d2r.WindowTitle("Bravo"): true,
+	}
 
-	next := nextPendingAccountDisplayName(accounts, 1, func(string) bool {
-		return true
-	})
+	pending := pendingBatchAccounts(accounts, runningTitles)
 
-	assert.Empty(t, next)
+	assert.Empty(t, pending)
 }
 
 func TestFormatLaunchDelayMessage(t *testing.T) {

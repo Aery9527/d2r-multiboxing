@@ -233,14 +233,23 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 		return
 	}
 
-	for i := range accounts {
-		acc := &accounts[i]
+	runningTitles := runningAccountWindowTitles()
+	pendingAccounts := pendingBatchAccounts(accounts, runningTitles)
+	if len(pendingAccounts) == 0 {
+		fmt.Println("  所有帳號都已在執行中。")
+		fmt.Println()
+		return
+	}
 
-		// 已有視窗存在則跳過
-		if process.FindWindowByTitle(d2r.WindowTitle(acc.DisplayName)) {
-			fmt.Printf("  ⏭ %s 已在執行中，跳過\n", acc.DisplayName)
-			continue
+	for i := range accounts {
+		if runningTitles[d2r.WindowTitle(accounts[i].DisplayName)] {
+			fmt.Printf("  ⏭ %s 已在執行中，跳過\n", accounts[i].DisplayName)
 		}
+	}
+
+	fmt.Printf("  已預先掃描目前執行中的 D2R 視窗，本次將啟動 %d 個尚未啟動的帳號。\n", len(pendingAccounts))
+
+	for i, acc := range pendingAccounts {
 
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
@@ -267,11 +276,8 @@ func launchAll(accounts []account.Account, d2rPath string, launchDelay int, scan
 
 		renameLaunchedWindow(pid, acc.DisplayName)
 
-		nextDisplayName := nextPendingAccountDisplayName(accounts, i+1, func(displayName string) bool {
-			return process.FindWindowByTitle(d2r.WindowTitle(displayName))
-		})
-		if launchDelay > 0 && nextDisplayName != "" {
-			fmt.Println(formatLaunchDelayMessage(launchDelay, nextDisplayName))
+		if launchDelay > 0 && i+1 < len(pendingAccounts) {
+			fmt.Println(formatLaunchDelayMessage(launchDelay, pendingAccounts[i+1].DisplayName))
 			time.Sleep(time.Duration(launchDelay) * time.Second)
 		}
 	}
@@ -413,16 +419,26 @@ func renameLaunchedWindow(pid uint32, displayName string) {
 	fmt.Printf("  ✔ 視窗已重命名為 \"%s\"\n", d2r.WindowTitle(displayName))
 }
 
-func nextPendingAccountDisplayName(accounts []account.Account, start int, isRunning func(string) bool) string {
-	for i := start; i < len(accounts); i++ {
-		displayName := accounts[i].DisplayName
-		if isRunning(displayName) {
-			continue
-		}
-		return displayName
+func runningAccountWindowTitles() map[string]bool {
+	titles := process.FindWindowTitlesByPrefix(d2r.WindowTitlePrefix)
+	running := make(map[string]bool, len(titles))
+	for _, title := range titles {
+		running[title] = true
 	}
 
-	return ""
+	return running
+}
+
+func pendingBatchAccounts(accounts []account.Account, runningTitles map[string]bool) []*account.Account {
+	pending := make([]*account.Account, 0, len(accounts))
+	for i := range accounts {
+		if runningTitles[d2r.WindowTitle(accounts[i].DisplayName)] {
+			continue
+		}
+		pending = append(pending, &accounts[i])
+	}
+
+	return pending
 }
 
 func formatLaunchDelayMessage(delaySeconds int, nextDisplayName string) string {

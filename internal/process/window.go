@@ -124,6 +124,30 @@ func FindWindowsByTitlePrefix(prefix string) []windows.Handle {
 	return handles
 }
 
+// FindWindowTitlesByPrefix returns titles of all visible windows whose title starts with prefix.
+func FindWindowTitlesByPrefix(prefix string) []string {
+	var titles []string
+	buf := make([]uint16, 512)
+
+	cb := syscall.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
+		visible, _, _ := procIsWindowVisible.Call(hwnd)
+		if visible == 0 {
+			return 1
+		}
+		n, _, _ := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+		if n > 0 {
+			title := syscall.UTF16ToString(buf[:n])
+			if strings.HasPrefix(title, prefix) {
+				titles = append(titles, title)
+			}
+		}
+		return 1
+	})
+
+	procEnumWindows.Call(cb, 0)
+	return titles
+}
+
 // GetForegroundHwnd returns the handle of the current foreground window.
 func GetForegroundHwnd() windows.Handle {
 	hwnd, _, _ := procGetForegroundWindow.Call()
