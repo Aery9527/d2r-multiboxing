@@ -105,9 +105,9 @@ func TestPrintMenuKeepsChoicePromptInsideOptionGroup(t *testing.T) {
 		printMenu(nil)
 	})
 
-	assert.Contains(t, output, "============================================\n主選單\n============================================\n\n")
-	assert.Contains(t, output, "--------------------------------------------\n[數字] 啟動指定帳號\n[0] 離線遊玩（可選 mod，不需帳密）")
-	assert.Contains(t, output, "[q] 退出\n")
+	assert.Contains(t, output, "========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n")
+	assert.Contains(t, output, "--------------------------------------------------------\n[數字] 啟動指定帳號\n[0]    離線遊玩（可選 mod，不需帳密）")
+	assert.Contains(t, output, "[q]    退出\n")
 	assert.NotContains(t, output, "? 請選擇：")
 }
 

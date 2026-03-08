@@ -37,12 +37,14 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 	ui.blankLine()
 	ui.headf("選擇 mod")
 	for {
+		options := ui.newMenuOptions()
+		options.option("0", "不使用 mod")
+		for i, modName := range installedMods {
+			options.option(strconv.Itoa(i+1), modName)
+		}
+		options.subMenuNav()
 		ui.menuBlock(func() {
-			ui.option("0", "不使用 mod")
-			for i, modName := range installedMods {
-				ui.option(strconv.Itoa(i+1), modName)
-			}
-			printSubMenuNav()
+			options.render(ui)
 		})
 		input, ok := ui.readInput()
 		if !ok {

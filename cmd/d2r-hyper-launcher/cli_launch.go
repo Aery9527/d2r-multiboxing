@@ -28,11 +28,13 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 
 	ui.blankLine()
 	ui.headf("啟動指定帳號：選擇區域")
+	options := ui.newMenuOptions()
+	options.option("1", "NA")
+	options.option("2", "EU")
+	options.option("3", "Asia")
+	options.subMenuNav()
 	ui.menuBlock(func() {
-		ui.option("1", "NA")
-		ui.option("2", "EU")
-		ui.option("3", "Asia")
-		printSubMenuNav()
+		options.render(ui)
 	})
 	input, ok := ui.readInput()
 	if !ok {
@@ -98,11 +100,13 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 
 	ui.blankLine()
 	ui.headf("啟動所有帳號：選擇區域")
+	options := ui.newMenuOptions()
+	options.option("1", "NA")
+	options.option("2", "EU")
+	options.option("3", "Asia")
+	options.subMenuNav()
 	ui.menuBlock(func() {
-		ui.option("1", "NA")
-		ui.option("2", "EU")
-		ui.option("3", "Asia")
-		printSubMenuNav()
+		options.render(ui)
 	})
 	input, ok := ui.readInput()
 	if !ok {

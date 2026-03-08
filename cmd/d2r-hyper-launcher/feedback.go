@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode/utf8"
+	"unicode"
+
+	"golang.org/x/text/width"
 )
 
 const (
@@ -40,6 +42,23 @@ type cliUI struct {
 	canSingleKeyContinue func() bool
 }
 
+type cliMenuEntryKind string
+
+const (
+	cliMenuEntryOption cliMenuEntryKind = "option"
+	cliMenuEntryBlank  cliMenuEntryKind = "blank"
+)
+
+type cliMenuEntry struct {
+	kind  cliMenuEntryKind
+	key   string
+	label string
+}
+
+type cliMenuOptions struct {
+	entries []cliMenuEntry
+}
+
 var ui = newCLIUI()
 
 func newCLIUI() *cliUI {
@@ -47,8 +66,8 @@ func newCLIUI() *cliUI {
 	return &cliUI{
 		style: cliUIStyle{
 			messageIndent: "",
-			headerDivider: "============================================",
-			menuDivider:   "--------------------------------------------",
+			headerDivider: "========================================================",
+			menuDivider:   "--------------------------------------------------------",
 			messagePrefixes: map[uiMessageKind]string{
 				uiMessageInfo:    cliInfoIcon,
 				uiMessagePrompt:  cliPromptIcon,
@@ -75,7 +94,7 @@ func (u *cliUI) prefix(kind uiMessageKind) string {
 func (u *cliUI) renderMessage(kind uiMessageKind, format string, args ...any) string {
 	prefix := fmt.Sprintf("%s%s ", u.style.messageIndent, u.prefix(kind))
 	body := fmt.Sprintf(format, args...)
-	continuationIndent := strings.Repeat(" ", utf8.RuneCountInString(prefix))
+	continuationIndent := strings.Repeat(" ", displayWidth(prefix))
 	return prefix + strings.ReplaceAll(body, "\n", "\n"+continuationIndent)
 }
 
@@ -93,8 +112,8 @@ func (u *cliUI) rawlnf(format string, args ...any) {
 
 func (u *cliUI) headf(format string, args ...any) {
 	title := fmt.Sprintf(format, args...)
-	width := utf8.RuneCountInString(u.style.headerDivider)
-	if titleWidth := utf8.RuneCountInString(title); titleWidth < width {
+	width := displayWidth(u.style.headerDivider)
+	if titleWidth := displayWidth(title); titleWidth < width {
 		padding := width - titleWidth
 		leftPadding := padding / 2
 		rightPadding := padding - leftPadding
@@ -111,6 +130,12 @@ func (u *cliUI) menuBlock(render func()) {
 	u.menuDividerLine()
 	render()
 	u.menuDividerLine()
+}
+
+func (u *cliUI) newMenuOptions() *cliMenuOptions {
+	return &cliMenuOptions{
+		entries: make([]cliMenuEntry, 0, 8),
+	}
 }
 
 func (u *cliUI) infof(format string, args ...any) {
@@ -148,6 +173,65 @@ func (u *cliUI) readInputf(format string, args ...any) (string, bool) {
 
 func (u *cliUI) option(key, label string) {
 	fmt.Printf("[%s] %s\n", key, label)
+}
+
+func (o *cliMenuOptions) option(key, label string) {
+	o.entries = append(o.entries, cliMenuEntry{
+		kind:  cliMenuEntryOption,
+		key:   key,
+		label: label,
+	})
+}
+
+func (o *cliMenuOptions) blankLine() {
+	o.entries = append(o.entries, cliMenuEntry{kind: cliMenuEntryBlank})
+}
+
+func (o *cliMenuOptions) subMenuNav() {
+	o.blankLine()
+	o.option(menuBack, "回上一層")
+	o.option(menuHome, "回主選單")
+	o.option(menuQuit, "離開程式")
+}
+
+func (o *cliMenuOptions) render(ui *cliUI) {
+	maxPrefixWidth := 0
+	for _, entry := range o.entries {
+		if entry.kind != cliMenuEntryOption {
+			continue
+		}
+		prefixWidth := displayWidth(fmt.Sprintf("[%s]", entry.key))
+		if prefixWidth > maxPrefixWidth {
+			maxPrefixWidth = prefixWidth
+		}
+	}
+
+	for _, entry := range o.entries {
+		switch entry.kind {
+		case cliMenuEntryBlank:
+			ui.blankLine()
+		case cliMenuEntryOption:
+			prefix := fmt.Sprintf("[%s]", entry.key)
+			padding := strings.Repeat(" ", maxPrefixWidth-displayWidth(prefix))
+			ui.rawlnf("%s%s %s", prefix, padding, entry.label)
+		}
+	}
+}
+
+func displayWidth(s string) int {
+	widthSum := 0
+	for _, r := range s {
+		if unicode.Is(unicode.Mn, r) {
+			continue
+		}
+		switch width.LookupRune(r).Kind() {
+		case width.EastAsianWide, width.EastAsianFullwidth:
+			widthSum += 2
+		default:
+			widthSum++
+		}
+	}
+	return widthSum
 }
 
 func (u *cliUI) headerDividerLine() {

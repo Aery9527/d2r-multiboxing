@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ func TestCLIUIHeadRendersTitleBetweenDividers(t *testing.T) {
 		testUI.headf("主選單")
 	})
 
-	assert.Equal(t, "============================================\n                    主選單                     \n============================================\n\n", output)
+	assert.Equal(t, "========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n", output)
 }
 
 func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {
@@ -43,7 +44,7 @@ func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {
 		testUI.menuDividerLine()
 	})
 
-	assert.Equal(t, "--------------------------------------------\n", output)
+	assert.Equal(t, "--------------------------------------------------------\n", output)
 }
 
 func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
@@ -55,7 +56,26 @@ func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
 		})
 	})
 
-	assert.Equal(t, "--------------------------------------------\n[1] 測試選項\n--------------------------------------------\n", output)
+	assert.Equal(t, "--------------------------------------------------------\n[1] 測試選項\n--------------------------------------------------------\n", output)
+}
+
+func TestCLIMenuOptionsRenderAlignsPrefixesToLongestKey(t *testing.T) {
+	testUI := newCLIUI()
+	options := testUI.newMenuOptions()
+	options.option("數字", "啟動指定帳號")
+	options.option("a", "啟動所有帳號")
+	options.option("0", "離線遊玩")
+
+	output := captureStdout(t, func() {
+		options.render(testUI)
+	})
+
+	assert.Equal(t, "[數字] 啟動指定帳號\n[a]    啟動所有帳號\n[0]    離線遊玩\n", output)
+}
+
+func TestDisplayWidthTreatsCJKAsDoubleWidth(t *testing.T) {
+	assert.Equal(t, 6, displayWidth("[數字]"))
+	assert.Equal(t, 3, displayWidth("[a]"))
 }
 
 func TestCLIUISubMenuNavKeepsBackHomeQuitLast(t *testing.T) {
