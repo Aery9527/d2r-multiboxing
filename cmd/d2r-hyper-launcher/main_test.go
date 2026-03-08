@@ -178,12 +178,70 @@ func TestPrintStartupAnnouncementShowsDisplayNameStatusNote(t *testing.T) {
 	assert.NotContains(t, output, "視窗切換已啟用：")
 }
 
+func TestPauseAfterStartupAnnouncementWaitsForAnyKey(t *testing.T) {
+	originalWaitForAnyKey := ui.waitForAnyKey
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.waitForAnyKey = originalWaitForAnyKey
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+
+	waitCalled := 0
+	ui.canSingleKeyContinue = func() bool { return true }
+	ui.waitForAnyKey = func() error {
+		waitCalled++
+		return nil
+	}
+
+	output := captureStdout(t, func() {
+		pauseAfterStartupAnnouncement()
+	})
+
+	assert.Contains(t, output, "? 請按任意鍵繼續...")
+	assert.Equal(t, 1, waitCalled)
+}
+
+func TestPauseAfterStartupAnnouncementWarnsWhenWaitFails(t *testing.T) {
+	originalWaitForAnyKey := ui.waitForAnyKey
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.waitForAnyKey = originalWaitForAnyKey
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+
+	ui.canSingleKeyContinue = func() bool { return true }
+	ui.waitForAnyKey = func() error { return assert.AnError }
+
+	output := captureStdout(t, func() {
+		pauseAfterStartupAnnouncement()
+	})
+
+	assert.Contains(t, output, "? 請按任意鍵繼續...")
+	assert.Contains(t, output, "⚠ 等待按鍵失敗：assert.AnError general error for testing")
+}
+
 func TestFormatLaunchDelayMessage(t *testing.T) {
 	assert.Equal(t, "  等待 30 秒後啟動下一個帳號：VoidLife", formatLaunchDelayMessage(30, "VoidLife"))
 }
 
 func TestFormatLaunchDelayRemainingMessage(t *testing.T) {
 	assert.Equal(t, "  還剩 25 秒後啟動下一個帳號：VoidLife", formatLaunchDelayRemainingMessage(25, "VoidLife"))
+}
+
+func TestPauseAfterSuccessfulLaunchWaitsThreeSeconds(t *testing.T) {
+	originalSleep := launchSuccessPauseSleep
+	t.Cleanup(func() {
+		launchSuccessPauseSleep = originalSleep
+	})
+
+	var slept time.Duration
+	launchSuccessPauseSleep = func(d time.Duration) {
+		slept = d
+	}
+
+	pauseAfterSuccessfulLaunch()
+
+	assert.Equal(t, 3*time.Second, slept)
 }
 
 func TestParseLaunchDelayInput(t *testing.T) {

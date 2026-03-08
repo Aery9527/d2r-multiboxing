@@ -12,6 +12,7 @@ import (
 
 const (
 	cliInfoIcon    = "•"
+	cliCommandIcon = ">"
 	cliPromptIcon  = "?"
 	cliSuccessIcon = "✔"
 	cliErrorIcon   = "✘"
@@ -21,6 +22,7 @@ const (
 type uiMessageKind string
 
 const (
+	uiMessageCommand uiMessageKind = "command"
 	uiMessageInfo    uiMessageKind = "info"
 	uiMessagePrompt  uiMessageKind = "prompt"
 	uiMessageSuccess uiMessageKind = "success"
@@ -71,6 +73,7 @@ func newCLIUI() *cliUI {
 			headerDivider: "========================================================",
 			menuDivider:   "--------------------------------------------------------",
 			messagePrefixes: map[uiMessageKind]string{
+				uiMessageCommand: cliCommandIcon,
 				uiMessageInfo:    cliInfoIcon,
 				uiMessagePrompt:  cliPromptIcon,
 				uiMessageSuccess: cliSuccessIcon,
@@ -175,6 +178,10 @@ func (u *cliUI) mainMenuOptions(build func(*cliMenuOptions)) *cliMenuOptions {
 
 func (u *cliUI) infof(format string, args ...any) {
 	u.line(uiMessageInfo, format, args...)
+}
+
+func (u *cliUI) commandf(format string, args ...any) {
+	u.line(uiMessageCommand, format, args...)
 }
 
 func (u *cliUI) infoLines(messages ...string) {
@@ -322,6 +329,7 @@ func (u *cliUI) blankLine() {
 }
 
 func (u *cliUI) anyKeyContinue() error {
+	u.blankLine()
 	var err error
 	if u.canSingleKeyContinue() {
 		u.inputf("請按任意鍵繼續...")

@@ -29,6 +29,106 @@
 - skill 同步 commit：`6c7a6ae` `docs(skills): align D2R workflows with new boundaries`
 - 收尾流程 commit：`3d01be4` `docs(skills): formalize refactor completion tracking`
 
+## 新架構訊號：是否把 UI 移到 `internal/ui`
+
+最近在 CLI UI layer 持續演進後，又出現一個新的邊界訊號：
+
+- `cmd/d2r-hyper-launcher/feedback.go` 裡的 `cliUI` 已不只是 menu/prompt helper，還開始承擔 command rendering（例如 `ui.commandf(...)`）
+- `internal/multiboxing/launcher/launcher.go` 為了把 D2R 啟動命令顯示回 CLI，仍需要透過 `SetCommandLogger(...)` / `commandLogger` 這個注入點把字串送回 `cmd`
+- 使用者已明確質疑：如果把 UI 抽到 `internal/ui`，是不是就能讓 `internal` feature package 直接依賴同一份 UI boundary，而不需要這層 logger bridge
+
+這個問題**是架構訊號，但不代表應該直接把整個現在的 `cliUI` 原封不動搬到 `internal/ui`**。
+
+## 為什麼這是架構訊號
+
+- 現在 `commandLogger` 的存在，本質上是在補 `cmd` 與 `internal/multiboxing/launcher` 之間「可見命令輸出」的邊界缺口
+- 若後續還有其他 `internal/*` package 想印玩家可見訊息，就可能再出現更多類似的注入點
+- 但另一方面，目前 `cliUI` 又混著大量純 CLI concern：
+  - header / menu divider
+  - `mainMenuOptions(...)` / `subMenuOptions(...)`
+  - prompt/input scanner
+  - any-key continue
+  - startup announcement / submenu navigation 的呈現語意
+
+也就是說：
+
+- **「命令輸出 renderer 可以共享」這件事是真的**
+- **「整包 CLI menu UI 都應搬進 internal/ui」這件事則未必成立**
+
+## 問題落點
+
+### `cmd/d2r-hyper-launcher/feedback.go`
+
+- 已經長成完整 CLI UI layer
+- 同時包含 message renderer、prompt/input、menu option layout、header/menu block、command display
+- 其中有些能力可共享，有些能力只屬於 launcher CLI 入口
+
+### `internal/multiboxing/launcher/launcher.go`
+
+- 目前需要將命令列輸出回傳給 CLI
+- 因為不能 import `cmd/d2r-hyper-launcher`，只好保留 `SetCommandLogger(...)` / `commandLogger`
+
+### `cmd/d2r-hyper-launcher/main.go`
+
+- 目前負責把 launcher 的 command logger 接到 `ui.commandf(...)`
+- 這個 wiring 本身沒有錯，但說明「可見命令輸出」尚未有更穩定的共用落點
+
+## 目前成本
+
+- `commandLogger` 仍然是額外 bridge，命名上也比較偏低階 callback，而不是明確的 UI/output boundary
+- 若未來更多 internal package 想輸出玩家可見訊息，容易出現多個平行注入點
+- 但若現在把整個 `cliUI` 搬進 `internal/ui`，會把很多其實只屬於 CLI 入口的 menu/prompt 流程一起上提，造成 `internal` 對玩家互動細節耦合過深
+
+## 可行方案
+
+### 方案 1：低風險，保留 `cmd` UI layer，只整理 logger 介面
+
+- 不搬 `cliUI`
+- 把 `commandLogger func(string)` 改成更語意化的輸出介面或 setter，例如：
+  - `SetCommandOutput(func(string))`
+  - 或小型介面 `type CommandOutput interface { Commandf(string, ...any) }`
+- 好處：改動最小，保留既有 CLI 邊界
+- 壞處：bridge 仍存在，只是名字與責任更清楚
+
+### 方案 2：中風險，抽出 `internal/ui/console` 這種「共享輸出 primitive」
+
+- **不要搬整包 `cliUI`**
+- 只抽出跨 `cmd` 與 `internal` 都合理依賴的最低層，例如：
+  - message kind / prefix renderer
+  - command line renderer（`>`）
+  - maybe display-width-aware text rendering primitive
+- `cmd/d2r-hyper-launcher` 仍保有：
+  - `headf(...)`
+  - `menuBlock(...)`
+  - `mainMenuOptions(...)`
+  - `subMenuOptions(...)`
+  - input / scanner / anyKeyContinue
+- `internal/multiboxing/launcher` 若真的需要玩家可見 command output，可直接依賴 `internal/ui/console`
+- 這是我目前最推薦的方向
+
+### 方案 3：較大範圍，整個 `cliUI` 搬到 `internal/ui`
+
+- 技術上可以解決 `commandLogger` 問題
+- 但風險是把大量 CLI-specific concern 上提：
+  - launcher menu 文案
+  - prompt/input 交互
+  - submenu navigation
+  - announcement/menu layout abstraction
+- 結果可能讓 `internal/ui` 變成「其實就是 `cmd` 專用，但放在 internal」的肥大模組
+- 除非未來有第二個 CLI entrypoint 也要共用整套 menu/prompt flow，否則目前不建議直接做這個方案
+
+## 建議順序
+
+1. 先承認這是架構訊號，而不是單純 rename 問題
+2. 下一輪若要真的動邊界，優先做**方案 2：抽共享 primitive，不搬整包 CLI**
+3. 在 proposal 確認前，先不要直接把整個 `feedback.go` 平移到 `internal/ui`
+
+## 暫時不做的事
+
+- 不把 `mainMenuOptions(...)` / `subMenuOptions(...)` / `anyKeyContinue()` 整包上提到 `internal/ui`
+- 不讓 `internal/multiboxing` 或 `internal/switcher` 直接依賴完整 CLI menu abstraction
+- 不為了拿掉 `commandLogger` 就把互動式 scanner / prompt boundary 一起打散
+
 ## 為什麼這次要把 CLI 與 `internal\` 一起整理
 
 - 原本的 CLI refactor 方案三，核心是在解決 `cmd/d2r-hyper-launcher/main.go` 同時承擔 menu renderer、selector、validator、feedback、domain coordinator 的問題

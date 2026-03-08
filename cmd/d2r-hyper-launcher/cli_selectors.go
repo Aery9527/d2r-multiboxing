@@ -34,8 +34,6 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 		return nil, true
 	}
 
-	ui.blankLine()
-	ui.headf("選擇 mod")
 	for {
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("0", "不使用 mod", "")
@@ -66,7 +64,7 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 		}
 
 		modName := installedMods[selected-1]
-		ui.successf("本次使用 mod：%s", modName)
+		ui.infof("本次使用 mod：%s", modName)
 		return mods.BuildLaunchArgs(modName), true
 	}
 }

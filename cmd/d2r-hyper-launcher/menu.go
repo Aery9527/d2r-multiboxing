@@ -20,12 +20,19 @@ const (
 
 func printStartupAnnouncement(cfgDir string) {
 	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
+
 	ui.infof("資料目錄：%s", cfgDir)
 	ui.warningLines(
 		"注意：帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
 		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，",
 		"就會導致啟動狀態顯示不正確。",
 	)
+}
+
+func pauseAfterStartupAnnouncement() {
+	if err := ui.anyKeyContinue(); err != nil {
+		ui.warningf("等待按鍵失敗：%v", err)
+	}
 }
 
 func printMenu(accounts []account.Account, cfg *config.Config) {

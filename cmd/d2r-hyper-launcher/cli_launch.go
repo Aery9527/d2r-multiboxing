@@ -15,6 +15,9 @@ import (
 
 var launchDelayRandIntN = rand.Intn
 var launchDelaySleep = time.Sleep
+var launchSuccessPauseSleep = time.Sleep
+
+const launchSuccessPauseDuration = 3 * time.Second
 
 func launchAccount(acc *account.Account, cfg *config.Config) {
 	if !ensureLaunchReadyD2RPath(cfg) {
@@ -68,7 +71,7 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 	}
 	ui.successf("D2R 已啟動 (PID: %d)", pid)
 
-	time.Sleep(2 * time.Second)
+	pauseAfterSuccessfulLaunch()
 	closed, err := launcher.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
 	if err != nil {
 		ui.warningf("關閉 Handle 失敗：%v", err)
@@ -141,7 +144,7 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 		}
 		ui.successf("%s 已啟動 (PID: %d)", acc.DisplayName, pid)
 
-		time.Sleep(3 * time.Second)
+		pauseAfterSuccessfulLaunch()
 		closed, err := launcher.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
 		if err != nil {
 			ui.warningf("%s Handle 關閉失敗：%v", acc.DisplayName, err)
@@ -179,7 +182,12 @@ func launchOffline(cfg *config.Config) {
 		return
 	}
 	ui.successf("D2R 已啟動 (PID: %d)", pid)
+	pauseAfterSuccessfulLaunch()
 	ui.blankLine()
+}
+
+func pauseAfterSuccessfulLaunch() {
+	launchSuccessPauseSleep(launchSuccessPauseDuration)
 }
 
 func accountLaunchArgs(acc account.Account, modArgs []string) []string {

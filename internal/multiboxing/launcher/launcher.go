@@ -13,19 +13,15 @@ func SetCommandLogger(logger func(string)) {
 	commandLogger = logger
 }
 
-func logCommand(message string) {
-	if commandLogger != nil {
-		commandLogger(message)
-	}
-}
-
 // LaunchD2R starts D2R.exe with the given account parameters and returns the PID.
 func LaunchD2R(d2rPath string, username string, password string, address string, extraArgs ...string) (uint32, error) {
 	args := buildOnlineArgs(username, password, address, extraArgs...)
 
 	cmd := exec.Command(d2rPath, args...)
 	cmd.Dir = filepath.Dir(d2rPath)
-	logCommand(fmt.Sprintf("  > %s %s", d2rPath, strings.Join(redactArgs(args), " ")))
+	if commandLogger != nil {
+		commandLogger(fmt.Sprintf("%s %s", d2rPath, strings.Join(redactArgs(args), " ")))
+	}
 
 	err := cmd.Start()
 	if err != nil {
@@ -40,7 +36,9 @@ func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
 	args := buildOfflineArgs(extraArgs...)
 	cmd := exec.Command(d2rPath, args...)
 	cmd.Dir = filepath.Dir(d2rPath)
-	logCommand(fmt.Sprintf("  > %s %s", d2rPath, strings.Join(args, " ")))
+	if commandLogger != nil {
+		commandLogger(fmt.Sprintf("%s %s", d2rPath, strings.Join(args, " ")))
+	}
 
 	if err := cmd.Start(); err != nil {
 		return 0, fmt.Errorf("failed to start D2R: %w", err)

@@ -11,6 +11,7 @@ func TestCLIUIPrefixesAreConfiguredByMessageKind(t *testing.T) {
 	testUI := newCLIUI()
 
 	assert.Equal(t, "•", testUI.prefix(uiMessageInfo))
+	assert.Equal(t, ">", testUI.prefix(uiMessageCommand))
 	assert.Equal(t, "?", testUI.prefix(uiMessagePrompt))
 	assert.Equal(t, "✔", testUI.prefix(uiMessageSuccess))
 	assert.Equal(t, "✘", testUI.prefix(uiMessageError))
@@ -125,6 +126,16 @@ func TestCLIUIInputPromptUsesPromptRenderer(t *testing.T) {
 	})
 
 	assert.Equal(t, "? 請選擇：", output)
+}
+
+func TestCLIUICommandUsesCommandRenderer(t *testing.T) {
+	testUI := newCLIUI()
+
+	output := captureStdout(t, func() {
+		testUI.commandf("%s %s", `C:\Games\D2R\D2R.exe`, "-uid osi")
+	})
+
+	assert.Equal(t, "> C:\\Games\\D2R\\D2R.exe -uid osi\n", output)
 }
 
 func TestCLIUIWarningLinesRendersGroupedMessageWithSinglePrefix(t *testing.T) {

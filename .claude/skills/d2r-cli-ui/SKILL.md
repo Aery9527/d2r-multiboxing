@@ -34,11 +34,12 @@ description: "Handle repository-specific CLI UI and message-presentation work in
 6. 若子選單需要固定的 `b` / `h` / `q` 導航，優先使用 `ui.subMenuOptions(func(*cliMenuOptions))`；它會統一補上 custom options 後的空行與「回上一層 / 回主選單 / 離開程式」。
 7. `infoLines(...)` / `warningLines(...)` / `promptLines(...)` / `successLines(...)` / `errorLines(...)` 是「同一組訊息的多段內容」，只會顯示一次 icon，後續段落縮排對齊到 icon 後方。
 8. 子選單導航固定是 `b` / `h` / `q`，且仍應保留在 submenu 的最後一組選項。
-9. CLI 輸出與輸入已收斂到 UI layer；不要在新的 call site 再散落 `fmt.Print*` 或直接操作 `scanner`。
+9. launcher 等執行命令的可見輸出也應走 UI layer；優先使用 `ui.commandf(...)`，並由 `>` prefix 表示實際執行的命令列。
+10. CLI 輸出與輸入已收斂到 UI layer；不要在新的 call site 再散落 `fmt.Print*` 或直接操作 `scanner`。
 
 ## 修改時要守住的規則
 
-- 想調整玩家可見訊息時，優先找 `ui.infof(...)`、`ui.warningf(...)`、`ui.promptf(...)`、`ui.headf(...)`、`ui.menuBlock(...)`、`ui.newMenuOptions()`、`ui.mainMenuOptions(...)`、`ui.subMenuOptions(...)`；不要直接拼接裸輸出。
+- 想調整玩家可見訊息時，優先找 `ui.infof(...)`、`ui.commandf(...)`、`ui.warningf(...)`、`ui.promptf(...)`、`ui.headf(...)`、`ui.menuBlock(...)`、`ui.newMenuOptions()`、`ui.mainMenuOptions(...)`、`ui.subMenuOptions(...)`；不要直接拼接裸輸出。
 - 若訊息是同一組公告 / 說明的多段內容，優先用 `*Lines(...)` helper，不要手動塞 `\n` 後又重複 icon。
 - 若需要 option 對齊，先把選項收進 `cliMenuOptions`，並優先把補充資訊放進 `comment` 欄位；不要在 label 內硬塞一長串括號後又自己猜最長寬度。
 - 若涉及全形字、中文 key、或 icon 對齊，使用 `displayWidth(...)` 邏輯；不要回退成 `utf8.RuneCountInString(...)`。

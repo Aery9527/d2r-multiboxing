@@ -42,6 +42,7 @@
   - `q`：離開程式
 - 相關共用邏輯集中在 `cmd/d2r-hyper-launcher` 下的 CLI 檔案群，不要再把所有選單與互動流程塞回單一 `main.go`
 - `cmd/d2r-hyper-launcher/feedback.go` 是目前的 CLI UI layer；調整玩家可見訊息時，應優先沿用 `ui.*` helper，而不是回頭散落 `fmt.Print*`、手動 `\n` 排版或直接操作輸入 scanner
+- launcher 或外部命令的玩家可見執行列輸出也要走 UI layer；優先使用 `ui.commandf(...)`，由 `>` prefix 表達實際執行命令，不要在 domain 層自己手拼 `> ` 前綴
 - `headf(...)` 與 `menuBlock(...)` 是不同語意：前者代表目前位於哪個 section，後者代表玩家準備閱讀並輸入的一組內容
 - 若一組訊息需要多段換行但仍屬同一則說明，優先使用 `infoLines(...)` / `warningLines(...)` / `promptLines(...)` / `successLines(...)` / `errorLines(...)`，讓 icon 只出現一次並維持 continuation 對齊
 - menu option 需要整齊對齊時，優先使用 `newMenuOptions()` 收集後再 `render()`；`option(...)` 現在以 `key / label / comment` 三欄資料收集並做 display-width-aware 對齊。主選單若最後要附上固定 `q` 離開選項，優先使用 `mainMenuOptions(func(*cliMenuOptions))`；子選單若最後要附上固定 `b / h / q` 導航，優先使用 `subMenuOptions(func(*cliMenuOptions))`，由 UI layer 統一補上空行與共通選項

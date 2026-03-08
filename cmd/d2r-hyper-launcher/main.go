@@ -28,7 +28,7 @@ func main() {
 	_ = windows.SetConsoleOutputCP(65001)
 
 	launcher.SetCommandLogger(func(message string) {
-		ui.rawln(message)
+		ui.commandf("%s", message)
 	})
 
 	cfg, err := config.Load()
@@ -38,6 +38,7 @@ func main() {
 	}
 	cfgDir, _ := config.Dir()
 	printStartupAnnouncement(cfgDir)
+	pauseAfterStartupAnnouncement()
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
