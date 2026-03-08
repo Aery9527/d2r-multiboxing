@@ -132,10 +132,10 @@ New-Item -ItemType Directory -Force .\.tmp | Out-Null
 go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 ```
 
-只有在 release 流程要更新正式產物時，才覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`：
+只有在 release 流程要更新正式產物時，才覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`，並同時注入版本與 release 時間（`yyyy-mm-dd hh:mm:ss`）：
 
 ```powershell
-go build -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
+go build -ldflags "-X main.version=vX.Y.Z -X main.releaseTime=YYYY-MM-DD HH:MM:SS" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
 
 ### 測試

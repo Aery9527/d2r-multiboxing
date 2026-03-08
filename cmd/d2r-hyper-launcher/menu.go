@@ -19,6 +19,7 @@ const (
 func printStartupAnnouncement(cfgDir string) {
 	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
 
+	ui.infof("目前版本：%s", displayReleaseSummary(version, releaseTime))
 	ui.infof("資料目錄：%s", cfgDir)
 	ui.warningLines(
 		"注意：帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",

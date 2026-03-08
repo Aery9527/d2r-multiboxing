@@ -11,7 +11,7 @@ description: "Handle repository-specific release work in d2r-hyper-launcher. Use
 
 - `git tag --list` - 找出上一個 release tag
 - `git log <last-tag>..HEAD --oneline` - 彙整自上次 release 以來的所有 commit
-- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 確認版本字串由 `-ldflags "-X main.version=..."` 注入
+- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 確認版本字串與 release 時間由 `-ldflags "-X main.version=... -X main.releaseTime=..."` 注入
 - [README.md](../../../README.md) - 確認目前 build 與玩家可見入口
 - [AGENT.md](../../../AGENT.md) - 測試、文件同步與整體規範
 - `.claude/skills/d2r-commit/SKILL.md` - commit message 與 commit 前檢查的語氣基準
@@ -73,12 +73,12 @@ go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 這個 repo 目前沒有獨立 `VERSION` 檔，版本會在 build 時透過：
 
 ```powershell
--ldflags "-X main.version=vX.Y.Z"
+-ldflags "-X main.version=vX.Y.Z -X main.releaseTime=YYYY-MM-DD HH:MM:SS"
 ```
 
 注入到：
 
-- `cmd/d2r-hyper-launcher/main.go` 的 `version`
+- `cmd/d2r-hyper-launcher/main.go` 的 `version` 與 `releaseTime`
 - 最終輸出的 `d2r-hyper-launcher.exe`
 
 所以這裡說的「先變更 version 再 build」，在本 repo 的實際意思是：
@@ -97,7 +97,7 @@ d2r-hyper-launcher.exe
 命令格式：
 
 ```powershell
-go build -ldflags "-X main.version=vX.Y.Z" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
+go build -ldflags "-X main.version=vX.Y.Z -X main.releaseTime=YYYY-MM-DD HH:MM:SS" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
 
 不要把 release build 輸出到其他暫存檔名，除非使用者另外要求。

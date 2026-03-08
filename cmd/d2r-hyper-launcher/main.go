@@ -14,14 +14,28 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// version is set at build time via -ldflags "-X main.version=x.y.z".
+// version and releaseTime are set at build time via
+// -ldflags "-X main.version=x.y.z -X main.releaseTime=yyyy-mm-dd hh:mm:ss".
 var version = "dev"
+var releaseTime = ""
 
 func displayVersion(version string) string {
 	if strings.HasPrefix(version, "v") {
 		return version
 	}
 	return "v" + version
+}
+
+func displayReleaseTime(releaseTime string) string {
+	releaseTime = strings.TrimSpace(releaseTime)
+	if releaseTime == "" {
+		return "尚未 release"
+	}
+	return fmt.Sprintf("%s release", releaseTime)
+}
+
+func displayReleaseSummary(version string, releaseTime string) string {
+	return fmt.Sprintf("%s（%s）", displayVersion(version), displayReleaseTime(releaseTime))
 }
 
 func main() {
