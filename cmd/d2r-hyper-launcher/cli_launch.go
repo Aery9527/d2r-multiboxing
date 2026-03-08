@@ -27,7 +27,7 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 	}
 
 	ui.blankLine()
-	ui.infof("選擇區域")
+	ui.headf("啟動指定帳號：選擇區域")
 	ui.option("1", "NA")
 	ui.option("2", "EU")
 	ui.option("3", "Asia")
@@ -95,7 +95,7 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 	ui.infof("本次只會啟動上面標示為 [未啟動] 的帳號，共 %d 個。", len(pendingAccounts))
 
 	ui.blankLine()
-	ui.infof("選擇區域")
+	ui.headf("啟動所有帳號：選擇區域")
 	ui.option("1", "NA")
 	ui.option("2", "EU")
 	ui.option("3", "Asia")
@@ -157,7 +157,7 @@ func launchOffline(cfg *config.Config) {
 	}
 
 	ui.blankLine()
-	ui.infof("=== 離線遊玩模式 ===")
+	ui.headf("離線遊玩模式")
 
 	modArgs, ok := selectLaunchMod(cfg.D2RPath)
 	if !ok {

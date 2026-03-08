@@ -16,6 +16,7 @@ const (
 )
 
 func printMenu(accounts []account.Account) {
+	ui.headf("主選單")
 	ui.infof("帳號列表：")
 	for i, acc := range accounts {
 		status := "未啟動"
@@ -29,7 +30,7 @@ func printMenu(accounts []account.Account) {
 	ui.infof("是否已啟動的判斷基準是用 account.csv 裡的 DisplayName 來對應視窗名稱。")
 	ui.infof("如果 D2R 還開著就先關掉工具再去改 DisplayName，之後這裡的啟動狀態偵測可能會不正確。")
 	ui.blankLine()
-	ui.dividerLine()
+	ui.menuDividerLine()
 	ui.option("數字", "啟動指定帳號")
 	ui.option("0", "離線遊玩（可選 mod，不需帳密）")
 	ui.option("a", "啟動所有帳號（可選 mod，只啟動未啟動的）")

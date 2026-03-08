@@ -35,7 +35,7 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 	}
 
 	ui.blankLine()
-	ui.infof("選擇 mod")
+	ui.headf("選擇 mod")
 	for {
 		ui.option("0", "不使用 mod")
 		for i, modName := range installedMods {

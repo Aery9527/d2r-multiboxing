@@ -26,6 +26,26 @@ func TestCLIUIOptionRendersBracketedChoice(t *testing.T) {
 	assert.Equal(t, "[a] 啟動所有帳號\n", output)
 }
 
+func TestCLIUIHeadRendersTitleBetweenDividers(t *testing.T) {
+	testUI := newCLIUI()
+
+	output := captureStdout(t, func() {
+		testUI.headf("主選單")
+	})
+
+	assert.Equal(t, "============================================\n主選單\n============================================\n\n", output)
+}
+
+func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {
+	testUI := newCLIUI()
+
+	output := captureStdout(t, func() {
+		testUI.menuDividerLine()
+	})
+
+	assert.Equal(t, "--------------------------------------------\n", output)
+}
+
 func TestCLIUISubMenuNavKeepsBackHomeQuitLast(t *testing.T) {
 	testUI := newCLIUI()
 

@@ -15,7 +15,7 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 	}
 
 	ui.blankLine()
-	ui.infof("=== 帳號啟動 flag 設定 ===")
+	ui.headf("帳號啟動 flag 設定")
 	printAccountLaunchFlagSummary(accounts)
 	ui.blankLine()
 	ui.option("1", "設定 flag")
@@ -44,6 +44,7 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 	}
 
 	ui.blankLine()
+	ui.headf("%s flag：選擇操作方式", actionLabel)
 	ui.promptf("這次要如何%s flag？", actionLabel)
 	ui.option("1", "以 flag 為維度")
 	ui.option("2", "以帳號為維度")
@@ -69,6 +70,7 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMode bool) {
 	options := account.LaunchFlagOptions()
 	ui.blankLine()
+	ui.headf("%s flag：依 flag 選帳號", flagActionLabel(setMode))
 	ui.infof("可用 flag：")
 	printLaunchFlagOptions(options)
 	printSubMenuNav()
@@ -89,6 +91,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMo
 	option := options[selected-1]
 	actionLabel := flagActionLabel(setMode)
 	ui.blankLine()
+	ui.headf("%s flag：選擇帳號", actionLabel)
 	ui.promptf("請輸入要%s「%s」的帳號編號，可用 2,4,6 或 1-3,5-7：", actionLabel, option.Name)
 	printAccountLaunchFlagSummary(accounts)
 	printSubMenuNav()
@@ -130,6 +133,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMo
 func configureFlagsByAccount(accounts []account.Account, accountsFile string, setMode bool) {
 	options := account.LaunchFlagOptions()
 	ui.blankLine()
+	ui.headf("%s flag：先選帳號", flagActionLabel(setMode))
 	ui.infof("帳號列表：")
 	printAccountLaunchFlagSummary(accounts)
 	printSubMenuNav()
@@ -151,6 +155,7 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, se
 	acc := accounts[accountIndex]
 	actionLabel := flagActionLabel(setMode)
 	ui.blankLine()
+	ui.headf("%s flag：選擇旗標", actionLabel)
 	ui.promptf("請輸入要對帳號「%s」%s的 flag 編號，可用 1,3 或 2-4：", acc.DisplayName, actionLabel)
 	printLaunchFlagOptions(options)
 	printSubMenuNav()

@@ -9,7 +9,7 @@ import (
 
 func setupSwitcher(cfg *config.Config) {
 	ui.blankLine()
-	ui.infof("=== 視窗切換設定 ===")
+	ui.headf("視窗切換設定")
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		ui.infof("目前設定：%s", switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex))

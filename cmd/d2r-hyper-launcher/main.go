@@ -31,10 +31,7 @@ func main() {
 		ui.rawln(message)
 	})
 
-	ui.rawln("============================================")
-	ui.rawlnf("  d2r-hyper-launcher  %s", displayVersion(version))
-	ui.rawln("============================================")
-	ui.blankLine()
+	ui.headf("d2r-hyper-launcher  %s", displayVersion(version))
 
 	cfg, err := config.Load()
 	if err != nil {

@@ -28,7 +28,8 @@ const (
 
 type cliUIStyle struct {
 	messageIndent   string
-	divider         string
+	headerDivider   string
+	menuDivider     string
 	messagePrefixes map[uiMessageKind]string
 }
 
@@ -46,7 +47,8 @@ func newCLIUI() *cliUI {
 	return &cliUI{
 		style: cliUIStyle{
 			messageIndent: "",
-			divider:       "--------------------------------------------",
+			headerDivider: "============================================",
+			menuDivider:   "--------------------------------------------",
 			messagePrefixes: map[uiMessageKind]string{
 				uiMessageInfo:    cliInfoIcon,
 				uiMessagePrompt:  cliPromptIcon,
@@ -89,6 +91,13 @@ func (u *cliUI) rawlnf(format string, args ...any) {
 	fmt.Printf(format+"\n", args...)
 }
 
+func (u *cliUI) headf(format string, args ...any) {
+	u.headerDividerLine()
+	u.rawlnf(format, args...)
+	u.headerDividerLine()
+	ui.blankLine()
+}
+
 func (u *cliUI) infof(format string, args ...any) {
 	u.line(uiMessageInfo, format, args...)
 }
@@ -126,8 +135,12 @@ func (u *cliUI) option(key, label string) {
 	fmt.Printf("[%s] %s\n", key, label)
 }
 
-func (u *cliUI) dividerLine() {
-	fmt.Println(u.style.divider)
+func (u *cliUI) headerDividerLine() {
+	fmt.Println(u.style.headerDivider)
+}
+
+func (u *cliUI) menuDividerLine() {
+	fmt.Println(u.style.menuDivider)
 }
 
 func (u *cliUI) blankLine() {
