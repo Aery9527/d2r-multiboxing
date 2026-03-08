@@ -39,13 +39,14 @@ func main() {
 	cfgDir, _ := config.Dir()
 	printStartupAnnouncement(cfgDir)
 	pauseAfterStartupAnnouncement()
+	ui.blankLine()
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
 			ui.warningf("視窗切換啟動失敗：%v", err)
 		}
+		ui.blankLine()
 	}
-	ui.blankLine()
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {

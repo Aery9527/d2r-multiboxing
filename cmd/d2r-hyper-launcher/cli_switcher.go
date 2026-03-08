@@ -8,99 +8,105 @@ import (
 )
 
 func setupSwitcher(cfg *config.Config) {
-	ui.blankLine()
-	ui.headf("視窗切換設定")
+	for {
+		ui.blankLine()
+		ui.headf("視窗切換設定")
 
-	if display, ok := switcherSavedDisplay(cfg); ok {
-		if cfg.Switcher.Enabled {
-			ui.infof("目前狀態：已啟用")
-			ui.infof("目前設定：%s", display)
+		if display, ok := switcherSavedDisplay(cfg); ok {
+			if cfg.Switcher.Enabled {
+				ui.infof("目前狀態：已啟用")
+				ui.infof("目前設定：%s", display)
+			} else {
+				ui.infof("目前狀態：未啟用")
+				ui.infof("已保存設定：%s", display)
+			}
 		} else {
-			ui.infof("目前狀態：未啟用")
-			ui.infof("已保存設定：%s", display)
+			ui.infof("目前狀態：未設定")
 		}
-	} else {
-		ui.infof("目前狀態：未設定")
-	}
-
-	ui.blankLine()
-	options := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "設定切換按鍵", "")
-		options.option("0", switcherToggleOptionLabel(cfg), "")
-	})
-	ui.menuBlock(func() {
-		options.render()
-	})
-	choice, ok := ui.readInput()
-	if !ok {
-		return
-	}
-	if isMenuNav(choice) != "" {
-		return
-	}
-
-	switch choice {
-	case "1":
-		wasRunning := switcher.IsRunning()
-		switcher.Stop()
 
 		ui.blankLine()
-		ui.promptf("請按下想用來切換視窗的按鍵組合...")
-		ui.infof("（支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）")
-		ui.infof("（搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕，放開後完成偵測）")
-		ui.infof("（按 Esc 取消）")
-		ui.blankLine()
-
-		modifiers, key, gamepadIndex, err := switcher.DetectKeyPress()
-		if err != nil {
-			ui.warningf("偵測失敗：%v", err)
-			restartSwitcherIfNeeded(cfg, wasRunning)
-			return
-		}
-		if key == "" {
-			ui.infof("已取消。")
-			restartSwitcherIfNeeded(cfg, wasRunning)
-			return
-		}
-
-		display := switcher.FormatSwitcherDisplay(modifiers, key, gamepadIndex)
-		ui.infof("偵測到：%s", display)
-		answer, ok := ui.readInputf("確認使用此組合？([Y]/[n])：")
+		options := ui.subMenuOptions(func(options *cliMenuOptions) {
+			options.option("1", "設定切換按鍵", "")
+			options.option("0", switcherToggleOptionLabel(cfg), "")
+		})
+		ui.menuBlock(func() {
+			options.render()
+		})
+		choice, ok := ui.readInput()
 		if !ok {
 			return
 		}
-		answer = strings.ToLower(answer)
-		if answer != "" && answer != "y" {
-			ui.infof("已取消。")
-			restartSwitcherIfNeeded(cfg, wasRunning)
+		if isMenuNav(choice) != "" {
 			return
 		}
 
-		cfg.Switcher = &config.SwitcherConfig{
-			Enabled:      true,
-			Modifiers:    modifiers,
-			Key:          key,
-			GamepadIndex: gamepadIndex,
-		}
-		if err := config.Save(cfg); err != nil {
-			ui.warningf("設定儲存失敗：%v", err)
+		switch choice {
+		case "1":
+			wasRunning := switcher.IsRunning()
+			switcher.Stop()
+
+			ui.blankLine()
+			ui.promptf("請按下想用來切換視窗的按鍵組合...")
+			ui.infof("（支援：鍵盤任意鍵 + Ctrl/Alt/Shift、滑鼠側鍵、搖桿按鈕）")
+			ui.infof("（搖桿組合鍵：先按住修飾按鈕，再按觸發按鈕，放開後完成偵測）")
+			ui.infof("（按 Esc 取消）")
+			ui.blankLine()
+
+			modifiers, key, gamepadIndex, err := switcher.DetectKeyPress()
+			if err != nil {
+				ui.warningf("偵測失敗：%v", err)
+				restartSwitcherIfNeeded(cfg, wasRunning)
+				return
+			}
+			if key == "" {
+				ui.infof("已取消。")
+				restartSwitcherIfNeeded(cfg, wasRunning)
+				return
+			}
+
+			display := switcher.FormatSwitcherDisplay(modifiers, key, gamepadIndex)
+			ui.infof("偵測到：%s", display)
+			answer, ok := ui.readInputf("確認使用此組合？([Y]/[n])：")
+			if !ok {
+				return
+			}
+			answer = strings.ToLower(answer)
+			if answer != "" && answer != "y" {
+				ui.infof("已取消。")
+				restartSwitcherIfNeeded(cfg, wasRunning)
+				return
+			}
+
+			cfg.Switcher = &config.SwitcherConfig{
+				Enabled:      true,
+				Modifiers:    modifiers,
+				Key:          key,
+				GamepadIndex: gamepadIndex,
+			}
+			if err := config.Save(cfg); err != nil {
+				ui.warningf("設定儲存失敗：%v", err)
+				return
+			}
+
+			if err := switcher.Start(cfg.Switcher); err != nil {
+				ui.warningf("切換功能啟動失敗：%v", err)
+				return
+			}
+
+			ui.successf("已儲存切換設定：%s", display)
+			ui.blankLine()
 			return
-		}
 
-		if err := switcher.Start(cfg.Switcher); err != nil {
-			ui.warningf("切換功能啟動失敗：%v", err)
+		case "0":
+			if !toggleSwitcherEnabled(cfg) {
+				continue
+			}
+			ui.blankLine()
 			return
+		default:
+			showInvalidInputAndPause()
 		}
-
-		ui.successf("已儲存切換設定：%s", display)
-
-	case "0":
-		toggleSwitcherEnabled(cfg)
-	default:
-		showInvalidInputAndPause()
 	}
-
-	ui.blankLine()
 }
 
 func restartSwitcherIfNeeded(cfg *config.Config, wasRunning bool) {
@@ -118,18 +124,19 @@ func switcherToggleOptionLabel(cfg *config.Config) string {
 	return "切換為開啟"
 }
 
-func toggleSwitcherEnabled(cfg *config.Config) {
+func toggleSwitcherEnabled(cfg *config.Config) bool {
 	if cfg == nil || cfg.Switcher == nil || cfg.Switcher.Key == "" {
 		showInputErrorAndPause("尚未設定切換按鍵，請先使用 [1] 設定。")
-		return
+		return false
 	}
 
 	if cfg.Switcher.Enabled {
 		disableSwitcher(cfg)
-		return
+		return true
 	}
 
 	enableSwitcher(cfg)
+	return true
 }
 
 func enableSwitcher(cfg *config.Config) {

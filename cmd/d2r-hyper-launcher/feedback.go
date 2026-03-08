@@ -334,10 +334,10 @@ func (u *cliUI) anyKeyContinue() error {
 	if u.canSingleKeyContinue() {
 		u.inputf("請按任意鍵繼續...")
 		err = u.waitForAnyKey()
+		u.blankLine()
 	} else {
 		_, _ = u.readInputf("請按 Enter 繼續...")
 	}
-	u.blankLine()
 	return err
 }
 

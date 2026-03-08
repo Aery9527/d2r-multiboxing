@@ -29,26 +29,8 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 		return
 	}
 
-	ui.blankLine()
-	ui.headf("啟動指定帳號：選擇區域")
-	options := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "NA", "")
-		options.option("2", "EU", "")
-		options.option("3", "Asia", "")
-	})
-	ui.menuBlock(func() {
-		options.render()
-	})
-	input, ok := ui.readInput()
+	region, ok := promptLaunchRegion("啟動指定帳號：選擇區域")
 	if !ok {
-		return
-	}
-	if nav := isMenuNav(input); nav != "" {
-		return
-	}
-	region := parseRegionInput(input)
-	if region == nil {
-		showInputErrorAndPause("無效的區域選擇。")
 		return
 	}
 
@@ -101,26 +83,8 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 	}
 	ui.infof("本次只會啟動上面標示為 <未啟動> 的帳號，共 %d 個。", len(pendingAccounts))
 
-	ui.blankLine()
-	ui.headf("啟動所有帳號：選擇區域")
-	options := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "NA", "")
-		options.option("2", "EU", "")
-		options.option("3", "Asia", "")
-	})
-	ui.menuBlock(func() {
-		options.render()
-	})
-	input, ok := ui.readInput()
+	region, ok := promptLaunchRegion("啟動所有帳號：選擇區域")
 	if !ok {
-		return
-	}
-	if nav := isMenuNav(input); nav != "" {
-		return
-	}
-	region := parseRegionInput(input)
-	if region == nil {
-		showInputErrorAndPause("無效的區域選擇。")
 		return
 	}
 
@@ -184,6 +148,34 @@ func launchOffline(cfg *config.Config) {
 	ui.successf("D2R 已啟動 (PID: %d)", pid)
 	pauseAfterSuccessfulLaunch()
 	ui.blankLine()
+}
+
+func promptLaunchRegion(title string) (*d2r.Region, bool) {
+	for {
+		ui.blankLine()
+		ui.headf("%s", title)
+		options := ui.subMenuOptions(func(options *cliMenuOptions) {
+			options.option("1", "NA", "")
+			options.option("2", "EU", "")
+			options.option("3", "Asia", "")
+		})
+		ui.menuBlock(func() {
+			options.render()
+		})
+		input, ok := ui.readInput()
+		if !ok {
+			return nil, false
+		}
+		if nav := isMenuNav(input); nav != "" {
+			return nil, false
+		}
+		region := parseRegionInput(input)
+		if region == nil {
+			showInputErrorAndPause("無效的區域選擇。")
+			continue
+		}
+		return region, true
+	}
 }
 
 func pauseAfterSuccessfulLaunch() {

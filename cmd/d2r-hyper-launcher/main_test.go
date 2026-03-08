@@ -459,6 +459,77 @@ func TestShowInputErrorAndPauseFallsBackToEnterWhenSingleKeyUnavailable(t *testi
 	assert.Contains(t, output, "? 請按 Enter 繼續...")
 }
 
+func TestSetupSwitcherKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "x\n\nb\n", func() {
+			setupSwitcher(&config.Config{})
+		})
+	})
+
+	assert.Contains(t, output, "✘ 無效輸入，請重試。")
+	assert.Equal(t, 2, strings.Count(output, "視窗切換設定"))
+}
+
+func TestSetupLaunchDelayKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "abc\n\nb\n", func() {
+			setupLaunchDelay(&config.Config{LaunchDelay: config.DefaultLaunchDelayRange()})
+		})
+	})
+
+	assert.Contains(t, output, "✘ 啟動間隔必須是整數，或使用像 30-60 的範圍格式")
+	assert.Equal(t, 2, strings.Count(output, "啟動間隔設定"))
+}
+
+func TestSetupAccountLaunchFlagsKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{{DisplayName: "Alpha", Email: "alpha@example.com"}}
+	output := captureStdout(t, func() {
+		withTestInput(t, "x\n\nb\n", func() {
+			setupAccountLaunchFlags(accounts, "")
+		})
+	})
+
+	assert.Contains(t, output, "✘ 無效輸入，請重試。")
+	assert.Equal(t, 2, strings.Count(output, "帳號啟動 flag 設定"))
+}
+
+func TestPromptLaunchRegionKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "x\n\nb\n", func() {
+			region, ok := promptLaunchRegion("啟動指定帳號：選擇區域")
+			assert.False(t, ok)
+			assert.Nil(t, region)
+		})
+	})
+
+	assert.Contains(t, output, "✘ 無效的區域選擇。")
+	assert.Equal(t, 2, strings.Count(output, "啟動指定帳號：選擇區域"))
+}
+
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 
