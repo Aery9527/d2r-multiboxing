@@ -189,6 +189,10 @@ func TestPrintStartupAnnouncementShowsDisplayNameStatusNote(t *testing.T) {
 	assert.Contains(t, output, "• 資料目錄：C:\\Users\\User\\AppData\\Roaming\\d2r-hyper-launcher\n")
 	assert.NotContains(t, output, "D2R 路徑：")
 	assert.Contains(t, output, "⚠ 注意：帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，\n  所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，\n  就會導致啟動狀態顯示不正確。\n")
+	assert.Contains(t, output, "⚠ 注意事項：\n")
+	assert.Contains(t, output, "  - 建議先把 D2R 設成「視窗化」或「無邊框視窗」\n")
+	assert.Contains(t, output, "  - a 批次啟動預設 launch_delay 是 10 秒；舊版預設留下的 5 秒會自動按 10 秒處理，如要調整請回主選單輸入 d。\n")
+	assert.Contains(t, output, "  - 本工具為社群自用工具，與 Blizzard Entertainment 無關；使用風險自負。\n")
 	assert.NotContains(t, output, "啟動間隔：")
 	assert.NotContains(t, output, "視窗切換已啟用：")
 }

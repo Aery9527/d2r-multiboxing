@@ -25,6 +25,17 @@ func printStartupAnnouncement(cfgDir string) {
 		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，",
 		"就會導致啟動狀態顯示不正確。",
 	)
+	ui.warningLines(
+		"注意事項：",
+		"- 建議先把 D2R 設成「視窗化」或「無邊框視窗」",
+		"- 設定搖桿切換按鍵時，建議以管理員權限執行，否則可能抓不到搖桿訊號。",
+		"- switcher 只有在 d2r-hyper-launcher 持續開著時才會生效；若把工具關掉，切窗功能也會停止作用。",
+		"- a 批次啟動預設 launch_delay 是 10 秒；舊版預設留下的 5 秒會自動按 10 秒處理，如要調整請回主選單輸入 d。",
+		"- 盡量不要手動修改 config.json，避免不小心破壞 JSON 格式；大部分設定請優先透過工具內建選單調整。",
+		"- 僅支援 Battle.net 版 D2R；操作進程 Handle 也可能被部分防毒軟體誤報。",
+		"- 本工具不會修改遊戲檔案、注入遊戲程式或自動化遊戲操作。",
+		"- 本工具為社群自用工具，與 Blizzard Entertainment 無關；使用風險自負。",
+	)
 }
 
 func pauseAfterStartupAnnouncement() {
