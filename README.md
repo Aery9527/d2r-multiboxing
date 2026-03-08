@@ -57,7 +57,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 - `Email`：Battle.net 登入信箱
 - `Password`：Battle.net 密碼
 - `DisplayName`：工具內顯示名稱，也是視窗切換時看到的名稱；啟動後的視窗會被命名為 `D2R-<DisplayName>`
-- `LaunchFlags`：每個帳號額外要帶的啟動旗標；可以先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定；參數用途可再查 [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md)
+- `LaunchFlags`：每個帳號額外要帶的啟動旗標；可以先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定。目前工具只提供兩種 flag 設定；依目前測試結果，「關閉聲音」有明顯作用，但 `-lq` 看起來沒有實際效果。參數用途可再查 [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md)
 
 > ⚠️ 如果 D2R 還開著時就修改 `DisplayName`，重新打開 launcher 後的 `[已啟動]` / `[未啟動]` 狀態顯示可能暫時不準。  
 > 建議在所有遊戲視窗都關閉後再改名稱，或回到主選單用 `r` 重新整理狀態。
@@ -77,7 +77,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 - `a`：工具會先預掃描目前已開啟帳號；如果還有待啟動帳號，才會再讓你選區域與 mod，並只對尚未啟動的帳號依序啟動
 - `0`：先選一次要套用的已安裝 mod（如果有），再進離線模式
 - `d`：設定 `a` 批次啟動時的啟動間隔；可輸入 `30` 或 `30-60` 這種範圍，代表每次都在該區間內隨機等待，且下限固定不可低於 10 秒
-- `f`：先顯示帳號列表與置中的兩行 flag 對照表，再設定或取消各帳號的額外啟動 flag；進入第二層後，前兩個選項會依目前動作自動切成「設定」或「取消」版本，另可直接「設定 / 取消所有帳號所有 flag」，各旗標用途可查 [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md)
+- `f`：先顯示帳號列表與置中的兩行 flag 對照表，再設定或取消各帳號的額外啟動 flag；目前只提供兩種 flag 設定，其中依目前測試結果，「關閉聲音」有明顯作用，但 `-lq` 看起來沒有實際效果。進入第二層後，前兩個選項會依目前動作自動切成「設定」或「取消」版本，另可直接「設定 / 取消所有帳號所有 flag」，各旗標用途可查 [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md)
 - `p`：開啟 Windows 檔案選擇視窗，設定 `D2R.exe` 路徑
 - `s`：設定視窗切換快捷鍵／滑鼠側鍵／搖桿按鍵
 - `r`：重新讀取 `accounts.csv` 並刷新狀態
