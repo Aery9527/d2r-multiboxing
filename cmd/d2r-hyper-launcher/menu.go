@@ -18,14 +18,13 @@ const (
 	menuQuit = "q"
 )
 
-func printStartupAnnouncement(cfgDir string, cfg *config.Config) {
+func printStartupAnnouncement(cfgDir string) {
 	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
 	ui.infof("資料目錄：%s", cfgDir)
-	ui.infof("D2R 路徑：%s", cfg.D2RPath)
 	ui.warningLines(
-		"帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
+		"注意：帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
 		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，",
-		"就會導致啟動狀態顯示不正確，請注意。",
+		"就會導致啟動狀態顯示不正確。",
 	)
 }
 
@@ -42,28 +41,36 @@ func printMenu(accounts []account.Account, cfg *config.Config) {
 
 	ui.blankLine()
 	options := ui.mainMenuOptions(func(options *cliMenuOptions) {
-		options.option("數字", "啟動指定帳號")
-		options.option("0", "離線遊玩（可選 mod，不需帳密）")
-		options.option("a", "啟動所有帳號（可選 mod，只啟動未啟動的）")
-		options.option("d", fmt.Sprintf("設定啟動間隔（目前：%s）", cfg.LaunchDelay.DisplayString()))
-		options.option("f", "設定帳號啟動 flag")
-		options.option("p", "選擇 D2R.exe 路徑")
-		options.option("s", switcherMenuOptionLabel(cfg))
-		options.option("r", "重新整理狀態")
+		options.option("數字", "啟動指定帳號", "")
+		options.option("0", "離線遊玩", "可選 mod，不需帳密")
+		options.option("a", "啟動所有帳號", "可選 mod，只啟動未啟動的")
+		options.option("d", "設定啟動間隔", fmt.Sprintf("目前：%s", cfg.LaunchDelay.DisplayString()))
+		options.option("f", "設定帳號啟動 flag", "進入可查看所有帳號的 flag 設定")
+		options.option("p", "選擇 D2R.exe 路徑", "目前："+cfg.D2RPath)
+		options.option("s", "視窗切換設定", switcherMenuOptionStatus(cfg))
+		options.option("r", "重新整理狀態", "")
 	})
 	ui.menuBlock(func() {
 		options.render()
 	})
 }
 
-func switcherMenuOptionLabel(cfg *config.Config) string {
-	if cfg.Switcher == nil || !cfg.Switcher.Enabled {
-		return "視窗切換設定（目前：未啟用）"
+func switcherMenuOptionStatus(cfg *config.Config) string {
+	display, ok := switcherSavedDisplay(cfg)
+	if !ok {
+		return "狀態：未設定"
 	}
-	return fmt.Sprintf(
-		"視窗切換設定（目前：%s）",
-		switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex),
-	)
+	if !cfg.Switcher.Enabled {
+		return fmt.Sprintf("狀態：未啟用（已保存：%s）", display)
+	}
+	return fmt.Sprintf("狀態：已啟用（%s）", display)
+}
+
+func switcherSavedDisplay(cfg *config.Config) (string, bool) {
+	if cfg == nil || cfg.Switcher == nil || cfg.Switcher.Key == "" {
+		return "", false
+	}
+	return switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex), true
 }
 
 func isMenuNav(input string) string {

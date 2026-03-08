@@ -29,7 +29,7 @@ description: "Handle repository-specific CLI UI and message-presentation work in
    - `headf(...)`：表示目前位於哪個環節 / section
    - `menuBlock(func(){ ... })`：表示玩家準備閱讀並輸入的一組內容
 3. `headf(...)` 會依 `headerDivider` 的顯示寬度置中，寬度計算要走 `displayWidth(...)`，不能只用 rune count。
-4. menu option 現在優先走 `newMenuOptions()` 收集，再由 `render()` 依最長 prefix 對齊；`cliMenuOptions` 會綁定建立它的 `ui`，混合中文與 ASCII key 時也要維持對齊。
+4. menu option 現在優先走 `newMenuOptions()` 收集；`option(...)` 以 `key / label / comment` 三欄資料建模，再由 `render()` 依最長 prefix 與 label 做 display-width-aware 對齊；`cliMenuOptions` 會綁定建立它的 `ui`。
 5. 若主選單需要固定的 `q` 離開選項，優先使用 `ui.mainMenuOptions(func(*cliMenuOptions))`；它會統一補上 custom options 後的空行與「退出」。
 6. 若子選單需要固定的 `b` / `h` / `q` 導航，優先使用 `ui.subMenuOptions(func(*cliMenuOptions))`；它會統一補上 custom options 後的空行與「回上一層 / 回主選單 / 離開程式」。
 7. `infoLines(...)` / `warningLines(...)` / `promptLines(...)` / `successLines(...)` / `errorLines(...)` 是「同一組訊息的多段內容」，只會顯示一次 icon，後續段落縮排對齊到 icon 後方。
@@ -40,7 +40,7 @@ description: "Handle repository-specific CLI UI and message-presentation work in
 
 - 想調整玩家可見訊息時，優先找 `ui.infof(...)`、`ui.warningf(...)`、`ui.promptf(...)`、`ui.headf(...)`、`ui.menuBlock(...)`、`ui.newMenuOptions()`、`ui.mainMenuOptions(...)`、`ui.subMenuOptions(...)`；不要直接拼接裸輸出。
 - 若訊息是同一組公告 / 說明的多段內容，優先用 `*Lines(...)` helper，不要手動塞 `\n` 後又重複 icon。
-- 若需要 option 對齊，先把選項收進 `cliMenuOptions`，不要一邊 `ui.option(...)` 一邊猜最長寬度。
+- 若需要 option 對齊，先把選項收進 `cliMenuOptions`，並優先把補充資訊放進 `comment` 欄位；不要在 label 內硬塞一長串括號後又自己猜最長寬度。
 - 若涉及全形字、中文 key、或 icon 對齊，使用 `displayWidth(...)` 邏輯；不要回退成 `utf8.RuneCountInString(...)`。
 - announcement / header / menu 文案調整時，確認 `ui_test.go` 與 `main_test.go` 的預期仍反映最新 UX。
 - 主選單與子選單的顯示變更，若影響玩家理解流程，需同步檢查 `README.md`、`docs/` 與 `AGENT.md` 是否要更新。
@@ -58,7 +58,8 @@ description: "Handle repository-specific CLI UI and message-presentation work in
 1. 先看 `printMenu()` 或對應 `cli_*.go` flow
 2. 主選單若最後要帶固定離開選項，優先用 `ui.mainMenuOptions(func(options *cliMenuOptions) { ... })`
 3. 其他一般 menu 用 `newMenuOptions()` 收集所有選項，再 `render()`
-4. 若是子選單，優先用 `ui.subMenuOptions(func(options *cliMenuOptions) { ... })`，讓 UI layer 自動補上空行與固定導覽選項
+4. 每個 option 優先寫成 `option(key, label, comment)`；主動作放 `label`，狀態 / 補充說明放 `comment`
+5. 若是子選單，優先用 `ui.subMenuOptions(func(options *cliMenuOptions) { ... })`，讓 UI layer 自動補上空行與固定導覽選項
 
 ### 調整錯誤 / 提示 / confirm 顯示
 

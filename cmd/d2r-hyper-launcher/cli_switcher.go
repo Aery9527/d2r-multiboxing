@@ -11,16 +11,22 @@ func setupSwitcher(cfg *config.Config) {
 	ui.blankLine()
 	ui.headf("視窗切換設定")
 
-	if cfg.Switcher != nil && cfg.Switcher.Enabled {
-		ui.infof("目前設定：%s", switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex))
+	if display, ok := switcherSavedDisplay(cfg); ok {
+		if cfg.Switcher.Enabled {
+			ui.infof("目前狀態：已啟用")
+			ui.infof("目前設定：%s", display)
+		} else {
+			ui.infof("目前狀態：未啟用")
+			ui.infof("已保存設定：%s", display)
+		}
 	} else {
-		ui.infof("目前狀態：未啟用")
+		ui.infof("目前狀態：未設定")
 	}
 
 	ui.blankLine()
 	options := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "設定切換按鍵")
-		options.option("0", "關閉切換功能")
+		options.option("1", "設定切換按鍵", "")
+		options.option("0", switcherToggleOptionLabel(cfg), "")
 	})
 	ui.menuBlock(func() {
 		options.render()
@@ -89,15 +95,7 @@ func setupSwitcher(cfg *config.Config) {
 		ui.successf("已儲存切換設定：%s", display)
 
 	case "0":
-		switcher.Stop()
-		if cfg.Switcher != nil {
-			cfg.Switcher.Enabled = false
-		}
-		if err := config.Save(cfg); err != nil {
-			ui.warningf("設定儲存失敗：%v", err)
-			return
-		}
-		ui.successf("已關閉切換功能")
+		toggleSwitcherEnabled(cfg)
 	default:
 		showInvalidInputAndPause()
 	}
@@ -111,4 +109,60 @@ func restartSwitcherIfNeeded(cfg *config.Config, wasRunning bool) {
 			ui.warningf("重新啟動切換功能失敗：%v", err)
 		}
 	}
+}
+
+func switcherToggleOptionLabel(cfg *config.Config) string {
+	if cfg != nil && cfg.Switcher != nil && cfg.Switcher.Enabled {
+		return "切換為關閉"
+	}
+	return "切換為開啟"
+}
+
+func toggleSwitcherEnabled(cfg *config.Config) {
+	if cfg == nil || cfg.Switcher == nil || cfg.Switcher.Key == "" {
+		showInputErrorAndPause("尚未設定切換按鍵，請先使用 [1] 設定。")
+		return
+	}
+
+	if cfg.Switcher.Enabled {
+		disableSwitcher(cfg)
+		return
+	}
+
+	enableSwitcher(cfg)
+}
+
+func enableSwitcher(cfg *config.Config) {
+	candidate := *cfg.Switcher
+	candidate.Enabled = true
+	if err := switcher.Start(&candidate); err != nil {
+		ui.warningf("切換功能啟動失敗：%v", err)
+		return
+	}
+
+	cfg.Switcher.Enabled = true
+	if err := config.Save(cfg); err != nil {
+		cfg.Switcher.Enabled = false
+		switcher.Stop()
+		ui.warningf("設定儲存失敗：%v", err)
+		return
+	}
+
+	ui.successf("已開啟切換功能：%s", switcher.FormatSwitcherDisplay(candidate.Modifiers, candidate.Key, candidate.GamepadIndex))
+}
+
+func disableSwitcher(cfg *config.Config) {
+	switcher.Stop()
+	cfg.Switcher.Enabled = false
+	if err := config.Save(cfg); err != nil {
+		cfg.Switcher.Enabled = true
+		if restartErr := switcher.Start(cfg.Switcher); restartErr != nil {
+			ui.warningf("設定儲存失敗：%v；且無法恢復切換功能：%v", err, restartErr)
+			return
+		}
+		ui.warningf("設定儲存失敗：%v", err)
+		return
+	}
+
+	ui.successf("已關閉切換功能，原設定會保留。")
 }

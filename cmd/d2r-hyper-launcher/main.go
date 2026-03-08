@@ -37,7 +37,7 @@ func main() {
 		return
 	}
 	cfgDir, _ := config.Dir()
-	printStartupAnnouncement(cfgDir, cfg)
+	printStartupAnnouncement(cfgDir)
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {

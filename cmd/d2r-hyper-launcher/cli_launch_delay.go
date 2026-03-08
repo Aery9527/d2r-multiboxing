@@ -15,8 +15,8 @@ func setupLaunchDelay(cfg *config.Config) {
 	options := ui.subMenuOptions(nil)
 	ui.menuBlock(func() {
 		ui.infof("固定下限：%d 秒", config.MinLaunchDelaySeconds)
-		ui.promptf("可輸入固定秒數，例如：30")
-		ui.promptf("也可輸入隨機範圍，例如：30-60")
+		ui.infof("可輸入固定秒數，例如：30")
+		ui.infof("也可輸入隨機範圍，例如：30-60")
 		options.render()
 	})
 	input, ok := ui.readInputf("請輸入新的秒數或範圍：")

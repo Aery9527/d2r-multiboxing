@@ -50,9 +50,10 @@ const (
 )
 
 type cliMenuEntry struct {
-	kind  cliMenuEntryKind
-	key   string
-	label string
+	kind    cliMenuEntryKind
+	key     string
+	label   string
+	comment string
 }
 
 type cliMenuOptions struct {
@@ -225,15 +226,20 @@ func (u *cliUI) readInputf(format string, args ...any) (string, bool) {
 	return u.readLine()
 }
 
-func (u *cliUI) option(key, label string) {
-	fmt.Printf("[%s] %s\n", key, label)
+func (u *cliUI) option(key, label, comment string) {
+	if comment == "" {
+		fmt.Printf("[%s] %s\n", key, label)
+		return
+	}
+	fmt.Printf("[%s] %s  %s\n", key, label, comment)
 }
 
-func (o *cliMenuOptions) option(key, label string) {
+func (o *cliMenuOptions) option(key, label, comment string) {
 	o.entries = append(o.entries, cliMenuEntry{
-		kind:  cliMenuEntryOption,
-		key:   key,
-		label: label,
+		kind:    cliMenuEntryOption,
+		key:     key,
+		label:   label,
+		comment: comment,
 	})
 }
 
@@ -243,18 +249,19 @@ func (o *cliMenuOptions) blankLine() {
 
 func (o *cliMenuOptions) appendSubMenuNav() {
 	o.blankLine()
-	o.option(menuBack, "回上一層")
-	o.option(menuHome, "回主選單")
-	o.option(menuQuit, "離開程式")
+	o.option(menuBack, "回上一層", "")
+	o.option(menuHome, "回主選單", "")
+	o.option(menuQuit, "離開程式", "")
 }
 
 func (o *cliMenuOptions) appendQuitOption() {
 	o.blankLine()
-	o.option(menuQuit, "退出")
+	o.option(menuQuit, "退出", "")
 }
 
 func (o *cliMenuOptions) render() {
 	maxPrefixWidth := 0
+	maxLabelWidth := 0
 	for _, entry := range o.entries {
 		if entry.kind != cliMenuEntryOption {
 			continue
@@ -262,6 +269,10 @@ func (o *cliMenuOptions) render() {
 		prefixWidth := displayWidth(fmt.Sprintf("[%s]", entry.key))
 		if prefixWidth > maxPrefixWidth {
 			maxPrefixWidth = prefixWidth
+		}
+		labelWidth := displayWidth(entry.label)
+		if labelWidth > maxLabelWidth {
+			maxLabelWidth = labelWidth
 		}
 	}
 
@@ -271,8 +282,13 @@ func (o *cliMenuOptions) render() {
 			o.ui.blankLine()
 		case cliMenuEntryOption:
 			prefix := fmt.Sprintf("[%s]", entry.key)
-			padding := strings.Repeat(" ", maxPrefixWidth-displayWidth(prefix))
-			o.ui.rawlnf("%s%s %s", prefix, padding, entry.label)
+			prefixPadding := strings.Repeat(" ", maxPrefixWidth-displayWidth(prefix))
+			line := fmt.Sprintf("%s%s %s", prefix, prefixPadding, entry.label)
+			if entry.comment != "" {
+				labelPadding := strings.Repeat(" ", maxLabelWidth-displayWidth(entry.label))
+				line += fmt.Sprintf("%s  %s", labelPadding, entry.comment)
+			}
+			o.ui.rawln(line)
 		}
 	}
 }

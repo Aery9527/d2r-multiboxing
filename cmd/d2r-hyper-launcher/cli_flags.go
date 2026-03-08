@@ -19,8 +19,8 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 	printAccountLaunchFlagSummary(accounts)
 	ui.blankLine()
 	options := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "設定 flag")
-		options.option("2", "取消 flag")
+		options.option("1", "設定 flag", "")
+		options.option("2", "取消 flag", "")
 	})
 	ui.menuBlock(func() {
 		options.render()
@@ -51,8 +51,8 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 	ui.headf("%s flag：選擇操作方式", actionLabel)
 	ui.promptf("這次要如何%s flag？", actionLabel)
 	modeOptions := ui.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "以 flag 為維度")
-		options.option("2", "以帳號為維度")
+		options.option("1", "以 flag 為維度", "")
+		options.option("2", "以帳號為維度", "")
 	})
 	ui.menuBlock(func() {
 		modeOptions.render()
@@ -81,14 +81,17 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMo
 	ui.headf("%s flag：依 flag 選帳號", flagActionLabel(setMode))
 	flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 		for i, option := range options {
-			label := option.Name
+			comment := option.Description
 			if option.Description != "" {
-				label += fmt.Sprintf("（%s）", option.Description)
+				comment = fmt.Sprintf("說明：%s", option.Description)
 			}
 			if option.Experimental {
-				label += "，效果依版本而定"
+				if comment != "" {
+					comment += "，"
+				}
+				comment += "效果依版本而定"
 			}
-			menuOptions.option(strconv.Itoa(i+1), label)
+			menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
 		}
 	})
 	ui.menuBlock(func() {
@@ -114,7 +117,7 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMo
 	ui.headf("%s flag：選擇帳號", actionLabel)
 	accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 		for i, acc := range accounts {
-			menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)  flag：%s", acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags)))
+			menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf("flag：%s", account.LaunchFlagsSummary(acc.LaunchFlags)))
 		}
 	})
 	ui.menuBlock(func() {
@@ -162,7 +165,7 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, se
 	ui.headf("%s flag：先選帳號", flagActionLabel(setMode))
 	accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 		for i, acc := range accounts {
-			menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)  flag：%s", acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags)))
+			menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf("flag：%s", account.LaunchFlagsSummary(acc.LaunchFlags)))
 		}
 	})
 	ui.menuBlock(func() {
@@ -189,14 +192,17 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, se
 	ui.headf("%s flag：選擇旗標", actionLabel)
 	flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 		for i, option := range options {
-			label := option.Name
+			comment := option.Description
 			if option.Description != "" {
-				label += fmt.Sprintf("（%s）", option.Description)
+				comment = fmt.Sprintf("說明：%s", option.Description)
 			}
 			if option.Experimental {
-				label += "，效果依版本而定"
+				if comment != "" {
+					comment += "，"
+				}
+				comment += "效果依版本而定"
 			}
-			menuOptions.option(strconv.Itoa(i+1), label)
+			menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
 		}
 	})
 	ui.menuBlock(func() {

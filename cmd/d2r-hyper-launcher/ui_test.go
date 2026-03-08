@@ -21,7 +21,7 @@ func TestCLIUIOptionRendersBracketedChoice(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.option("a", "啟動所有帳號")
+		testUI.option("a", "啟動所有帳號", "")
 	})
 
 	assert.Equal(t, "[a] 啟動所有帳號\n", output)
@@ -52,7 +52,7 @@ func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		testUI.menuBlock(func() {
-			testUI.option("1", "測試選項")
+			testUI.option("1", "測試選項", "")
 		})
 	})
 
@@ -62,9 +62,9 @@ func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
 func TestCLIMenuOptionsRenderAlignsPrefixesToLongestKey(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.newMenuOptions()
-	options.option("數字", "啟動指定帳號")
-	options.option("a", "啟動所有帳號")
-	options.option("0", "離線遊玩")
+	options.option("數字", "啟動指定帳號", "")
+	options.option("a", "啟動所有帳號", "")
+	options.option("0", "離線遊玩", "")
 
 	output := captureStdout(t, func() {
 		options.render()
@@ -81,7 +81,7 @@ func TestDisplayWidthTreatsCJKAsDoubleWidth(t *testing.T) {
 func TestCLIUISubMenuOptionsAppendsCommonNavAfterBlankLine(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "測試選項")
+		options.option("1", "測試選項", "")
 	})
 
 	output := captureStdout(t, func() {
@@ -94,7 +94,7 @@ func TestCLIUISubMenuOptionsAppendsCommonNavAfterBlankLine(t *testing.T) {
 func TestCLIUIMainMenuOptionsAppendsQuitAfterBlankLine(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.mainMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "測試選項")
+		options.option("1", "測試選項", "")
 	})
 
 	output := captureStdout(t, func() {
@@ -102,6 +102,19 @@ func TestCLIUIMainMenuOptionsAppendsQuitAfterBlankLine(t *testing.T) {
 	})
 
 	assert.Equal(t, "[1] 測試選項\n\n[q] 退出\n", output)
+}
+
+func TestCLIMenuOptionsRenderAlignsCommentColumn(t *testing.T) {
+	testUI := newCLIUI()
+	options := testUI.newMenuOptions()
+	options.option("0", "離線遊玩", "可選 mod，不需帳密")
+	options.option("d", "設定啟動間隔", "目前：30-60 秒（隨機）")
+
+	output := captureStdout(t, func() {
+		options.render()
+	})
+
+	assert.Equal(t, "[0] 離線遊玩      可選 mod，不需帳密\n[d] 設定啟動間隔  目前：30-60 秒（隨機）\n", output)
 }
 
 func TestCLIUIInputPromptUsesPromptRenderer(t *testing.T) {
