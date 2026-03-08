@@ -42,7 +42,7 @@ func main() {
 	cfgDir, _ := config.Dir()
 	fmt.Printf("  資料目錄：%s\n", cfgDir)
 	fmt.Printf("  D2R 路徑：%s\n", cfg.D2RPath)
-	fmt.Printf("  啟動間隔：%d 秒\n", cfg.LaunchDelay)
+	fmt.Printf("  啟動間隔：%s\n", cfg.LaunchDelay.DisplayString())
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
@@ -109,6 +109,8 @@ func main() {
 			launchOffline(cfg, scanner)
 		case "a":
 			launchAll(accounts, cfg, scanner)
+		case "d":
+			setupLaunchDelay(cfg, scanner)
 		case "p":
 			setupD2RPath(cfg)
 		case "s":

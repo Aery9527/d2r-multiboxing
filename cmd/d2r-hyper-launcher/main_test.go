@@ -104,6 +104,64 @@ func TestFormatLaunchDelayMessage(t *testing.T) {
 	assert.Equal(t, "  等待 30 秒後啟動下一個帳號：VoidLife", formatLaunchDelayMessage(30, "VoidLife"))
 }
 
+func TestFormatLaunchDelayRemainingMessage(t *testing.T) {
+	assert.Equal(t, "  還剩 25 秒後啟動下一個帳號：VoidLife", formatLaunchDelayRemainingMessage(25, "VoidLife"))
+}
+
+func TestParseLaunchDelayInput(t *testing.T) {
+	delay, err := parseLaunchDelayInput("45")
+	assert.NoError(t, err)
+	assert.Equal(t, config.LaunchDelayRange{MinSeconds: 45, MaxSeconds: 45}, delay)
+
+	delay, err = parseLaunchDelayInput("30-60")
+	assert.NoError(t, err)
+	assert.Equal(t, config.LaunchDelayRange{MinSeconds: 30, MaxSeconds: 60}, delay)
+}
+
+func TestParseLaunchDelayInputRejectsNegative(t *testing.T) {
+	_, err := parseLaunchDelayInput("9")
+	assert.EqualError(t, err, "啟動間隔下限不可小於 10 秒")
+}
+
+func TestParseLaunchDelayInputRejectsNonInteger(t *testing.T) {
+	_, err := parseLaunchDelayInput("abc")
+	assert.EqualError(t, err, "啟動間隔必須是整數，或使用像 30-60 的範圍格式")
+}
+
+func TestParseLaunchDelayInputRejectsInvalidRangeOrder(t *testing.T) {
+	_, err := parseLaunchDelayInput("60-30")
+	assert.EqualError(t, err, "啟動間隔下限不可大於上限")
+}
+
+func TestLaunchDelayRangeUsesRandomValue(t *testing.T) {
+	delay := config.LaunchDelayRange{MinSeconds: 30, MaxSeconds: 60}
+	assert.Equal(t, 42, delay.NextSeconds(func(n int) int {
+		assert.Equal(t, 31, n)
+		return 12
+	}))
+}
+
+func TestWaitForNextBatchLaunchReportsRemainingEveryFiveSeconds(t *testing.T) {
+	originalSleep := launchDelaySleep
+	t.Cleanup(func() {
+		launchDelaySleep = originalSleep
+	})
+
+	var sleeps []time.Duration
+	launchDelaySleep = func(d time.Duration) {
+		sleeps = append(sleeps, d)
+	}
+
+	output := captureStdout(t, func() {
+		waitForNextBatchLaunch(12, "VoidLife")
+	})
+
+	assert.Contains(t, output, "  等待 12 秒後啟動下一個帳號：VoidLife")
+	assert.Contains(t, output, "  還剩 7 秒後啟動下一個帳號：VoidLife")
+	assert.Contains(t, output, "  還剩 2 秒後啟動下一個帳號：VoidLife")
+	assert.Equal(t, []time.Duration{5 * time.Second, 5 * time.Second, 2 * time.Second}, sleeps)
+}
+
 func TestIsAccountRunningReturnsFalseForMissingWindow(t *testing.T) {
 	assert.False(t, isAccountRunning("DefinitelyNotRunningAccount"))
 }

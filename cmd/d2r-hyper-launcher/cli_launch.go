@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"d2rhl/internal/common/config"
@@ -11,6 +12,9 @@ import (
 	"d2rhl/internal/multiboxing/account"
 	"d2rhl/internal/multiboxing/launcher"
 )
+
+var launchDelayRandIntN = rand.Intn
+var launchDelaySleep = time.Sleep
 
 func launchAccount(acc *account.Account, cfg *config.Config, scanner *bufio.Scanner) {
 	if !ensureLaunchReadyD2RPath(cfg, scanner) {
@@ -135,9 +139,9 @@ func launchAll(accounts []account.Account, cfg *config.Config, scanner *bufio.Sc
 
 		renameLaunchedWindow(pid, acc.DisplayName)
 
-		if cfg.LaunchDelay > 0 && i+1 < len(pendingAccounts) {
-			fmt.Println(formatLaunchDelayMessage(cfg.LaunchDelay, pendingAccounts[i+1].DisplayName))
-			time.Sleep(time.Duration(cfg.LaunchDelay) * time.Second)
+		if i+1 < len(pendingAccounts) {
+			delaySeconds := cfg.LaunchDelay.NextSeconds(launchDelayRandIntN)
+			waitForNextBatchLaunch(delaySeconds, pendingAccounts[i+1].DisplayName)
 		}
 	}
 	fmt.Println()
@@ -233,4 +237,29 @@ func batchAccountStatusLines(accounts []account.Account, runningTitles map[strin
 
 func formatLaunchDelayMessage(delaySeconds int, nextDisplayName string) string {
 	return fmt.Sprintf("  等待 %d 秒後啟動下一個帳號：%s", delaySeconds, nextDisplayName)
+}
+
+func formatLaunchDelayRemainingMessage(remainingSeconds int, nextDisplayName string) string {
+	return fmt.Sprintf("  還剩 %d 秒後啟動下一個帳號：%s", remainingSeconds, nextDisplayName)
+}
+
+func waitForNextBatchLaunch(delaySeconds int, nextDisplayName string) {
+	if delaySeconds <= 0 {
+		return
+	}
+
+	fmt.Println(formatLaunchDelayMessage(delaySeconds, nextDisplayName))
+	remainingSeconds := delaySeconds
+	for remainingSeconds > 0 {
+		stepSeconds := 5
+		if remainingSeconds < stepSeconds {
+			stepSeconds = remainingSeconds
+		}
+
+		launchDelaySleep(time.Duration(stepSeconds) * time.Second)
+		remainingSeconds -= stepSeconds
+		if remainingSeconds > 0 {
+			fmt.Println(formatLaunchDelayRemainingMessage(remainingSeconds, nextDisplayName))
+		}
+	}
 }

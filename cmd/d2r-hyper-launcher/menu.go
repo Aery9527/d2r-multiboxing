@@ -34,6 +34,7 @@ func printMenu(accounts []account.Account) {
 	fmt.Println("  <數字>  啟動指定帳號")
 	fmt.Println("  0       離線遊玩（可選 mod，不需帳密）")
 	fmt.Println("  a       啟動所有帳號（可選 mod，只啟動未啟動的）")
+	fmt.Println("  d       設定啟動間隔")
 	fmt.Println("  f       設定帳號啟動 flag")
 	fmt.Println("  p       選擇 D2R.exe 路徑")
 	fmt.Println("  s       視窗切換設定")
