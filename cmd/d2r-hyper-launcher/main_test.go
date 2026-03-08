@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -404,6 +405,69 @@ func TestPrintAccountList(t *testing.T) {
 	assert.NotContains(t, output, "flag：")
 }
 
+func TestBuildAccountLaunchFlagTableLines(t *testing.T) {
+	options := account.LaunchFlagOptions()
+	accounts := []account.Account{
+		{LaunchFlags: account.LaunchFlagNoSound | account.LaunchFlagSkipLogoVideo},
+		{LaunchFlags: account.LaunchFlagNoRumble},
+	}
+
+	lines := buildAccountLaunchFlagTableLines(accounts)
+
+	assert.Len(t, lines, len(accounts)+5)
+	assert.Equal(t, lines[0], lines[3])
+	assert.Equal(t, lines[0], lines[len(lines)-1])
+
+	headerTopCells := parseLaunchFlagTableCells(lines[1])
+	headerBottomCells := parseLaunchFlagTableCells(lines[2])
+	expectedHeaderTop := []string{"帳號編號"}
+	expectedHeaderBottom := []string{""}
+	for _, option := range options {
+		title, flag := launchFlagTableHeaderLines(option)
+		expectedHeaderTop = append(expectedHeaderTop, title)
+		expectedHeaderBottom = append(expectedHeaderBottom, flag)
+	}
+	assert.Equal(t, expectedHeaderTop, headerTopCells)
+	assert.Equal(t, expectedHeaderBottom, headerBottomCells)
+
+	assert.Equal(t, expectedLaunchFlagTableCells(1, accounts[0].LaunchFlags, options), parseLaunchFlagTableCells(lines[4]))
+	assert.Equal(t, expectedLaunchFlagTableCells(2, accounts[1].LaunchFlags, options), parseLaunchFlagTableCells(lines[5]))
+}
+
+func TestCenterLaunchFlagTableCell(t *testing.T) {
+	assert.Equal(t, "  v  ", centerLaunchFlagTableCell("v", 5))
+	assert.Equal(t, " 帳號 ", centerLaunchFlagTableCell("帳號", 6))
+	assert.Equal(t, "alpha", centerLaunchFlagTableCell("alpha", 3))
+}
+
+func TestSetupAccountLaunchFlagsShowsFlagTableAfterAccountList(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{{DisplayName: "Alpha", Email: "alpha@example.com", LaunchFlags: account.LaunchFlagNoSound}}
+	output := captureStdout(t, func() {
+		withTestInput(t, "b\n", func() {
+			setupAccountLaunchFlags(accounts, "")
+		})
+	})
+
+	accountListIndex := strings.Index(output, "帳號列表：")
+	flagTableIndex := strings.Index(output, "flag 對照表：")
+	menuOptionIndex := strings.Index(output, "[1] 設定 flag")
+	assert.NotEqual(t, -1, accountListIndex)
+	assert.NotEqual(t, -1, flagTableIndex)
+	assert.NotEqual(t, -1, menuOptionIndex)
+	assert.Less(t, accountListIndex, flagTableIndex)
+	assert.Less(t, flagTableIndex, menuOptionIndex)
+	assert.Contains(t, output, "關閉聲音")
+	assert.Contains(t, output, "-ns / -nosound")
+	assert.Contains(t, output, "| 1")
+	assert.Contains(t, output, "| v ")
+}
+
 func TestShowInputErrorAndPause(t *testing.T) {
 	originalWaitForAnyKey := ui.waitForAnyKey
 	originalCanSingleKeyContinue := ui.canSingleKeyContinue
@@ -574,4 +638,26 @@ func withTestInput(t *testing.T, input string, fn func()) {
 	}()
 
 	fn()
+}
+
+func parseLaunchFlagTableCells(line string) []string {
+	parts := strings.Split(line, "|")
+	cells := make([]string, 0, len(parts))
+	for _, part := range parts[1 : len(parts)-1] {
+		cells = append(cells, strings.TrimSpace(part))
+	}
+	return cells
+}
+
+func expectedLaunchFlagTableCells(accountNumber int, flags uint32, options []account.LaunchFlagOption) []string {
+	cells := make([]string, 0, len(options)+1)
+	cells = append(cells, strconv.Itoa(accountNumber))
+	for _, option := range options {
+		cell := ""
+		if flags&option.Bit != 0 {
+			cell = "v"
+		}
+		cells = append(cells, cell)
+	}
+	return cells
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"d2rhl/internal/multiboxing/account"
 )
@@ -18,6 +19,8 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 		ui.blankLine()
 		ui.headf("帳號啟動 flag 設定")
 		printAccountList(accounts)
+		ui.blankLine()
+		printAccountLaunchFlagTable(accounts)
 		ui.blankLine()
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("1", "設定 flag", "")
@@ -303,6 +306,121 @@ func printAccountList(accounts []account.Account) {
 		}
 		ui.rawlnf("[%d] <%s> %-15s (%s) ", i+1, status, acc.DisplayName, acc.Email)
 	}
+}
+
+func printAccountLaunchFlagTable(accounts []account.Account) {
+	ui.infof("flag 對照表：")
+	for _, line := range buildAccountLaunchFlagTableLines(accounts) {
+		ui.rawln(line)
+	}
+}
+
+func buildAccountLaunchFlagTableLines(accounts []account.Account) []string {
+	options := account.LaunchFlagOptions()
+	headerTop := make([]string, 0, len(options)+1)
+	headerBottom := make([]string, 0, len(options)+1)
+	headerTop = append(headerTop, "帳號編號")
+	headerBottom = append(headerBottom, "")
+	for _, option := range options {
+		title, flag := launchFlagTableHeaderLines(option)
+		headerTop = append(headerTop, title)
+		headerBottom = append(headerBottom, flag)
+	}
+
+	widths := launchFlagTableColumnWidths(accounts, headerTop, headerBottom, options)
+
+	lines := make([]string, 0, len(accounts)+5)
+	separator := buildLaunchFlagTableSeparator(widths)
+	lines = append(lines, separator)
+	lines = append(lines, buildLaunchFlagTableRow(headerTop, widths))
+	lines = append(lines, buildLaunchFlagTableRow(headerBottom, widths))
+	lines = append(lines, separator)
+	for i, acc := range accounts {
+		cells := make([]string, 0, len(options)+1)
+		cells = append(cells, strconv.Itoa(i+1))
+		for _, option := range options {
+			cell := ""
+			if acc.LaunchFlags&option.Bit != 0 {
+				cell = "v"
+			}
+			cells = append(cells, cell)
+		}
+		lines = append(lines, buildLaunchFlagTableRow(cells, widths))
+	}
+	lines = append(lines, separator)
+	return lines
+}
+
+func launchFlagTableHeaderLines(option account.LaunchFlagOption) (string, string) {
+	if option.Description == "" {
+		return option.Name, ""
+	}
+	return option.Name, option.Description
+}
+
+func launchFlagTableColumnWidths(accounts []account.Account, headerTop []string, headerBottom []string, options []account.LaunchFlagOption) []int {
+	widths := make([]int, len(headerTop))
+	for i := range headerTop {
+		widths[i] = maxDisplayWidth(headerTop[i], headerBottom[i])
+	}
+	for i := range accounts {
+		indexWidth := displayWidth(strconv.Itoa(i + 1))
+		if indexWidth > widths[0] {
+			widths[0] = indexWidth
+		}
+		for j, option := range options {
+			cellWidth := 0
+			if accounts[i].LaunchFlags&option.Bit != 0 {
+				cellWidth = displayWidth("v")
+			}
+			if cellWidth > widths[j+1] {
+				widths[j+1] = cellWidth
+			}
+		}
+	}
+	return widths
+}
+
+func maxDisplayWidth(values ...string) int {
+	maxWidth := 0
+	for _, value := range values {
+		if width := displayWidth(value); width > maxWidth {
+			maxWidth = width
+		}
+	}
+	return maxWidth
+}
+
+func buildLaunchFlagTableSeparator(widths []int) string {
+	var builder strings.Builder
+	builder.WriteString("+")
+	for _, width := range widths {
+		builder.WriteString(strings.Repeat("-", width+2))
+		builder.WriteString("+")
+	}
+	return builder.String()
+}
+
+func buildLaunchFlagTableRow(cells []string, widths []int) string {
+	var builder strings.Builder
+	builder.WriteString("|")
+	for i, cell := range cells {
+		builder.WriteString(" ")
+		builder.WriteString(centerLaunchFlagTableCell(cell, widths[i]))
+		builder.WriteString(" ")
+		builder.WriteString("|")
+	}
+	return builder.String()
+}
+
+func centerLaunchFlagTableCell(value string, width int) string {
+	padding := width - displayWidth(value)
+	if padding <= 0 {
+		return value
+	}
+	left := padding / 2
+	right := padding - left
+	return strings.Repeat(" ", left) + value + strings.Repeat(" ", right)
 }
 
 func printLaunchFlagOptions(options []account.LaunchFlagOption) {
