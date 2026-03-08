@@ -23,9 +23,9 @@ func printStartupAnnouncement(cfgDir string, cfg *config.Config) {
 	ui.infof("資料目錄：%s", cfgDir)
 	ui.infof("D2R 路徑：%s", cfg.D2RPath)
 	ui.warningLines(
-		"帳號啟動狀態是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
-		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName，",
-		"就會導致狀態顯示不正確，請注意。",
+		"帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
+		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，",
+		"就會導致啟動狀態顯示不正確，請注意。",
 	)
 }
 

@@ -14,7 +14,8 @@
 
 - 遇到 `multiboxing` 相關需求時，優先使用對應 skill 取得細節 context
 - 遇到 `switcher` 相關需求時，優先使用對應 skill 取得細節 context
-- `AGENT.md` 只提供高層引導，不承載這兩個功能的細部實作說明
+- 遇到 CLI 顯示訊息、header、announcement、menu 排版、option 對齊、prompt / error / success 顯示等玩家可見 UI 調整時，優先使用 `d2r-cli-ui` skill
+- `AGENT.md` 只提供高層引導，不承載各功能 skill 的細部實作說明
 
 ## 高層架構
 
@@ -40,6 +41,11 @@
   - `h`：回主選單
   - `q`：離開程式
 - 相關共用邏輯集中在 `cmd/d2r-hyper-launcher` 下的 CLI 檔案群，不要再把所有選單與互動流程塞回單一 `main.go`
+- `cmd/d2r-hyper-launcher/feedback.go` 是目前的 CLI UI layer；調整玩家可見訊息時，應優先沿用 `ui.*` helper，而不是回頭散落 `fmt.Print*`、手動 `\n` 排版或直接操作輸入 scanner
+- `headf(...)` 與 `menuBlock(...)` 是不同語意：前者代表目前位於哪個 section，後者代表玩家準備閱讀並輸入的一組內容
+- 若一組訊息需要多段換行但仍屬同一則說明，優先使用 `infoLines(...)` / `warningLines(...)` / `promptLines(...)` / `successLines(...)` / `errorLines(...)`，讓 icon 只出現一次並維持 continuation 對齊
+- menu option 需要整齊對齊時，優先使用 `newMenuOptions()` 收集後再 `render(ui)`；不要在 call site 一邊輸出一邊猜 spacing
+- 遇到中文 / 全形字寬度問題時，沿用現有 display-width-aware 對齊邏輯，不要退回單純 rune count
 - 玩家在 CLI 內任何可預期的輸入錯誤（格式錯誤、超出範圍、無效選項）都要走共用 helper，先顯示錯誤訊息，再提示玩家確認後才回到原流程；優先顯示「按任意鍵繼續」，但若終端不支援單鍵讀取，需自動 fallback 成「按 Enter 繼續」
 - 不要要求玩家手動修改 `config.json`；玩家可見設定應優先提供 CLI 內可操作流程，例如用檔案選擇器設定 `D2R.exe` 路徑
 

@@ -137,7 +137,7 @@ func TestPrintStartupAnnouncementShowsDisplayNameStatusNote(t *testing.T) {
 	assert.Contains(t, output, "d2r-hyper-launcher (")
 	assert.Contains(t, output, "• 資料目錄：C:\\Users\\User\\AppData\\Roaming\\d2r-hyper-launcher\n")
 	assert.Contains(t, output, "• D2R 路徑：C:\\Games\\D2R\\D2R.exe\n")
-	assert.Contains(t, output, "⚠ 帳號啟動狀態是用 account.csv 裡的 DisplayName 對應視窗名稱，\n  所以已經透過該工具開啟 D2R 然後又去修改 DisplayName，\n  就會導致狀態顯示不正確，請注意。\n")
+	assert.Contains(t, output, "⚠ 帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，\n  所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，\n  就會導致啟動狀態顯示不正確，請注意。\n")
 	assert.NotContains(t, output, "啟動間隔：")
 	assert.NotContains(t, output, "視窗切換已啟用：")
 }
