@@ -11,7 +11,7 @@ description: "Handle repository-specific release work in d2r-hyper-launcher. Use
 
 - `git tag --list` - 找出上一個 release tag
 - `git log <last-tag>..HEAD --oneline` - 彙整自上次 release 以來的所有 commit
-- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 確認版本字串由 `-ldflags "-X main.version=..."` 注入
+- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 確認版本字串與 release 時間由 `-ldflags "-X main.version=... -X main.releaseTime=..."` 注入
 - [README.md](../../../README.md) - 確認目前 build 與玩家可見入口
 - [AGENT.md](../../../AGENT.md) - 測試、文件同步與整體規範
 - `.claude/skills/d2r-commit/SKILL.md` - commit message 與 commit 前檢查的語氣基準
@@ -28,6 +28,7 @@ description: "Handle repository-specific release work in d2r-hyper-launcher. Use
    - 覆蓋 repo 根目錄的 `d2r-hyper-launcher.exe`
    - 新增一份 release note
    - 同步更新 `README.md` 內顯示的目前最新版本
+   - 若這次 release 含有 repo 結構或玩家 workflow 調整，也要確認相關 `.claude/skills/d2r-*.md` 沒有留著過期指引
    - 完成後 merge 到 `master`
    - 最後建立一個新的 git tag
 
@@ -72,12 +73,12 @@ go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 這個 repo 目前沒有獨立 `VERSION` 檔，版本會在 build 時透過：
 
 ```powershell
--ldflags "-X main.version=vX.Y.Z"
+-ldflags "-X main.version=vX.Y.Z -X main.releaseTime=YYYY-MM-DD HH:MM:SS"
 ```
 
 注入到：
 
-- `cmd/d2r-hyper-launcher/main.go` 的 `version`
+- `cmd/d2r-hyper-launcher/main.go` 的 `version` 與 `releaseTime`
 - 最終輸出的 `d2r-hyper-launcher.exe`
 
 所以這裡說的「先變更 version 再 build」，在本 repo 的實際意思是：
@@ -96,7 +97,7 @@ d2r-hyper-launcher.exe
 命令格式：
 
 ```powershell
-go build -ldflags "-X main.version=vX.Y.Z" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
+go build -ldflags "-X main.version=vX.Y.Z -X main.releaseTime=YYYY-MM-DD HH:MM:SS" -o d2r-hyper-launcher.exe ./cmd/d2r-hyper-launcher
 ```
 
 不要把 release build 輸出到其他暫存檔名，除非使用者另外要求。
@@ -117,7 +118,7 @@ release note 應該聚焦：
 
 - 這次 release 的高階主題
 - 玩家或使用者會感受到的變化
-- 涉及哪些 scope（例如 `multiboxing`、`switcher`、`docs`、`repo workflow`）
+- 涉及哪些 scope（例如 `common`、`multiboxing`、`switcher`、`docs`、`repo workflow`）
 - 若有必要，補充升級注意事項
 
 寫完 `docs/releases/vX.Y.Z.md` 後，要同步更新 `README.md` 裡的「目前最新版本」顯示，並直接連到對應的 `docs/releases/vX.Y.Z.md`，讓玩家在 repo 首頁就能看到並點進目前最新 release note。
@@ -136,6 +137,9 @@ release note 一律使用**中文說明**，不要混用英文段落或英文條
 - ...
 
 ## 各範圍變更
+### common
+- ...
+
 ### multiboxing
 - ...
 

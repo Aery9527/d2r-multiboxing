@@ -14,16 +14,14 @@
 
 - 遇到 `multiboxing` 相關需求時，優先使用對應 skill 取得細節 context
 - 遇到 `switcher` 相關需求時，優先使用對應 skill 取得細節 context
-- `AGENT.md` 只提供高層引導，不承載這兩個功能的細部實作說明
+- 遇到 CLI 顯示訊息、header、announcement、menu 排版、option 對齊、prompt / error / success 顯示等玩家可見 UI 調整時，優先使用 `d2r-cli-ui` skill
+- `AGENT.md` 只提供高層引導，不承載各功能 skill 的細部實作說明
 
 ## 高層架構
 
-- [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go) - CLI 入口與互動流程
-- [internal/config/](internal/config/) - 設定與資料目錄管理
-- [internal/d2r/](internal/d2r/) - D2R 相關常數與共用定義
-- [internal/account/](internal/account/) - 帳號資料與密碼處理
-- [internal/process/](internal/process/) - D2R 啟動、進程與視窗操作
-- [internal/handle/](internal/handle/) - 核心 Windows handle 處理
+- [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go) 與同目錄 `cli_*.go` / `menu.go` - CLI 入口、主選單 dispatch 與互動流程
+- [internal/common/](internal/common/) - 跨功能共用基礎（設定、D2R 常數、通用進程/視窗操作）
+- [internal/multiboxing/](internal/multiboxing/) - 多開 domain（帳號、啟動器、mods、背景 handle monitor）
 - [internal/switcher/](internal/switcher/) - 視窗切換功能
 
 ## 文件入口
@@ -42,7 +40,14 @@
   - `b`：回上一層
   - `h`：回主選單
   - `q`：離開程式
-- 相關共用邏輯集中在 [cmd/d2r-hyper-launcher/main.go](cmd/d2r-hyper-launcher/main.go)
+- 相關共用邏輯集中在 `cmd/d2r-hyper-launcher` 下的 CLI 檔案群，不要再把所有選單與互動流程塞回單一 `main.go`
+- `cmd/d2r-hyper-launcher/feedback.go` 是目前的 CLI UI layer；調整玩家可見訊息時，應優先沿用 `ui.*` helper，而不是回頭散落 `fmt.Print*`、手動 `\n` 排版或直接操作輸入 scanner
+- launcher 或外部命令的玩家可見執行列輸出也要走 UI layer；優先使用 `ui.commandf(...)`，由 `>` prefix 表達實際執行命令，不要在 domain 層自己手拼 `> ` 前綴
+- `headf(...)` 與 `menuBlock(...)` 是不同語意：前者代表目前位於哪個 section，後者代表玩家準備閱讀並輸入的一組內容
+- 若一組訊息需要多段換行但仍屬同一則說明，優先使用 `infoLines(...)` / `warningLines(...)` / `promptLines(...)` / `successLines(...)` / `errorLines(...)`，讓 icon 只出現一次並維持 continuation 對齊
+- menu option 需要整齊對齊時，優先使用 `newMenuOptions()` 收集後再 `render()`；`option(...)` 現在以 `key / label / comment` 三欄資料收集並做 display-width-aware 對齊。主選單若最後要附上固定 `q` 離開選項，優先使用 `mainMenuOptions(func(*cliMenuOptions))`；子選單若最後要附上固定 `b / h / q` 導航，優先使用 `subMenuOptions(func(*cliMenuOptions))`，由 UI layer 統一補上空行與共通選項
+- 遇到中文 / 全形字寬度問題時，沿用現有 display-width-aware 對齊邏輯，不要退回單純 rune count
+- 玩家在 CLI 內任何可預期的輸入錯誤（格式錯誤、超出範圍、無效選項）都要走共用 helper，先顯示錯誤訊息，再提示玩家確認後才回到原流程；優先顯示「按任意鍵繼續」，但若終端不支援單鍵讀取，需自動 fallback 成「按 Enter 繼續」
 - 不要要求玩家手動修改 `config.json`；玩家可見設定應優先提供 CLI 內可操作流程，例如用檔案選擇器設定 `D2R.exe` 路徑
 
 ## Git / 分支流程

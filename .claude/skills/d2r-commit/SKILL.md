@@ -21,7 +21,7 @@ description: "Handle repository-specific git commit work in d2r-hyper-launcher. 
    - 若包含 Go / script / 設定 / build / 行為邏輯變更，**一定要先跑測試，測試通過後才能 commit。**
    - 若今天所有變更都明確只是 `.md` 文件或程式註解調整，且**不影響實際執行流程**，可以跳過測試直接 commit。
    - 若對「是不是純文件 / 純註解」有疑慮，採保守做法：照常跑測試。
-3. 若改動影響使用者可見流程、設定、限制、技術前提或 skill 描述，先同步更新相關 `README`、`docs/`、`.claude/skills/`。
+3. 若改動影響使用者可見流程、設定、限制、技術前提、repo 架構邊界或 skill 描述，先同步更新相關 `README`、`docs/`、`.claude/skills/`；尤其是大型 refactor 後，要回頭檢查 `d2r-multiboxing`、`d2r-switcher`、`d2r-release` 等 skill 是否仍指向正確的檔案與 workflow。
 4. 若測試失敗，不要硬 commit；先修正或明確告知使用者目前仍有失敗。
 5. 建立 commit 後，預設直接 push 到目前分支的 remote upstream。
 6. 若 push 前需要同步遠端而遇到 conflict，或 push / rebase / merge 過程出現衝突，停止操作並通知使用者 review。
@@ -77,6 +77,7 @@ go build -o .\.tmp\d2r-hyper-launcher-dev.exe ./cmd/d2r-hyper-launcher
 **改成這種寫法：**
 
 - `fix(multiboxing): stabilize multi-account startup flow`
+- `refactor(common): centralize shared config and process helpers`
 - `docs(repo): simplify player onboarding and usage navigation`
 - `refactor(switcher): streamline trigger setup workflow`
 

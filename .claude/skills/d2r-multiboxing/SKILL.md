@@ -9,22 +9,26 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 
 ## 先看哪些檔案
 
-- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 主選單、單帳號啟動、批次啟動、背景 handle 監控
-- [internal/process/launcher.go](../../../internal/process/launcher.go) - D2R 啟動參數組裝
-- [internal/process/window.go](../../../internal/process/window.go) - 視窗重命名與前景切換
-- [internal/handle/closer.go](../../../internal/handle/closer.go) - 關閉目標 handle 的公開 API
-- [internal/handle/enumerator.go](../../../internal/handle/enumerator.go) - 列舉系統 handle 並篩選目標 Event
-- [internal/handle/winapi.go](../../../internal/handle/winapi.go) - NT API 封裝
-- [internal/account/account.go](../../../internal/account/account.go) 與 [internal/account/crypto.go](../../../internal/account/crypto.go) - CSV / DPAPI
-- [internal/config/config.go](../../../internal/config/config.go) - `d2r_path`、`launch_delay`、資料目錄
-- [internal/mods/](../../../internal/mods/) - 已安裝 mod 掃描與 `-mod` / `-txt` 參數組裝
-- [internal/d2r/constants.go](../../../internal/d2r/constants.go) - 進程名、Event 名稱、區域常數、視窗標題前綴
+- [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 薄 CLI bootstrap、主選單 dispatch、背景 monitor 啟動
+- [cmd/d2r-hyper-launcher/cli_launch.go](../../../cmd/d2r-hyper-launcher/cli_launch.go) - 單帳號 / 批次 / 離線啟動 flow
+- [cmd/d2r-hyper-launcher/cli_accounts_file.go](../../../cmd/d2r-hyper-launcher/cli_accounts_file.go) 與 [cmd/d2r-hyper-launcher/cli_d2r_path.go](../../../cmd/d2r-hyper-launcher/cli_d2r_path.go) - `accounts.csv` 建立與 `D2R.exe` 路徑修復流程
+- [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go) 與 [cmd/d2r-hyper-launcher/cli_flags.go](../../../cmd/d2r-hyper-launcher/cli_flags.go) - account / mod / launch flags 選擇流程
+- [internal/multiboxing/launcher/launcher.go](../../../internal/multiboxing/launcher/launcher.go) - D2R 啟動參數組裝
+- [internal/multiboxing/launcher/closer.go](../../../internal/multiboxing/launcher/closer.go) - 關閉目標 handle 的公開 API
+- [internal/multiboxing/launcher/enumerator.go](../../../internal/multiboxing/launcher/enumerator.go) - 列舉系統 handle 並篩選目標 Event
+- [internal/multiboxing/launcher/winapi.go](../../../internal/multiboxing/launcher/winapi.go) - NT API 封裝
+- [internal/multiboxing/monitor/handle_monitor.go](../../../internal/multiboxing/monitor/handle_monitor.go) - 背景 handle monitor
+- [internal/multiboxing/account/account.go](../../../internal/multiboxing/account/account.go) 與 [internal/multiboxing/account/crypto.go](../../../internal/multiboxing/account/crypto.go) - CSV / DPAPI
+- [internal/common/config/config.go](../../../internal/common/config/config.go) - `d2r_path`、`launch_delay`、資料目錄
+- [internal/multiboxing/mods/](../../../internal/multiboxing/mods/) - 已安裝 mod 掃描與 `-mod` / `-txt` 參數組裝
+- [internal/common/d2r/constants.go](../../../internal/common/d2r/constants.go) - 進程名、Event 名稱、區域常數、視窗標題前綴
+- [internal/common/process/window.go](../../../internal/common/process/window.go) - 視窗重命名與前景切換
 - [README.md](../../../README.md) 與 [docs/multiboxing-usage-guide.md](../../../docs/multiboxing-usage-guide.md) - 使用者可見行為
 
 ## 核心事實
 
 1. 多開的核心是關閉 `DiabloII Check For Other Instances` Event Handle。
-2. 只有 [internal/handle/](../../../internal/handle/) 允許使用 NT API；其他功能維持 Go 標準庫或 `golang.org/x/sys/windows` 高階 API。
+2. 只有 [internal/multiboxing/launcher/](../../../internal/multiboxing/launcher/) 這層允許直接碰 NT API；其他功能維持 Go 標準庫或 `golang.org/x/sys/windows` 高階 API。
 3. 線上帳號啟動由 `LaunchD2R()` 組出 `-uid osi -username -password -address`；不要移除 `-uid osi`。
 4. 視窗標題需維持 `D2R-<DisplayName>` 格式，這也是 switcher 用來找視窗的依據。
 5. 背景 monitor 會每 2 秒掃描 D2R 行程，替新 PID 再做一次 handle 關閉。
@@ -33,6 +37,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 ## 修改時要守住的規則
 
 - 子選單必須保留 `b` / `h` / `q` 導航，沿用 `printSubMenuNav()` 與 `isMenuNav()`。
+- CLI 互動流程已拆到 `cli_launch.go`、`cli_d2r_path.go`、`cli_accounts_file.go`、`cli_flags.go` 等檔案；不要再把多開流程整坨塞回 `main.go`。
 - `enumerator.go` 只對 `Event` 類型查詢 object name，避免對 pipe/file handle 查詢造成 hang。
 - 啟動後仍需要等待遊戲初始化，再執行 `CloseHandlesByName()` 與 `RenameWindow()`。
 - 不要把玩家導回手動修改 `config.json`；像 `d2r_path` 這類玩家可見設定，優先提供 CLI 內可操作流程。
@@ -44,21 +49,21 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 
 ### 調整啟動流程
 
-1. 先看 [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) 的 `launchAccount()`、`launchAll()`、`launchOffline()`
-2. 再看 [internal/process/launcher.go](../../../internal/process/launcher.go) 是否需要新增或調整參數
-3. 若有 mod 選擇流程，再檢查 [internal/mods/](../../../internal/mods/) 與 `-mod <name> -txt` 是否仍正確串接
+1. 先看 [cmd/d2r-hyper-launcher/cli_launch.go](../../../cmd/d2r-hyper-launcher/cli_launch.go) 的 `launchAccount()`、`launchAll()`、`launchOffline()`
+2. 再看 [internal/multiboxing/launcher/launcher.go](../../../internal/multiboxing/launcher/launcher.go) 是否需要新增或調整參數
+3. 若有 mod 選擇流程，再檢查 [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go) 與 [internal/multiboxing/mods/](../../../internal/multiboxing/mods/) 是否仍正確串接 `-mod <name> -txt`
 4. 檢查密碼是否仍經過 `redactArgs()` 遮罩
 
 ### 修正多開失敗
 
-1. 先確認 [internal/d2r/constants.go](../../../internal/d2r/constants.go) 的 `SingleInstanceEventName`
-2. 再檢查 [internal/handle/enumerator.go](../../../internal/handle/enumerator.go) 與 [internal/handle/closer.go](../../../internal/handle/closer.go)
-3. 若是時序問題，再回頭調整 `main.go` 啟動後的等待與 monitor 邏輯
+1. 先確認 [internal/common/d2r/constants.go](../../../internal/common/d2r/constants.go) 的 `SingleInstanceEventName`
+2. 再檢查 [internal/multiboxing/launcher/enumerator.go](../../../internal/multiboxing/launcher/enumerator.go) 與 [internal/multiboxing/launcher/closer.go](../../../internal/multiboxing/launcher/closer.go)
+3. 若是時序問題，再回頭調整 [cmd/d2r-hyper-launcher/cli_launch.go](../../../cmd/d2r-hyper-launcher/cli_launch.go) 與 [internal/multiboxing/monitor/handle_monitor.go](../../../internal/multiboxing/monitor/handle_monitor.go)
 
 ### 調整帳號或設定儲存
 
-1. 看 [internal/account/account.go](../../../internal/account/account.go)
-2. 看 [internal/config/config.go](../../../internal/config/config.go)
+1. 看 [internal/multiboxing/account/account.go](../../../internal/multiboxing/account/account.go)
+2. 看 [internal/common/config/config.go](../../../internal/common/config/config.go)
 3. 確保資料目錄仍是 `~/.d2r-hyper-launcher` 或 `D2R_HYPER_LAUNCHER_HOME`
 
 ## 驗證
