@@ -101,14 +101,45 @@ func TestBatchAccountStatusLinesShowsRunningAndPendingAccounts(t *testing.T) {
 }
 
 func TestPrintMenuKeepsChoicePromptInsideOptionGroup(t *testing.T) {
+	cfg := &config.Config{
+		LaunchDelay: config.LaunchDelayRange{MinSeconds: 30, MaxSeconds: 60},
+		Switcher: &config.SwitcherConfig{
+			Enabled: true,
+			Key:     "Tab",
+		},
+	}
 	output := captureStdout(t, func() {
-		printMenu(nil)
+		printMenu(nil, cfg)
 	})
 
 	assert.Contains(t, output, "========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n")
 	assert.Contains(t, output, "--------------------------------------------------------\n[數字] 啟動指定帳號\n[0]    離線遊玩（可選 mod，不需帳密）")
+	assert.Contains(t, output, "[d]    設定啟動間隔（目前：30-60 秒（隨機））\n")
+	assert.Contains(t, output, "[s]    視窗切換設定（目前：Tab（Tab 鍵））\n")
 	assert.Contains(t, output, "[q]    退出\n")
+	assert.NotContains(t, output, "是否已啟動的判斷基準")
 	assert.NotContains(t, output, "? 請選擇：")
+}
+
+func TestPrintStartupAnnouncementShowsDisplayNameStatusNote(t *testing.T) {
+	cfg := &config.Config{
+		D2RPath: `C:\Games\D2R\D2R.exe`,
+		LaunchDelay: config.LaunchDelayRange{
+			MinSeconds: 30,
+			MaxSeconds: 60,
+		},
+	}
+
+	output := captureStdout(t, func() {
+		printStartupAnnouncement(`C:\Users\User\AppData\Roaming\d2r-hyper-launcher`, cfg)
+	})
+
+	assert.Contains(t, output, "d2r-hyper-launcher (")
+	assert.Contains(t, output, "• 資料目錄：C:\\Users\\User\\AppData\\Roaming\\d2r-hyper-launcher\n")
+	assert.Contains(t, output, "• D2R 路徑：C:\\Games\\D2R\\D2R.exe\n")
+	assert.Contains(t, output, "• 說明：帳號啟動狀態是用 account.csv 裡的 DisplayName 對應視窗名稱；若 D2R 還開著，請先關掉工具再修改 DisplayName，否則狀態偵測可能不正確。\n")
+	assert.NotContains(t, output, "啟動間隔：")
+	assert.NotContains(t, output, "視窗切換已啟用：")
 }
 
 func TestFormatLaunchDelayMessage(t *testing.T) {

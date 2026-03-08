@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
+	"d2rhl/internal/common/config"
 	"d2rhl/internal/common/d2r"
 	"d2rhl/internal/common/process"
 	"d2rhl/internal/multiboxing/account"
+	"d2rhl/internal/switcher"
 )
 
 const (
@@ -15,7 +18,14 @@ const (
 	menuQuit = "q"
 )
 
-func printMenu(accounts []account.Account) {
+func printStartupAnnouncement(cfgDir string, cfg *config.Config) {
+	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
+	ui.infof("資料目錄：%s", cfgDir)
+	ui.infof("D2R 路徑：%s", cfg.D2RPath)
+	ui.warningf("帳號啟動狀態是用 account.csv 裡的 DisplayName 對應視窗名稱，\n所以已經透過該工具開啟 D2R 然後又去修改 DisplayName，\n就會導致狀態顯示不正確，請注意。")
+}
+
+func printMenu(accounts []account.Account, cfg *config.Config) {
 	ui.headf("主選單")
 	ui.infof("帳號列表：")
 	for i, acc := range accounts {
@@ -27,17 +37,14 @@ func printMenu(accounts []account.Account) {
 	}
 
 	ui.blankLine()
-	ui.infof("是否已啟動的判斷基準是用 account.csv 裡的 DisplayName 來對應視窗名稱。")
-	ui.infof("如果 D2R 還開著就先關掉工具再去改 DisplayName，之後這裡的啟動狀態偵測可能會不正確。")
-	ui.blankLine()
 	options := ui.newMenuOptions()
 	options.option("數字", "啟動指定帳號")
 	options.option("0", "離線遊玩（可選 mod，不需帳密）")
 	options.option("a", "啟動所有帳號（可選 mod，只啟動未啟動的）")
-	options.option("d", "設定啟動間隔")
+	options.option("d", fmt.Sprintf("設定啟動間隔（目前：%s）", cfg.LaunchDelay.DisplayString()))
 	options.option("f", "設定帳號啟動 flag")
 	options.option("p", "選擇 D2R.exe 路徑")
-	options.option("s", "視窗切換設定")
+	options.option("s", switcherMenuOptionLabel(cfg))
 	options.option("r", "重新整理狀態")
 	options.blankLine()
 	options.option(menuQuit, "退出")
@@ -48,6 +55,16 @@ func printMenu(accounts []account.Account) {
 
 func printSubMenuNav() {
 	ui.subMenuNav()
+}
+
+func switcherMenuOptionLabel(cfg *config.Config) string {
+	if cfg.Switcher == nil || !cfg.Switcher.Enabled {
+		return "視窗切換設定（目前：未啟用）"
+	}
+	return fmt.Sprintf(
+		"視窗切換設定（目前：%s）",
+		switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex),
+	)
 }
 
 func isMenuNav(input string) string {

@@ -31,23 +31,17 @@ func main() {
 		ui.rawln(message)
 	})
 
-	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
-
 	cfg, err := config.Load()
 	if err != nil {
 		ui.errorf("設定檔載入失敗：%v", err)
 		return
 	}
 	cfgDir, _ := config.Dir()
-	ui.infof("資料目錄：%s", cfgDir)
-	ui.infof("D2R 路徑：%s", cfg.D2RPath)
-	ui.infof("啟動間隔：%s", cfg.LaunchDelay.DisplayString())
+	printStartupAnnouncement(cfgDir, cfg)
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
 			ui.warningf("視窗切換啟動失敗：%v", err)
-		} else {
-			ui.successf("視窗切換已啟用：%s", switcher.FormatSwitcherDisplay(cfg.Switcher.Modifiers, cfg.Switcher.Key, cfg.Switcher.GamepadIndex))
 		}
 	}
 	ui.blankLine()
@@ -86,7 +80,7 @@ func main() {
 	monitor.StartHandleMonitor()
 
 	for {
-		printMenu(accounts)
+		printMenu(accounts, cfg)
 		input, ok := ui.readInput()
 		if !ok {
 			break
