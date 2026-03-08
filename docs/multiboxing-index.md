@@ -9,7 +9,7 @@
 |---|---|---|
 | [README.md](../README.md) | 第一次接觸工具的玩家 | 快速開始、`accounts.csv` 基本格式、主選單入口 |
 | [multiboxing-usage-guide.md](multiboxing-usage-guide.md) | 想照步驟操作的玩家 | 完整操作流程、`f` 選單、單帳號 / 批次 / 離線模式、常見問題 |
-| [D2R_PARAMS.md](D2R_PARAMS.md) | 想查啟動參數用途的人 | `LaunchFlags` 對應參數、`-uid osi`、`-mod` / `-txt`、參數參考與來源 |
+| [D2R_PARAMS.md](D2R_PARAMS.md) | 想查啟動參數用途的人 | `LaunchFlags` 對應參數、Battle.net / mod 相關旗標、參數參考與來源 |
 | [multiboxing-technical-guide.md](multiboxing-technical-guide.md) | 想看底層原理的開發者 | 單實例鎖、handle 關閉、背景 monitor、視窗重命名、模組分工 |
 | [releases/v1.0.0.md](releases/v1.0.0.md) | 想看目前正式版整理內容的人 | `v1.0.0` 的多開相關變更摘要 |
 

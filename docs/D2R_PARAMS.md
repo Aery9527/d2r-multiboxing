@@ -36,7 +36,7 @@
 
 目前 launcher 直接 expose 給多開玩家的，主要是：
 
-- Battle.net 直接登入需要的 `-uid osi`、`-username`、`-password`、`-address`
+- Battle.net 連線相關的 `-username`、`-password`、`-address`
 - 每帳號 `LaunchFlags` 會用到的 `-ns`、`-lq`
 - mod 啟動會用到的 `-mod <name> -txt`
 
@@ -107,7 +107,7 @@
 
 | 參數 | 說明 | 預設值 |
 |------|------|--------|
-| `-uid osi` | 啟用 Battle.net Online Services Interface 模式；本專案以此模式直接帶帳密與區域參數啟動遊戲，也會保留給 mod 啟動流程使用 | 未設定 |
+| `-uid osi` | 啟用 Battle.net Online Services Interface 模式；社群資料仍可見這個參數，但本專案目前不會自動附加，僅保留作為參數參考 | 未設定 |
 | `-mod <name>` | 指定要載入的 mod 名稱；通常對應 `D2R.exe` 同層 `mods\<name>\` 資料夾 | 未設定 |
 | `-txt` | 搭配 `-mod` 使用，讓 D2R 載入該 mod 的資料 | 關閉 |
 | `-direct` | 直接使用 `Data\` 目錄與內部資料檔；gist 與社群多將它視為 mod / 資料測試用途 | 關閉 |

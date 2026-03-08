@@ -14,7 +14,7 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
 	assert.Equal(t, d2r.DefaultGamePath, cfg.D2RPath)
-	assert.Equal(t, LaunchDelayRange{MinSeconds: 30, MaxSeconds: 30}, cfg.LaunchDelay)
+	assert.Equal(t, LaunchDelayRange{MinSeconds: 10, MaxSeconds: 10}, cfg.LaunchDelay)
 }
 func TestSaveAndLoad(t *testing.T) {
 	// 使用 temp 目錄模擬設定檔
@@ -89,4 +89,23 @@ func TestLaunchDelayRangeJSONCompatibility(t *testing.T) {
 
 	assert.NoError(t, json.Unmarshal([]byte(`{"d2r_path":"C:\\D2R.exe","launch_delay":"30-60"}`), &cfg))
 	assert.Equal(t, LaunchDelayRange{MinSeconds: 30, MaxSeconds: 60}, cfg.LaunchDelay)
+}
+
+func TestLaunchDelayRangeJSONCompatibilityAcceptsLegacyFiveSeconds(t *testing.T) {
+	var cfg Config
+
+	assert.NoError(t, json.Unmarshal([]byte(`{"d2r_path":"C:\\D2R.exe","launch_delay":5}`), &cfg))
+	assert.Equal(t, LaunchDelayRange{MinSeconds: 5, MaxSeconds: 5}, cfg.LaunchDelay)
+}
+
+func TestLoadNormalizesLegacyFiveSecondDefault(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv(HomeDirEnv, tmpDir)
+
+	err := os.WriteFile(filepath.Join(tmpDir, configFileName), []byte("{\n  \"d2r_path\": \"C:\\\\D2R.exe\",\n  \"launch_delay\": 5\n}"), 0o600)
+	assert.NoError(t, err)
+
+	cfg, err := Load()
+	assert.NoError(t, err)
+	assert.Equal(t, LaunchDelayRange{MinSeconds: 10, MaxSeconds: 10}, cfg.LaunchDelay)
 }

@@ -101,6 +101,20 @@ func TestBatchAccountStatusLinesShowsRunningAndPendingAccounts(t *testing.T) {
 	}, lines)
 }
 
+func TestLaunchTargetAccountLinesShowsAccountsToLaunch(t *testing.T) {
+	accounts := []*account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com"},
+		{DisplayName: "Bravo", Email: "bravo@example.com"},
+	}
+
+	lines := launchTargetAccountLines(accounts)
+
+	assert.Equal(t, []string{
+		"  Alpha (alpha@example.com)",
+		"  Bravo (bravo@example.com)",
+	}, lines)
+}
+
 func TestPrintMenuKeepsChoicePromptInsideOptionGroup(t *testing.T) {
 	cfg := &config.Config{
 		D2RPath:     `C:\Games\D2R\D2R.exe`,
@@ -639,6 +653,54 @@ func TestShowInvalidInputAndPause(t *testing.T) {
 	assert.Contains(t, output, "? 請按任意鍵繼續...")
 }
 
+func TestShowInfoAndPause(t *testing.T) {
+	originalWaitForAnyKey := ui.waitForAnyKey
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.waitForAnyKey = originalWaitForAnyKey
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+
+	waitCalled := 0
+	ui.canSingleKeyContinue = func() bool { return true }
+	ui.waitForAnyKey = func() error {
+		waitCalled++
+		return nil
+	}
+
+	output := captureStdout(t, func() {
+		showInfoAndPause("所有帳號都已在執行中。")
+	})
+
+	assert.Contains(t, output, "• 所有帳號都已在執行中。")
+	assert.Contains(t, output, "? 請按任意鍵繼續...")
+	assert.Equal(t, 1, waitCalled)
+}
+
+func TestShowWarningAndPause(t *testing.T) {
+	originalWaitForAnyKey := ui.waitForAnyKey
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.waitForAnyKey = originalWaitForAnyKey
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+
+	waitCalled := 0
+	ui.canSingleKeyContinue = func() bool { return true }
+	ui.waitForAnyKey = func() error {
+		waitCalled++
+		return nil
+	}
+
+	output := captureStdout(t, func() {
+		showWarningAndPause("Alpha 已在執行中。")
+	})
+
+	assert.Contains(t, output, "⚠ Alpha 已在執行中。")
+	assert.Contains(t, output, "? 請按任意鍵繼續...")
+	assert.Equal(t, 1, waitCalled)
+}
+
 func TestShowInputErrorAndPauseFallsBackToEnterWhenSingleKeyUnavailable(t *testing.T) {
 	originalCanSingleKeyContinue := ui.canSingleKeyContinue
 	t.Cleanup(func() {
@@ -717,7 +779,9 @@ func TestPromptLaunchRegionKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		withTestInput(t, "x\n\nb\n", func() {
-			region, ok := promptLaunchRegion("啟動指定帳號：選擇區域")
+			region, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
+				{DisplayName: "Alpha", Email: "alpha@example.com"},
+			})
 			assert.False(t, ok)
 			assert.Nil(t, region)
 		})
@@ -725,6 +789,38 @@ func TestPromptLaunchRegionKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
 
 	assert.Contains(t, output, "✘ 無效的區域選擇。")
 	assert.Equal(t, 2, strings.Count(output, "啟動指定帳號：選擇區域"))
+}
+
+func TestPromptLaunchRegionShowsSingleTargetAccount(t *testing.T) {
+	output := captureStdout(t, func() {
+		withTestInput(t, "b\n", func() {
+			region, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
+				{DisplayName: "Alpha", Email: "alpha@example.com"},
+			})
+			assert.False(t, ok)
+			assert.Nil(t, region)
+		})
+	})
+
+	assert.Contains(t, output, "• 準備啟動的帳號：")
+	assert.Contains(t, output, "  Alpha (alpha@example.com)")
+}
+
+func TestPromptLaunchRegionShowsBatchTargetAccounts(t *testing.T) {
+	output := captureStdout(t, func() {
+		withTestInput(t, "b\n", func() {
+			region, ok := promptLaunchRegion("啟動所有帳號：選擇區域", []*account.Account{
+				{DisplayName: "Alpha", Email: "alpha@example.com"},
+				{DisplayName: "Bravo", Email: "bravo@example.com"},
+			})
+			assert.False(t, ok)
+			assert.Nil(t, region)
+		})
+	})
+
+	assert.Contains(t, output, "• 準備啟動的帳號：")
+	assert.Contains(t, output, "  Alpha (alpha@example.com)")
+	assert.Contains(t, output, "  Bravo (bravo@example.com)")
 }
 
 func captureStdout(t *testing.T, fn func()) string {

@@ -122,7 +122,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 
   資料目錄：C:\Users\User\.d2r-hyper-launcher
   D2R 路徑：C:\Program Files (x86)\Diablo II Resurrected\D2R.exe
-  啟動間隔：30 秒
+  啟動間隔：10 秒
 
   帳號列表：
   [1] 主帳號-法師      (player1@gmail.com)  [未啟動]
@@ -154,7 +154,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 - 可輸入 `30-60`，代表每次隨機等待 30 到 60 秒
 - 這個設定會直接回寫到 `config.json` 的 `launch_delay`
 
-之所以預設保留 30 秒，是因為實際使用上若短時間內太頻繁重複登入／關閉，Battle.net 端有機率把連線擋住；如果你要縮短，請自行衡量風險。
+目前新建設定的預設值是 10 秒；若你原本是舊版本留下的 `5` 秒預設，工具會在載入時自動按 10 秒處理。Battle.net 端仍可能因短時間內太頻繁重複登入／關閉而擋線；如果你要再縮短或調高，請自行衡量風險。
 
 ## 設定帳號啟動 flag
 
@@ -312,6 +312,6 @@ C:\Program Files (x86)\Diablo II Resurrected\mods\
 
 - [multiboxing-index.md](multiboxing-index.md) — 多開文件總覽與閱讀順序
 - [README.md](../README.md) — 新手快速開始
-- [D2R_PARAMS.md](D2R_PARAMS.md) — `LaunchFlags`、`-uid osi`、mod 參數參考
+- [D2R_PARAMS.md](D2R_PARAMS.md) — `LaunchFlags`、Battle.net / mod 參數參考
 - [switcher-usage-guide.md](switcher-usage-guide.md) — 視窗切換功能教學
 - [multiboxing-technical-guide.md](multiboxing-technical-guide.md) — multiboxing 技術原理

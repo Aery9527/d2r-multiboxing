@@ -29,6 +29,12 @@ const (
 
 	// MinLaunchDelaySeconds is the hard lower bound for batch launch delays.
 	MinLaunchDelaySeconds = 10
+
+	// DefaultLaunchDelaySeconds is the default fixed delay written for new configs.
+	DefaultLaunchDelaySeconds = 10
+
+	// LegacyDefaultLaunchDelaySeconds is accepted for backward compatibility with older releases.
+	LegacyDefaultLaunchDelaySeconds = 5
 )
 
 // LaunchDelayRange describes the delay used between batch launches.
@@ -39,47 +45,12 @@ type LaunchDelayRange struct {
 
 // DefaultLaunchDelayRange returns the default fixed delay.
 func DefaultLaunchDelayRange() LaunchDelayRange {
-	return LaunchDelayRange{MinSeconds: 30, MaxSeconds: 30}
+	return LaunchDelayRange{MinSeconds: DefaultLaunchDelaySeconds, MaxSeconds: DefaultLaunchDelaySeconds}
 }
 
 // ParseLaunchDelayRange parses either "30" or "30-60" style input.
 func ParseLaunchDelayRange(input string) (LaunchDelayRange, error) {
-	input = strings.TrimSpace(input)
-	if input == "" {
-		return LaunchDelayRange{}, fmt.Errorf("啟動間隔不可為空，請輸入像 30 或 30-60")
-	}
-
-	if !strings.Contains(input, "-") {
-		value, err := strconv.Atoi(input)
-		if err != nil {
-			return LaunchDelayRange{}, fmt.Errorf("啟動間隔必須是整數，或使用像 30-60 的範圍格式")
-		}
-		delay := LaunchDelayRange{MinSeconds: value, MaxSeconds: value}
-		if err := delay.Validate(); err != nil {
-			return LaunchDelayRange{}, err
-		}
-		return delay, nil
-	}
-
-	parts := strings.Split(input, "-")
-	if len(parts) != 2 {
-		return LaunchDelayRange{}, fmt.Errorf("啟動間隔範圍格式錯誤，請輸入像 30-60")
-	}
-
-	minSeconds, err := strconv.Atoi(strings.TrimSpace(parts[0]))
-	if err != nil {
-		return LaunchDelayRange{}, fmt.Errorf("啟動間隔下限必須是整數")
-	}
-	maxSeconds, err := strconv.Atoi(strings.TrimSpace(parts[1]))
-	if err != nil {
-		return LaunchDelayRange{}, fmt.Errorf("啟動間隔上限必須是整數")
-	}
-
-	delay := LaunchDelayRange{MinSeconds: minSeconds, MaxSeconds: maxSeconds}
-	if err := delay.Validate(); err != nil {
-		return LaunchDelayRange{}, err
-	}
-	return delay, nil
+	return parseLaunchDelayRange(input, false)
 }
 
 // Validate checks whether the delay range is usable.
@@ -94,6 +65,17 @@ func (r LaunchDelayRange) Validate() error {
 		return fmt.Errorf("啟動間隔下限不可大於上限")
 	}
 	return nil
+}
+
+func (r LaunchDelayRange) isLegacyDefault() bool {
+	return r.MinSeconds == LegacyDefaultLaunchDelaySeconds && r.MaxSeconds == LegacyDefaultLaunchDelaySeconds
+}
+
+func (r LaunchDelayRange) validateForConfigLoad() error {
+	if r.isLegacyDefault() {
+		return nil
+	}
+	return r.Validate()
 }
 
 // String returns the persisted representation.
@@ -136,7 +118,7 @@ func (r *LaunchDelayRange) UnmarshalJSON(data []byte) error {
 	var intValue int
 	if err := json.Unmarshal(data, &intValue); err == nil {
 		parsed := LaunchDelayRange{MinSeconds: intValue, MaxSeconds: intValue}
-		if err := parsed.Validate(); err != nil {
+		if err := parsed.validateForConfigLoad(); err != nil {
 			return err
 		}
 		*r = parsed
@@ -145,7 +127,7 @@ func (r *LaunchDelayRange) UnmarshalJSON(data []byte) error {
 
 	var stringValue string
 	if err := json.Unmarshal(data, &stringValue); err == nil {
-		parsed, err := ParseLaunchDelayRange(stringValue)
+		parsed, err := parseLaunchDelayRange(strings.TrimSpace(stringValue), true)
 		if err != nil {
 			return err
 		}
@@ -245,6 +227,9 @@ func Load() (*Config, error) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
+	if cfg.LaunchDelay.isLegacyDefault() {
+		cfg.LaunchDelay = DefaultLaunchDelayRange()
+	}
 	if err := cfg.LaunchDelay.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid launch_delay: %w", err)
 	}
@@ -274,4 +259,55 @@ func Save(cfg *Config) error {
 	}
 
 	return nil
+}
+
+func parseLaunchDelayRange(input string, allowLegacyDefault bool) (LaunchDelayRange, error) {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return LaunchDelayRange{}, fmt.Errorf("啟動間隔不可為空，請輸入像 30 或 30-60")
+	}
+
+	if !strings.Contains(input, "-") {
+		value, err := strconv.Atoi(input)
+		if err != nil {
+			return LaunchDelayRange{}, fmt.Errorf("啟動間隔必須是整數，或使用像 30-60 的範圍格式")
+		}
+		delay := LaunchDelayRange{MinSeconds: value, MaxSeconds: value}
+		if allowLegacyDefault {
+			if err := delay.validateForConfigLoad(); err != nil {
+				return LaunchDelayRange{}, err
+			}
+			return delay, nil
+		}
+		if err := delay.Validate(); err != nil {
+			return LaunchDelayRange{}, err
+		}
+		return delay, nil
+	}
+
+	parts := strings.Split(input, "-")
+	if len(parts) != 2 {
+		return LaunchDelayRange{}, fmt.Errorf("啟動間隔範圍格式錯誤，請輸入像 30-60")
+	}
+
+	minSeconds, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	if err != nil {
+		return LaunchDelayRange{}, fmt.Errorf("啟動間隔下限必須是整數")
+	}
+	maxSeconds, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+	if err != nil {
+		return LaunchDelayRange{}, fmt.Errorf("啟動間隔上限必須是整數")
+	}
+
+	delay := LaunchDelayRange{MinSeconds: minSeconds, MaxSeconds: maxSeconds}
+	if allowLegacyDefault {
+		if err := delay.validateForConfigLoad(); err != nil {
+			return LaunchDelayRange{}, err
+		}
+		return delay, nil
+	}
+	if err := delay.Validate(); err != nil {
+		return LaunchDelayRange{}, err
+	}
+	return delay, nil
 }

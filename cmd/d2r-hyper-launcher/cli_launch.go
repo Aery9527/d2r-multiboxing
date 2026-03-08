@@ -24,12 +24,11 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 		return
 	}
 	if isAccountRunning(acc.DisplayName) {
-		ui.warningf("%s 已在執行中，請先切回既有視窗或改用其他帳號。", acc.DisplayName)
-		ui.blankLine()
+		showWarningAndPause(fmt.Sprintf("%s 已在執行中。", acc.DisplayName))
 		return
 	}
 
-	region, ok := promptLaunchRegion("啟動指定帳號：選擇區域")
+	region, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{acc})
 	if !ok {
 		return
 	}
@@ -77,13 +76,12 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 		ui.rawln(line)
 	}
 	if len(pendingAccounts) == 0 {
-		ui.infof("所有帳號都已在執行中。")
-		ui.blankLine()
+		showInfoAndPause("所有帳號都已在執行中。")
 		return
 	}
 	ui.infof("本次只會啟動上面標示為 <未啟動> 的帳號，共 %d 個。", len(pendingAccounts))
 
-	region, ok := promptLaunchRegion("啟動所有帳號：選擇區域")
+	region, ok := promptLaunchRegion("啟動所有帳號：選擇區域", pendingAccounts)
 	if !ok {
 		return
 	}
@@ -149,9 +147,13 @@ func launchOffline(cfg *config.Config) {
 	ui.blankLine()
 }
 
-func promptLaunchRegion(title string) (*d2r.Region, bool) {
+func promptLaunchRegion(title string, accounts []*account.Account) (*d2r.Region, bool) {
 	for {
 		ui.headf("%s", title)
+		ui.infof("準備啟動的帳號：")
+		for _, line := range launchTargetAccountLines(accounts) {
+			ui.rawln(line)
+		}
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("1", "NA", "")
 			options.option("2", "EU", "")
@@ -174,6 +176,17 @@ func promptLaunchRegion(title string) (*d2r.Region, bool) {
 		}
 		return region, true
 	}
+}
+
+func launchTargetAccountLines(accounts []*account.Account) []string {
+	lines := make([]string, 0, len(accounts))
+	for _, acc := range accounts {
+		if acc == nil {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("  %s (%s)", acc.DisplayName, acc.Email))
+	}
+	return lines
 }
 
 func pauseAfterSuccessfulLaunch() {

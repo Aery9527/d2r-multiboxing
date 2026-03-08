@@ -9,7 +9,6 @@ import (
 func TestBuildOnlineArgs(t *testing.T) {
 	args := buildOnlineArgs("user@example.com", "secret", "us.actual.battle.net", "-mod", "sample", "-txt")
 	assert.Equal(t, []string{
-		"-uid", "osi",
 		"-mod", "sample", "-txt",
 		"-username", "user@example.com",
 		"-password", "secret",

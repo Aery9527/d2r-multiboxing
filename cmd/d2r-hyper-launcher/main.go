@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -33,13 +34,12 @@ func main() {
 
 	cfg, err := config.Load()
 	if err != nil {
-		ui.errorf("設定檔載入失敗：%v", err)
+		showInputErrorAndPause(fmt.Sprintf("設定檔載入失敗：%v", err))
 		return
 	}
 	cfgDir, _ := config.Dir()
 	printStartupAnnouncement(cfgDir)
 	pauseAfterStartupAnnouncement()
-	ui.blankLine()
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
@@ -50,13 +50,13 @@ func main() {
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {
-		ui.errorf("無法取得帳號檔案路徑：%v", err)
+		showInputErrorAndPause(fmt.Sprintf("無法取得帳號檔案路徑：%v", err))
 		return
 	}
 
 	createdAccountsFile, err := account.EnsureAccountsFile(accountsFile)
 	if err != nil {
-		ui.errorf("建立帳號檔案失敗：%v", err)
+		showInputErrorAndPause(fmt.Sprintf("建立帳號檔案失敗：%v", err))
 		return
 	}
 	if createdAccountsFile {
@@ -66,13 +66,13 @@ func main() {
 
 	accounts, err := account.LoadAccounts(accountsFile)
 	if err != nil {
-		ui.errorf("讀取帳號失敗：%v", err)
+		showInputErrorAndPause(fmt.Sprintf("讀取帳號失敗：%v", err))
 		return
 	}
 
 	changed, err := account.EncryptPlaintextPasswords(accountsFile, accounts)
 	if err != nil {
-		ui.errorf("密碼加密失敗：%v", err)
+		showInputErrorAndPause(fmt.Sprintf("密碼加密失敗：%v", err))
 		return
 	}
 	if changed {

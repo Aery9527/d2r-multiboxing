@@ -335,10 +335,10 @@ func (u *cliUI) anyKeyContinue() error {
 	if u.canSingleKeyContinue() {
 		u.inputf("請按任意鍵繼續...")
 		err = u.waitForAnyKey()
-		u.blankLine()
 	} else {
 		_, _ = u.readInputf("請按 Enter 繼續...")
 	}
+	u.blankLine()
 	return err
 }
 
@@ -346,8 +346,26 @@ func showInvalidInputAndPause() {
 	showInputErrorAndPause("無效輸入，請重試。")
 }
 
+func showInfoAndPause(message string) {
+	showMessageAndPause(func() {
+		ui.infof("%s", message)
+	})
+}
+
+func showWarningAndPause(message string) {
+	showMessageAndPause(func() {
+		ui.warningf("%s", message)
+	})
+}
+
 func showInputErrorAndPause(message string) {
-	ui.errorf("%s", message)
+	showMessageAndPause(func() {
+		ui.errorf("%s", message)
+	})
+}
+
+func showMessageAndPause(showMessage func()) {
+	showMessage()
 	if err := ui.anyKeyContinue(); err != nil {
 		ui.warningf("等待按鍵失敗：%v", err)
 	}
