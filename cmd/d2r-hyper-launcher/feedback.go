@@ -139,10 +139,11 @@ func (u *cliUI) headf(format string, args ...any) {
 		title = strings.Repeat(" ", leftPadding) + title + strings.Repeat(" ", rightPadding)
 	}
 
+	u.blankLine()
 	u.headerDividerLine()
 	u.rawln(title)
 	u.headerDividerLine()
-	ui.blankLine()
+	u.blankLine()
 }
 
 func (u *cliUI) menuBlock(render func()) {

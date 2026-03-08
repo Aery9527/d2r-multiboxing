@@ -35,7 +35,7 @@ func TestCLIUIHeadRendersTitleBetweenDividers(t *testing.T) {
 		testUI.headf("主選單")
 	})
 
-	assert.Equal(t, "========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n", output)
+	assert.Equal(t, "\n========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n", output)
 }
 
 func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {

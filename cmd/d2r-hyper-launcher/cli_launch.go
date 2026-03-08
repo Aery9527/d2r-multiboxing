@@ -131,7 +131,6 @@ func launchOffline(cfg *config.Config) {
 		return
 	}
 
-	ui.blankLine()
 	ui.headf("離線遊玩模式")
 
 	modArgs, ok := selectLaunchMod(cfg.D2RPath)
@@ -152,7 +151,6 @@ func launchOffline(cfg *config.Config) {
 
 func promptLaunchRegion(title string) (*d2r.Region, bool) {
 	for {
-		ui.blankLine()
 		ui.headf("%s", title)
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("1", "NA", "")

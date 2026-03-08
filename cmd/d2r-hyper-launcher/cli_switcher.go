@@ -9,7 +9,6 @@ import (
 
 func setupSwitcher(cfg *config.Config) {
 	for {
-		ui.blankLine()
 		ui.headf("視窗切換設定")
 
 		if display, ok := switcherSavedDisplay(cfg); ok {

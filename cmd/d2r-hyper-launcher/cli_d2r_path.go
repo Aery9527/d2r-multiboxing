@@ -17,7 +17,6 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, setup func(*config.Co
 			return true
 		}
 
-		ui.blankLine()
 		ui.headf("啟動前檢查 D2R 路徑")
 		ui.warningf("找不到可啟動的 D2R.exe：%s", cfg.D2RPath)
 		ui.warningf("原因：%v", err)
@@ -48,7 +47,6 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, setup func(*config.Co
 }
 
 func setupD2RPath(cfg *config.Config) bool {
-	ui.blankLine()
 	ui.headf("設定 D2R 路徑")
 	ui.promptf("即將開啟 Windows 檔案選擇視窗，請選擇 D2R.exe。")
 

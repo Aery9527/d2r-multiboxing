@@ -17,7 +17,6 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 
 menuLoop:
 	for {
-		ui.blankLine()
 		ui.headf("帳號啟動 flag 設定")
 		printAccountList(accounts)
 		ui.blankLine()
@@ -53,7 +52,6 @@ menuLoop:
 		}
 
 		for {
-			ui.blankLine()
 			ui.headf("%s flag：選擇操作方式", actionLabel)
 			ui.infof("這次要如何%s flag？", actionLabel)
 			modeOptions := ui.subMenuOptions(func(options *cliMenuOptions) {
@@ -121,7 +119,6 @@ func configureAllFlagsForAllAccounts(accounts []account.Account, accountsFile st
 	mask := allLaunchFlagMask(options)
 	affectedOptions := launchFlagOptionsForMask(options, mask)
 
-	ui.blankLine()
 	ui.headf("%s所有帳號所有 flag", actionLabel)
 	ui.infof("即將對全部帳號%s以下 flag：", actionLabel)
 	for _, option := range affectedOptions {
@@ -150,7 +147,6 @@ func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMo
 
 selectFlag:
 	for {
-		ui.blankLine()
 		ui.headf("%s flag：依 flag 選帳號", flagActionLabel(setMode))
 		flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 			for i, option := range options {
@@ -192,7 +188,6 @@ selectFlag:
 
 	actionLabel := flagActionLabel(setMode)
 	for {
-		ui.blankLine()
 		ui.headf("%s flag：選擇帳號", actionLabel)
 		accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 			for i, acc := range accounts {
@@ -252,7 +247,6 @@ func configureFlagsByAccount(accounts []account.Account, accountsFile string, se
 
 selectAccount:
 	for {
-		ui.blankLine()
 		ui.headf("%s flag：先選帳號", flagActionLabel(setMode))
 		accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 			for i, acc := range accounts {
@@ -286,7 +280,6 @@ selectAccount:
 
 	actionLabel := flagActionLabel(setMode)
 	for {
-		ui.blankLine()
 		ui.headf("%s flag：選擇旗標", actionLabel)
 		flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
 			for i, option := range options {

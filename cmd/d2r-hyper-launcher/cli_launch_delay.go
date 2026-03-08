@@ -9,7 +9,6 @@ import (
 
 func setupLaunchDelay(cfg *config.Config) {
 	for {
-		ui.blankLine()
 		ui.headf("啟動間隔設定")
 		ui.infof("目前設定：%s", cfg.LaunchDelay.DisplayString())
 		ui.infof("說明：這會影響主選單 [a]「啟動所有帳號」時，每個帳號之間的等待秒數。")
