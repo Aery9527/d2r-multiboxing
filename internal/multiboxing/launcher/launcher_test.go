@@ -18,8 +18,8 @@ func TestBuildOnlineArgs(t *testing.T) {
 }
 
 func TestBuildOfflineArgs(t *testing.T) {
-	assert.Equal(t, []string{"-uid", "osi"}, buildOfflineArgs())
-	assert.Equal(t, []string{"-uid", "osi", "-mod", "sample", "-txt"}, buildOfflineArgs("-mod", "sample", "-txt"))
+	assert.Empty(t, buildOfflineArgs())
+	assert.Equal(t, []string{"-mod", "sample", "-txt"}, buildOfflineArgs("-mod", "sample", "-txt"))
 }
 
 func TestRedactArgs(t *testing.T) {

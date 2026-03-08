@@ -51,9 +51,9 @@ func printMenu(accounts []account.Account, cfg *config.Config) {
 		options.option("數字", "啟動指定帳號", "")
 		options.option("0", "離線遊玩", "可選 mod，不需帳密")
 		options.option("a", "啟動所有帳號", "可選 mod，只啟動未啟動的")
-		options.option("d", "設定啟動間隔", fmt.Sprintf("目前：%s", cfg.LaunchDelay.DisplayString()))
+		options.option("d", "設定啟動間隔", cfg.LaunchDelay.DisplayString())
 		options.option("f", "設定帳號啟動 flag", "進入可查看所有帳號的 flag 設定")
-		options.option("p", "選擇 D2R.exe 路徑", "目前："+cfg.D2RPath)
+		options.option("p", "選擇 D2R.exe 路徑", cfg.D2RPath)
 		options.option("s", "視窗切換設定", switcherMenuOptionStatus(cfg))
 		options.option("r", "重新整理狀態", "")
 	})
@@ -65,12 +65,12 @@ func printMenu(accounts []account.Account, cfg *config.Config) {
 func switcherMenuOptionStatus(cfg *config.Config) string {
 	display, ok := switcherSavedDisplay(cfg)
 	if !ok {
-		return "狀態：未設定"
+		return "未設定"
 	}
 	if !cfg.Switcher.Enabled {
-		return fmt.Sprintf("狀態：未啟用（已保存：%s）", display)
+		return fmt.Sprintf("未啟用設定：%s", display)
 	}
-	return fmt.Sprintf("狀態：已啟用（%s）", display)
+	return fmt.Sprintf("已啟用設定：%s", display)
 }
 
 func switcherSavedDisplay(cfg *config.Config) (string, bool) {

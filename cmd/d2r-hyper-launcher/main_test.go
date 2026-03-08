@@ -118,11 +118,11 @@ func TestPrintMenuKeepsChoicePromptInsideOptionGroup(t *testing.T) {
 	assert.Contains(t, output, "[0]    離線遊玩")
 	assert.Contains(t, output, "可選 mod，不需帳密\n")
 	assert.Contains(t, output, "[d]    設定啟動間隔")
-	assert.Contains(t, output, "目前：30-60 秒（隨機）\n")
+	assert.Contains(t, output, "30-60 秒（隨機）\n")
 	assert.Contains(t, output, "[p]    選擇 D2R.exe 路徑")
 	assert.Contains(t, output, "C:\\Games\\D2R\\D2R.exe\n")
 	assert.Contains(t, output, "[s]    視窗切換設定")
-	assert.Contains(t, output, "狀態：已啟用（Tab（Tab 鍵））\n")
+	assert.Contains(t, output, "已啟用設定：Tab（Tab 鍵）\n")
 	assert.Contains(t, output, "[q]    退出\n")
 	assert.NotContains(t, output, "是否已啟動的判斷基準")
 	assert.NotContains(t, output, "? 請選擇：")
@@ -136,11 +136,11 @@ func TestSwitcherMenuOptionStatusKeepsSavedBindingWhenDisabled(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, "狀態：未啟用（已保存：Tab（Tab 鍵））", switcherMenuOptionStatus(cfg))
+	assert.Equal(t, "未啟用設定：Tab（Tab 鍵）", switcherMenuOptionStatus(cfg))
 }
 
 func TestSwitcherMenuOptionStatusShowsUnsetWhenNoBindingSaved(t *testing.T) {
-	assert.Equal(t, "狀態：未設定", switcherMenuOptionStatus(&config.Config{}))
+	assert.Equal(t, "未設定", switcherMenuOptionStatus(&config.Config{}))
 }
 
 func TestSwitcherToggleOptionLabelShowsEnableWhenDisabled(t *testing.T) {

@@ -48,7 +48,8 @@ func LaunchD2ROffline(d2rPath string, extraArgs ...string) (uint32, error) {
 }
 
 func buildOnlineArgs(username string, password string, address string, extraArgs ...string) []string {
-	args := buildOfflineArgs(extraArgs...)
+	args := []string{"-uid", "osi"}
+	args = append(args, extraArgs...)
 	args = append(args,
 		"-username", username,
 		"-password", password,
@@ -58,7 +59,7 @@ func buildOnlineArgs(username string, password string, address string, extraArgs
 }
 
 func buildOfflineArgs(extraArgs ...string) []string {
-	args := []string{"-uid", "osi"}
+	args := make([]string, 0, len(extraArgs))
 	args = append(args, extraArgs...)
 	return args
 }
