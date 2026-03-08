@@ -38,6 +38,14 @@ func displayReleaseSummary(version string, releaseTime string) string {
 	return fmt.Sprintf("%s（%s）", displayVersion(version), displayReleaseTime(releaseTime))
 }
 
+func maybeShowStartupAnnouncement(cfgDir string, createdAccountsFile bool) {
+	if createdAccountsFile {
+		return
+	}
+	printStartupAnnouncement(cfgDir)
+	pauseAfterStartupAnnouncement()
+}
+
 func main() {
 	_ = windows.SetConsoleCP(65001)
 	_ = windows.SetConsoleOutputCP(65001)
@@ -52,15 +60,7 @@ func main() {
 		return
 	}
 	cfgDir, _ := config.Dir()
-	printStartupAnnouncement(cfgDir)
-	pauseAfterStartupAnnouncement()
-
-	if cfg.Switcher != nil && cfg.Switcher.Enabled {
-		if err := switcher.Start(cfg.Switcher); err != nil {
-			ui.warningf("視窗切換啟動失敗：%v", err)
-		}
-		ui.blankLine()
-	}
+	printStartupHeader()
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {
@@ -76,6 +76,15 @@ func main() {
 	if createdAccountsFile {
 		handleCreatedAccountsFile(cfgDir, accountsFile)
 		return
+	}
+
+	maybeShowStartupAnnouncement(cfgDir, createdAccountsFile)
+
+	if cfg.Switcher != nil && cfg.Switcher.Enabled {
+		if err := switcher.Start(cfg.Switcher); err != nil {
+			ui.warningf("視窗切換啟動失敗：%v", err)
+		}
+		ui.blankLine()
 	}
 
 	accounts, err := account.LoadAccounts(accountsFile)

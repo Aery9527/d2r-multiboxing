@@ -17,12 +17,10 @@ const (
 )
 
 func printStartupAnnouncement(cfgDir string) {
-	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
-
 	ui.infof("目前版本：%s", displayReleaseSummary(version, releaseTime))
 	ui.infof("資料目錄：%s", cfgDir)
 	ui.warningLines(
-		"注意：帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
+		"帳號啟動狀態的偵測是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
 		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName的話，",
 		"就會導致啟動狀態顯示不正確。",
 	)
@@ -37,6 +35,10 @@ func printStartupAnnouncement(cfgDir string) {
 		"- 本工具不會修改遊戲檔案、注入遊戲程式或自動化遊戲操作。",
 		"- 本工具為社群自用工具，與 Blizzard Entertainment 無關；使用風險自負。",
 	)
+}
+
+func printStartupHeader() {
+	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
 }
 
 func pauseAfterStartupAnnouncement() {

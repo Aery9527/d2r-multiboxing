@@ -7,9 +7,7 @@ import (
 )
 
 func handleCreatedAccountsFile(cfgDir, accountsFile string) {
-	ui.blankLine()
-	ui.successf("已自動建立帳號設定檔 accounts.csv。")
-	ui.infof("建立位置：%s", accountsFile)
+	ui.successf("已自動建立帳號設定檔 accounts.csv，建立位置：%s", accountsFile)
 	ui.infof("已先幫你放入兩筆範例資料，請把它們改成你自己的 Battle.net 帳號。")
 	ui.infof("CSV 格式：Email,Password,DisplayName,LaunchFlags")
 	ui.infof("範例：your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),")
