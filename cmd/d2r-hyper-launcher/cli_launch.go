@@ -96,7 +96,7 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 		ui.blankLine()
 		return
 	}
-	ui.infof("本次只會啟動上面標示為 [未啟動] 的帳號，共 %d 個。", len(pendingAccounts))
+	ui.infof("本次只會啟動上面標示為 <未啟動> 的帳號，共 %d 個。", len(pendingAccounts))
 
 	ui.blankLine()
 	ui.headf("啟動所有帳號：選擇區域")
@@ -242,7 +242,7 @@ func batchAccountStatusLines(accounts []account.Account, runningTitles map[strin
 		if runningTitles[d2r.WindowTitle(accounts[i].DisplayName)] {
 			status = "已啟動"
 		}
-		lines = append(lines, fmt.Sprintf("  [%s] %s (%s)", status, accounts[i].DisplayName, accounts[i].Email))
+		lines = append(lines, fmt.Sprintf("  <%s> %s (%s)", status, accounts[i].DisplayName, accounts[i].Email))
 	}
 	return lines
 }

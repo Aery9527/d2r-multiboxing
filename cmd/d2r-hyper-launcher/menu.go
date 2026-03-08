@@ -22,7 +22,11 @@ func printStartupAnnouncement(cfgDir string, cfg *config.Config) {
 	ui.headf("d2r-hyper-launcher (%s)", displayVersion(version))
 	ui.infof("資料目錄：%s", cfgDir)
 	ui.infof("D2R 路徑：%s", cfg.D2RPath)
-	ui.warningf("帳號啟動狀態是用 account.csv 裡的 DisplayName 對應視窗名稱，\n所以已經透過該工具開啟 D2R 然後又去修改 DisplayName，\n就會導致狀態顯示不正確，請注意。")
+	ui.warningLines(
+		"帳號啟動狀態是用 account.csv 裡的 DisplayName 去對應視窗名稱，",
+		"所以已經透過該工具開啟 D2R 然後又去修改 DisplayName，",
+		"就會導致狀態顯示不正確，請注意。",
+	)
 }
 
 func printMenu(accounts []account.Account, cfg *config.Config) {
@@ -33,7 +37,7 @@ func printMenu(accounts []account.Account, cfg *config.Config) {
 		if process.FindWindowByTitle(d2r.WindowTitle(acc.DisplayName)) {
 			status = "已啟動"
 		}
-		ui.rawlnf("  [%d] %-15s (%s)  [%s]", i+1, acc.DisplayName, acc.Email, status)
+		ui.rawlnf("[%d] <%s> %-15s (%s)  ", i+1, status, acc.DisplayName, acc.Email)
 	}
 
 	ui.blankLine()

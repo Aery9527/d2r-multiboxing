@@ -98,6 +98,16 @@ func TestCLIUIInputPromptUsesPromptRenderer(t *testing.T) {
 	assert.Equal(t, "? 請選擇：", output)
 }
 
+func TestCLIUIWarningLinesRendersGroupedMessageWithSinglePrefix(t *testing.T) {
+	testUI := newCLIUI()
+
+	output := captureStdout(t, func() {
+		testUI.warningLines("第一行", "第二行", "", "第三行")
+	})
+
+	assert.Equal(t, "⚠ 第一行\n  第二行\n  第三行\n", output)
+}
+
 func TestCLIUIReadInputUsesDefaultPrompt(t *testing.T) {
 	testUI := newCLIUI()
 	testUI.readLine = func() (string, bool) {

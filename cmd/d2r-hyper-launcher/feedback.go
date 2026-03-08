@@ -102,6 +102,20 @@ func (u *cliUI) line(kind uiMessageKind, format string, args ...any) {
 	fmt.Printf("%s\n", u.renderMessage(kind, format, args...))
 }
 
+func (u *cliUI) lines(kind uiMessageKind, messages ...string) {
+	group := make([]string, 0, len(messages))
+	for _, message := range messages {
+		if message == "" {
+			continue
+		}
+		group = append(group, message)
+	}
+	if len(group) == 0 {
+		return
+	}
+	u.line(kind, "%s", strings.Join(group, "\n"))
+}
+
 func (u *cliUI) rawln(text string) {
 	fmt.Println(text)
 }
@@ -142,20 +156,40 @@ func (u *cliUI) infof(format string, args ...any) {
 	u.line(uiMessageInfo, format, args...)
 }
 
+func (u *cliUI) infoLines(messages ...string) {
+	u.lines(uiMessageInfo, messages...)
+}
+
 func (u *cliUI) promptf(format string, args ...any) {
 	u.line(uiMessagePrompt, format, args...)
+}
+
+func (u *cliUI) promptLines(messages ...string) {
+	u.lines(uiMessagePrompt, messages...)
 }
 
 func (u *cliUI) successf(format string, args ...any) {
 	u.line(uiMessageSuccess, format, args...)
 }
 
+func (u *cliUI) successLines(messages ...string) {
+	u.lines(uiMessageSuccess, messages...)
+}
+
 func (u *cliUI) errorf(format string, args ...any) {
 	u.line(uiMessageError, format, args...)
 }
 
+func (u *cliUI) errorLines(messages ...string) {
+	u.lines(uiMessageError, messages...)
+}
+
 func (u *cliUI) warningf(format string, args ...any) {
 	u.line(uiMessageWarning, format, args...)
+}
+
+func (u *cliUI) warningLines(messages ...string) {
+	u.lines(uiMessageWarning, messages...)
 }
 
 func (u *cliUI) inputf(format string, args ...any) {
