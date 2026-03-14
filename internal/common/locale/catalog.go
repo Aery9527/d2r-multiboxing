@@ -252,17 +252,19 @@ type SwitcherCatalog struct {
 	DisableSaveAndRestoreFailed string // fmt("%v", "%v") – save err, restart err
 
 	// Account filter
-	OptSetAccounts             string // [2] menu option label
-	AccountFilterTitle         string // sub-menu header
-	AccountFilterDescIncluded  string // description line: what "included" means
-	AccountFilterDescExcluded  string // description line: what "excluded" means
-	AccountIncluded            string // per-account status label – included
-	AccountExcluded            string // per-account status label – excluded
-	AccountFilterSaved         string // success after save
-	AccountFilterNoAccounts    string // warning when accounts list is empty
-	AccountFilterOptToggle     string // [1~N] toggle single account
-	AccountFilterOptAll        string // [a] include-all option label
-	AccountFilterOptNone       string // [n] exclude-all option label
+	OptSetAccounts              string // [2] menu option label
+	AccountFilterTitle          string // sub-menu header
+	AccountFilterDescIncluded   string // description line: what "included" means
+	AccountFilterDescExcluded   string // description line: what "excluded" means
+	AccountIncluded             string // per-account status label – included
+	AccountExcluded             string // per-account status label – excluded
+	AccountFilterSaved          string // success after save
+	AccountFilterNoAccounts     string // warning when accounts list is empty
+	AccountFilterOptToggle      string // [1~N] toggle single account
+	AccountFilterOptAll         string // [a] include-all option label
+	AccountFilterOptNone        string // [n] exclude-all option label
+	AccountFilterWarnOneIncluded  string // warning: only 1 account in cycle
+	AccountFilterWarnNoneIncluded string // warning: all accounts excluded
 }
 
 // FlagsCatalog holds strings for account launch-flag configuration.

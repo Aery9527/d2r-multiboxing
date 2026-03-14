@@ -28,6 +28,7 @@
 - 外部命令顯示也走 `ui.commandf(...)`，不要在 domain 層手動拼 `> ` 前綴。
 - 所有子選單導航契約固定：`b` 返回、`h` 主選單、`q` 離開（`cmd/d2r-hyper-launcher/menu.go`）。
 - 輸入錯誤使用 pause helper：`showInputErrorAndPause`、`showInvalidInputAndPause`，讓玩家確認後回流程。
+- **警告訊息後緊接著繼續流程時，必須使用 `showWarningAndPause` 而非單純 `ui.warningf`**，確保玩家有機會閱讀警告內容再繼續；若直接用 `ui.warningf` 後流程馬上刷新畫面，訊息會被清掉玩家看不到。
 - 需要對齊選單時，優先用 `newMenuOptions()` 收集再 `render()`；主選單用 `mainMenuOptions(...)`，子選單用 `subMenuOptions(...)`。
 - 中文字寬對齊沿用 display-width-aware 邏輯，不要退回單純 rune 計數。
 - 不要引導玩家手動改 `config.json`；優先提供 CLI 內可操作流程（例如 `d2r_path_picker.go`）。

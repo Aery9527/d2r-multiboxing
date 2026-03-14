@@ -167,7 +167,9 @@ var catalogEn = Catalog{
 		AccountFilterNoAccounts: "No accounts found. Please configure accounts.csv first.",
 		AccountFilterOptToggle:  "Toggle account",
 		AccountFilterOptAll:     "Include all",
-		AccountFilterOptNone:    "Exclude all",
+		AccountFilterOptNone:          "Exclude all",
+		AccountFilterWarnOneIncluded:   "Only 1 account is in the switch cycle — the hotkey will always focus that account",
+		AccountFilterWarnNoneIncluded:  "All accounts are excluded — the hotkey will have no effect",
 	},
 
 	Flags: FlagsCatalog{

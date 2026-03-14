@@ -192,7 +192,21 @@ func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
 
 		switcher.UpdateExcludedAccounts(account.ExcludedFromSwitcher(accounts))
 		ui.successf("%s", lang.Switcher.AccountFilterSaved)
-		ui.blankLine()
+
+		included := 0
+		for _, acc := range accounts {
+			if !account.SkipSwitcher(acc.ToolFlags) {
+				included++
+			}
+		}
+		switch {
+		case included == 0:
+			showWarningAndPause(lang.Switcher.AccountFilterWarnNoneIncluded)
+		case included == 1:
+			showWarningAndPause(lang.Switcher.AccountFilterWarnOneIncluded)
+		default:
+			ui.blankLine()
+		}
 	}
 }
 

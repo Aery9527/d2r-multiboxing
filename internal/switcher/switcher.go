@@ -161,7 +161,12 @@ func switchToNext() {
 		hwnds = filtered
 	}
 
-	if len(hwnds) < 2 {
+	if len(hwnds) == 0 {
+		return
+	}
+
+	if len(hwnds) == 1 {
+		_ = process.SwitchToWindow(hwnds[0])
 		return
 	}
 

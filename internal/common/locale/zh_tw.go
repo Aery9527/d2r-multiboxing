@@ -167,7 +167,9 @@ var catalogZhTW = Catalog{
 		AccountFilterNoAccounts: "尚無帳號，請先設定 accounts.csv",
 		AccountFilterOptToggle:  "切換指定帳號狀態",
 		AccountFilterOptAll:     "全部包含",
-		AccountFilterOptNone:    "全部排除",
+		AccountFilterOptNone:          "全部排除",
+		AccountFilterWarnOneIncluded:   "目前只有 1 個帳號在切換循環中，切換鍵會永遠切到此帳號",
+		AccountFilterWarnNoneIncluded:  "所有帳號都已排除，切換鍵不會有任何作用",
 	},
 
 	Flags: FlagsCatalog{
