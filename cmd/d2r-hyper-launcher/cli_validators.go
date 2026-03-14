@@ -74,7 +74,7 @@ func selectedLaunchFlagMask(flagIndexes []int, options []account.LaunchFlagOptio
 }
 
 func confirmChanges() bool {
-	answer, ok := ui.readInputf("確認套用？([Y]/[n])：")
+	answer, ok := ui.readInputf("%s", lang.Flags.ConfirmPrompt)
 	if !ok {
 		return false
 	}
@@ -84,9 +84,9 @@ func confirmChanges() bool {
 
 func flagActionLabel(setMode bool) string {
 	if setMode {
-		return "設定"
+		return lang.Flags.ActionSet
 	}
-	return "取消"
+	return lang.Flags.ActionClear
 }
 
 func allLaunchFlagMask(options []account.LaunchFlagOption) uint32 {

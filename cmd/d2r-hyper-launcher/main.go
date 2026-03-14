@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"d2rhl/internal/common/config"
+	"d2rhl/internal/common/locale"
 	"d2rhl/internal/multiboxing/account"
 	"d2rhl/internal/multiboxing/launcher"
 	"d2rhl/internal/multiboxing/monitor"
@@ -19,6 +20,10 @@ import (
 var version = "dev"
 var releaseTime = ""
 
+// lang is the active locale catalog.  Initialised to zh-TW as a safe fallback
+// before config is loaded; updated once the player's language is known.
+var lang = locale.Get(locale.LocaleZhTW)
+
 func displayVersion(version string) string {
 	if strings.HasPrefix(version, "v") {
 		return version
@@ -29,9 +34,9 @@ func displayVersion(version string) string {
 func displayReleaseTime(releaseTime string) string {
 	releaseTime = strings.TrimSpace(releaseTime)
 	if releaseTime == "" {
-		return "尚未 release"
+		return lang.Startup.UnreleasedTag
 	}
-	return fmt.Sprintf("%s release", releaseTime)
+	return fmt.Sprintf(lang.Startup.ReleaseSuffix, releaseTime)
 }
 
 func displayReleaseSummary(version string, releaseTime string) string {
@@ -56,7 +61,7 @@ func main() {
 
 	cfg, err := config.Load()
 	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf("設定檔載入失敗：%v", err))
+		showInputErrorAndPause(fmt.Sprintf(lang.Startup.ConfigLoadFailed, err))
 		return
 	}
 	cfgDir, _ := config.Dir()
@@ -64,13 +69,13 @@ func main() {
 
 	accountsFile, err := config.AccountsPath()
 	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf("無法取得帳號檔案路徑：%v", err))
+		showInputErrorAndPause(fmt.Sprintf(lang.Startup.AccountsPathFailed, err))
 		return
 	}
 
 	createdAccountsFile, err := account.EnsureAccountsFile(accountsFile)
 	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf("建立帳號檔案失敗：%v", err))
+		showInputErrorAndPause(fmt.Sprintf(lang.Startup.AccountsFileFailed, err))
 		return
 	}
 	if createdAccountsFile {
@@ -78,28 +83,36 @@ func main() {
 		return
 	}
 
+	// Ensure language is set; show picker on first run after accounts file exists.
+	if cfg.Language == "" {
+		pickInitialLanguage(cfg)
+	}
+	if l, ok := locale.ParseLocale(cfg.Language); ok {
+		lang = locale.Get(l)
+	}
+
 	maybeShowStartupAnnouncement(cfgDir, createdAccountsFile)
 
 	if cfg.Switcher != nil && cfg.Switcher.Enabled {
 		if err := switcher.Start(cfg.Switcher); err != nil {
-			ui.warningf("視窗切換啟動失敗：%v", err)
+			ui.warningf(lang.Startup.SwitcherStartFail, err)
 		}
 		ui.blankLine()
 	}
 
 	accounts, err := account.LoadAccounts(accountsFile)
 	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf("讀取帳號失敗：%v", err))
+		showInputErrorAndPause(fmt.Sprintf(lang.Startup.AccountsLoadFailed, err))
 		return
 	}
 
 	changed, err := account.EncryptPlaintextPasswords(accountsFile, accounts)
 	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf("密碼加密失敗：%v", err))
+		showInputErrorAndPause(fmt.Sprintf(lang.Startup.EncryptFailed, err))
 		return
 	}
 	if changed {
-		ui.successf("已加密明文密碼並回寫至 CSV")
+		ui.successf("%s", lang.Startup.PasswordEncrypted)
 	}
 
 	monitor.StartHandleMonitor()
@@ -114,12 +127,12 @@ func main() {
 		switch strings.ToLower(input) {
 		case menuQuit:
 			switcher.Stop()
-			ui.infof("再見！")
+			ui.infof("%s", lang.Common.Goodbye)
 			return
 		case "r":
 			accounts, err = account.LoadAccounts(accountsFile)
 			if err != nil {
-				ui.errorf("讀取帳號失敗：%v", err)
+				ui.errorf(lang.Startup.AccountsLoadRefresh, err)
 			}
 		case "0":
 			launchOffline(cfg)
@@ -133,6 +146,8 @@ func main() {
 			setupSwitcher(cfg)
 		case "f":
 			setupAccountLaunchFlags(accounts, accountsFile)
+		case "l":
+			setupLanguage(cfg)
 		default:
 			id, err := strconv.Atoi(input)
 			if err != nil || id < 1 || id > len(accounts) {

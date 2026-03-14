@@ -25,18 +25,18 @@ func parseRegionInput(input string) *d2r.Region {
 func selectLaunchMod(d2rPath string) ([]string, bool) {
 	installedMods, err := mods.DiscoverInstalled(d2rPath)
 	if err != nil {
-		ui.errorf("讀取 mods 失敗：%v", err)
+		ui.errorf(lang.Launch.ModLoadFailed, err)
 		return nil, false
 	}
 
 	if len(installedMods) == 0 {
-		ui.infof("找不到已安裝 mod，將以原版啟動。")
+		ui.infof("%s", lang.Launch.ModNoMods)
 		return nil, true
 	}
 
 	for {
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
-			options.option("0", "不使用 mod", "")
+			options.option("0", lang.Launch.ModOptNone, "")
 			for i, modName := range installedMods {
 				options.option(strconv.Itoa(i+1), modName, "")
 			}
@@ -59,12 +59,12 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 		}
 
 		if selected == 0 {
-			ui.infof("本次啟動不使用 mod。")
+			ui.infof("%s", lang.Launch.ModNoneChosen)
 			return nil, true
 		}
 
 		modName := installedMods[selected-1]
-		ui.infof("本次使用 mod：%s", modName)
+		ui.infof(lang.Launch.ModUsing, modName)
 		return mods.BuildLaunchArgs(modName), true
 	}
 }

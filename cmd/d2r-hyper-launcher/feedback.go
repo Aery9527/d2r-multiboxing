@@ -226,7 +226,7 @@ func (u *cliUI) inputf(format string, args ...any) {
 }
 
 func (u *cliUI) readInput() (string, bool) {
-	return u.readInputf("請選擇：")
+	return u.readInputf("%s", lang.Common.SelectPrompt)
 }
 
 func (u *cliUI) readInputf(format string, args ...any) (string, bool) {
@@ -257,14 +257,14 @@ func (o *cliMenuOptions) blankLine() {
 
 func (o *cliMenuOptions) appendSubMenuNav() {
 	o.blankLine()
-	o.option(menuBack, "回上一層", "")
-	o.option(menuHome, "回主選單", "")
-	o.option(menuQuit, "離開程式", "")
+	o.option(menuBack, lang.Common.NavBack, "")
+	o.option(menuHome, lang.Common.NavHome, "")
+	o.option(menuQuit, lang.Common.NavQuit, "")
 }
 
 func (o *cliMenuOptions) appendQuitOption() {
 	o.blankLine()
-	o.option(menuQuit, "退出", "")
+	o.option(menuQuit, lang.Common.QuitLabel, "")
 }
 
 func (o *cliMenuOptions) render() {
@@ -333,17 +333,17 @@ func (u *cliUI) anyKeyContinue() error {
 	u.blankLine()
 	var err error
 	if u.canSingleKeyContinue() {
-		u.inputf("請按任意鍵繼續...")
+		u.inputf("%s", lang.Common.AnyKeyPrompt)
 		err = u.waitForAnyKey()
 	} else {
-		_, _ = u.readInputf("請按 Enter 繼續...")
+		_, _ = u.readInputf("%s", lang.Common.EnterKeyPrompt)
 	}
 	u.blankLine()
 	return err
 }
 
 func showInvalidInputAndPause() {
-	showInputErrorAndPause("無效輸入，請重試。")
+	showInputErrorAndPause(lang.Common.InvalidInput)
 }
 
 func showInfoAndPause(message string) {
@@ -367,7 +367,7 @@ func showInputErrorAndPause(message string) {
 func showMessageAndPause(showMessage func()) {
 	showMessage()
 	if err := ui.anyKeyContinue(); err != nil {
-		ui.warningf("等待按鍵失敗：%v", err)
+		ui.warningf(lang.Common.WaitKeyFailed, err)
 	}
 	ui.blankLine()
 }

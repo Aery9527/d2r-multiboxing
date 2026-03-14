@@ -7,19 +7,28 @@ import (
 	"d2rhl/internal/common/config"
 )
 
+// displayDelay formats a LaunchDelayRange for display using the active locale.
+// Use this in the CLI layer instead of the domain's DisplayString method.
+func displayDelay(r config.LaunchDelayRange) string {
+	if r.MinSeconds == r.MaxSeconds {
+		return fmt.Sprintf(lang.Delay.DisplayFixed, r.MinSeconds)
+	}
+	return fmt.Sprintf(lang.Delay.DisplayRandom, r.MinSeconds, r.MaxSeconds)
+}
+
 func setupLaunchDelay(cfg *config.Config) {
 	for {
-		ui.headf("啟動間隔設定")
-		ui.infof("目前設定：%s", cfg.LaunchDelay.DisplayString())
-		ui.infof("說明：這會影響主選單 [a]「啟動所有帳號」時，每個帳號之間的等待秒數。")
+		ui.headf("%s", lang.Delay.Title)
+		ui.infof(lang.Delay.CurrentSetting, displayDelay(cfg.LaunchDelay))
+		ui.infof("%s", lang.Delay.Description)
 		options := ui.subMenuOptions(nil)
 		ui.menuBlock(func() {
-			ui.infof("固定下限：%d 秒", config.MinLaunchDelaySeconds)
-			ui.infof("可輸入固定秒數，例如：30")
-			ui.infof("也可輸入隨機範圍，例如：30-60")
+			ui.infof(lang.Delay.MinLabel, config.MinLaunchDelaySeconds)
+			ui.infof("%s", lang.Delay.HintFixed)
+			ui.infof("%s", lang.Delay.HintRange)
 			options.render()
 		})
-		input, ok := ui.readInputf("請輸入新的秒數或範圍：")
+		input, ok := ui.readInputf("%s", lang.Delay.InputPrompt)
 		if !ok {
 			return
 		}
@@ -35,11 +44,11 @@ func setupLaunchDelay(cfg *config.Config) {
 
 		cfg.LaunchDelay = delay
 		if err := config.Save(cfg); err != nil {
-			showInputErrorAndPause(fmt.Sprintf("設定儲存失敗：%v", err))
+			showInputErrorAndPause(fmt.Sprintf(lang.Common.SaveFailed, err))
 			continue
 		}
 
-		ui.successf("已更新啟動間隔：%s", delay.DisplayString())
+		ui.successf(lang.Delay.Updated, displayDelay(delay))
 		ui.blankLine()
 		return
 	}

@@ -163,6 +163,10 @@ type Config struct {
 
 	// Switcher holds the window switcher settings.
 	Switcher *SwitcherConfig `json:"switcher,omitempty"`
+
+	// Language is the display language tag (e.g. "zh-TW", "en").
+	// An empty value means the player has not chosen a language yet (first run).
+	Language string `json:"language,omitempty"`
 }
 
 // DefaultConfig returns a Config with default values.

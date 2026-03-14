@@ -7,21 +7,21 @@ import (
 )
 
 func handleCreatedAccountsFile(cfgDir, accountsFile string) {
-	ui.successf("已自動建立帳號設定檔 accounts.csv，建立位置：%s", accountsFile)
-	ui.infof("已先幫你放入兩筆範例資料，請把它們改成你自己的 Battle.net 帳號。")
-	ui.infof("CSV 格式：Email,Password,DisplayName,LaunchFlags")
-	ui.infof("範例：your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),")
-	ui.infof("LaunchFlags 可先留空；之後可回到工具主選單用 [f] 再設定各帳號的啟動旗標。")
+	ui.successf(lang.Accounts.CreatedOK, accountsFile)
+	ui.infof("%s", lang.Accounts.CreatedInfo1)
+	ui.infof("%s", lang.Accounts.CreatedInfo2)
+	ui.infof("%s", lang.Accounts.CreatedInfo3)
+	ui.infof("%s", lang.Accounts.CreatedInfo4)
 	ui.blankLine()
-	ui.promptf("按任意鍵後，程式會結束並自動開啟資料目錄，方便你直接修改剛建立好的 accounts.csv。")
+	ui.promptf("%s", lang.Accounts.CreatedPressAny)
 
 	if err := ui.anyKeyContinue(); err != nil {
-		ui.warningf("等待按鍵失敗：%v", err)
+		ui.warningf(lang.Common.WaitKeyFailed, err)
 		return
 	}
 
 	if err := openFolder(cfgDir); err != nil {
-		ui.warningf("無法自動開啟資料目錄：%v", err)
+		ui.warningf(lang.Accounts.OpenFolderFailed, err)
 	}
 }
 

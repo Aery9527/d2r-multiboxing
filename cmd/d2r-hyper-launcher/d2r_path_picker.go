@@ -11,8 +11,9 @@ import (
 )
 
 // PickD2RPath opens a Windows file picker and returns the selected D2R.exe path.
-func PickD2RPath(currentPath string) (string, error) {
-	script := buildD2RPathPickerScript(dialogInitialDir(currentPath))
+// dialogTitle is shown in the file picker window title bar.
+func PickD2RPath(currentPath string, dialogTitle string) (string, error) {
+	script := buildD2RPathPickerScript(dialogInitialDir(currentPath), dialogTitle)
 
 	cmd := exec.Command("powershell.exe", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-Command", script)
 	output, err := cmd.CombinedOutput()
@@ -50,13 +51,14 @@ func dialogInitialDir(currentPath string) string {
 	return ""
 }
 
-func buildD2RPathPickerScript(initialDir string) string {
+func buildD2RPathPickerScript(initialDir string, title string) string {
 	escapedInitialDir := powerShellSingleQuote(initialDir)
+	escapedTitle := powerShellSingleQuote(title)
 
 	return fmt.Sprintf(`
 Add-Type -AssemblyName System.Windows.Forms | Out-Null
 $dialog = New-Object System.Windows.Forms.OpenFileDialog
-$dialog.Title = '選擇 D2R.exe'
+$dialog.Title = '%s'
 $dialog.Filter = 'D2R.exe|D2R.exe|Executable files (*.exe)|*.exe|All files (*.*)|*.*'
 $dialog.CheckFileExists = $true
 $dialog.Multiselect = $false
@@ -67,7 +69,7 @@ if ('%s' -ne '') {
 if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
     [Console]::Out.Write($dialog.FileName)
 }
-`, escapedInitialDir, escapedInitialDir)
+`, escapedTitle, escapedInitialDir, escapedInitialDir)
 }
 
 func powerShellSingleQuote(value string) string {

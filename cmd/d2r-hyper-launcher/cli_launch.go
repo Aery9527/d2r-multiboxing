@@ -24,11 +24,11 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 		return
 	}
 	if isAccountRunning(acc.DisplayName) {
-		showWarningAndPause(fmt.Sprintf("%s 已在執行中。", acc.DisplayName))
+		showWarningAndPause(fmt.Sprintf(lang.Launch.AlreadyRunning, acc.DisplayName))
 		return
 	}
 
-	region, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{acc})
+	region, ok := promptLaunchRegion(lang.Launch.RegionSingleTitle, []*account.Account{acc})
 	if !ok {
 		return
 	}
@@ -40,24 +40,24 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 
 	password, err := account.GetDecryptedPassword(acc)
 	if err != nil {
-		ui.errorf("密碼解密失敗：%v", err)
+		ui.errorf(lang.Launch.DecryptFailed, err)
 		return
 	}
 
-	ui.infof("正在啟動 %s (%s)...", acc.DisplayName, region.Name)
+	ui.infof(lang.Launch.Starting, acc.DisplayName, region.Name)
 	pid, err := launcher.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, accountLaunchArgs(*acc, modArgs)...)
 	if err != nil {
-		ui.errorf("啟動失敗：%v", err)
+		ui.errorf(lang.Launch.LaunchFailed, err)
 		return
 	}
-	ui.successf("D2R 已啟動 (PID: %d)", pid)
+	ui.successf(lang.Launch.LaunchOK, pid)
 
 	pauseAfterSuccessfulLaunch()
 	closed, err := launcher.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
 	if err != nil {
-		ui.warningf("關閉 Handle 失敗：%v", err)
+		ui.warningf(lang.Launch.CloseHandleFailed, err)
 	} else if closed > 0 {
-		ui.successf("已關閉 %d 個 Event Handle", closed)
+		ui.successf(lang.Launch.HandlesClosed, closed)
 	}
 
 	renameLaunchedWindow(pid, acc.DisplayName)
@@ -71,17 +71,17 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 
 	runningTitles := runningAccountWindowTitles()
 	pendingAccounts := pendingBatchAccounts(accounts, runningTitles)
-	ui.infof("已預先掃描目前執行中的 D2R 視窗：")
+	ui.infof("%s", lang.Launch.BatchScanHeader)
 	for _, line := range batchAccountStatusLines(accounts, runningTitles) {
 		ui.rawln(line)
 	}
 	if len(pendingAccounts) == 0 {
-		showInfoAndPause("所有帳號都已在執行中。")
+		showInfoAndPause(lang.Launch.AllRunning)
 		return
 	}
-	ui.infof("本次只會啟動上面標示為 <未啟動> 的帳號，共 %d 個。", len(pendingAccounts))
+	ui.infof(lang.Launch.BatchOnlyPending, len(pendingAccounts))
 
-	region, ok := promptLaunchRegion("啟動所有帳號：選擇區域", pendingAccounts)
+	region, ok := promptLaunchRegion(lang.Launch.RegionBatchTitle, pendingAccounts)
 	if !ok {
 		return
 	}
@@ -94,24 +94,24 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 	for i, acc := range pendingAccounts {
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
-			ui.warningf("帳號 %s 密碼解密失敗：%v", acc.DisplayName, err)
+			ui.warningf(lang.Launch.BatchDecryptFailed, acc.DisplayName, err)
 			continue
 		}
 
-		ui.infof("正在啟動 %s (%s)...", acc.DisplayName, region.Name)
+		ui.infof(lang.Launch.Starting, acc.DisplayName, region.Name)
 		pid, err := launcher.LaunchD2R(cfg.D2RPath, acc.Email, password, region.Address, accountLaunchArgs(*acc, modArgs)...)
 		if err != nil {
-			ui.warningf("帳號 %s 啟動失敗：%v", acc.DisplayName, err)
+			ui.warningf(lang.Launch.BatchLaunchFailed, acc.DisplayName, err)
 			continue
 		}
-		ui.successf("%s 已啟動 (PID: %d)", acc.DisplayName, pid)
+		ui.successf(lang.Launch.BatchLaunchOK, acc.DisplayName, pid)
 
 		pauseAfterSuccessfulLaunch()
 		closed, err := launcher.CloseHandlesByName(pid, d2r.SingleInstanceEventName)
 		if err != nil {
-			ui.warningf("%s Handle 關閉失敗：%v", acc.DisplayName, err)
+			ui.warningf(lang.Launch.BatchHandleCloseFailed, acc.DisplayName, err)
 		} else if closed > 0 {
-			ui.successf("%s 已關閉 %d 個 Handle", acc.DisplayName, closed)
+			ui.successf(lang.Launch.BatchHandlesClosed, acc.DisplayName, closed)
 		}
 
 		renameLaunchedWindow(pid, acc.DisplayName)
@@ -129,20 +129,20 @@ func launchOffline(cfg *config.Config) {
 		return
 	}
 
-	ui.headf("離線遊玩模式")
+	ui.headf("%s", lang.Launch.OfflineTitle)
 
 	modArgs, ok := selectLaunchMod(cfg.D2RPath)
 	if !ok {
 		return
 	}
 
-	ui.infof("正在啟動 D2R（離線模式）...")
+	ui.infof("%s", lang.Launch.OfflineLaunching)
 	pid, err := launcher.LaunchD2ROffline(cfg.D2RPath, modArgs...)
 	if err != nil {
-		ui.errorf("啟動失敗：%v", err)
+		ui.errorf(lang.Launch.OfflineLaunchFailed, err)
 		return
 	}
-	ui.successf("D2R 已啟動 (PID: %d)", pid)
+	ui.successf(lang.Launch.OfflineLaunchOK, pid)
 	pauseAfterSuccessfulLaunch()
 	ui.blankLine()
 }
@@ -150,7 +150,7 @@ func launchOffline(cfg *config.Config) {
 func promptLaunchRegion(title string, accounts []*account.Account) (*d2r.Region, bool) {
 	for {
 		ui.headf("%s", title)
-		ui.infof("準備啟動的帳號：")
+		ui.infof("%s", lang.Launch.RegionTargetLabel)
 		for _, line := range launchTargetAccountLines(accounts) {
 			ui.rawln(line)
 		}
@@ -171,7 +171,7 @@ func promptLaunchRegion(title string, accounts []*account.Account) (*d2r.Region,
 		}
 		region := parseRegionInput(input)
 		if region == nil {
-			showInputErrorAndPause("無效的區域選擇。")
+			showInputErrorAndPause(lang.Launch.RegionInvalid)
 			continue
 		}
 		return region, true
@@ -201,14 +201,14 @@ func accountLaunchArgs(acc account.Account, modArgs []string) []string {
 }
 
 func renameLaunchedWindow(pid uint32, displayName string) {
-	ui.infof("正在準備重命名視窗：%s", displayName)
+	ui.infof(lang.Launch.WindowRenaming, displayName)
 	err := process.RenameWindow(pid, d2r.WindowTitle(displayName), 15, 2*time.Second)
 	if err != nil {
-		ui.warningf("視窗重命名失敗 (%s)：%v", displayName, err)
+		ui.warningf(lang.Launch.WindowRenameFailed, displayName, err)
 		return
 	}
 
-	ui.successf("視窗已重命名為 %q", d2r.WindowTitle(displayName))
+	ui.successf(lang.Launch.WindowRenamed, d2r.WindowTitle(displayName))
 }
 
 func runningAccountWindowTitles() map[string]bool {
@@ -249,9 +249,9 @@ func runningBatchAccounts(accounts []account.Account, runningTitles map[string]b
 func batchAccountStatusLines(accounts []account.Account, runningTitles map[string]bool) []string {
 	lines := make([]string, 0, len(accounts))
 	for i := range accounts {
-		status := "未啟動"
+		status := lang.Launch.StatusStopped
 		if runningTitles[d2r.WindowTitle(accounts[i].DisplayName)] {
-			status = "已啟動"
+			status = lang.Launch.StatusRunning
 		}
 		lines = append(lines, fmt.Sprintf("  <%s> %s (%s)", status, accounts[i].DisplayName, accounts[i].Email))
 	}
@@ -259,11 +259,11 @@ func batchAccountStatusLines(accounts []account.Account, runningTitles map[strin
 }
 
 func formatLaunchDelayMessage(delaySeconds int, nextDisplayName string) string {
-	return fmt.Sprintf("  等待 %d 秒後啟動下一個帳號：%s", delaySeconds, nextDisplayName)
+	return fmt.Sprintf("  "+lang.Launch.BatchDelayMsg, delaySeconds, nextDisplayName)
 }
 
 func formatLaunchDelayRemainingMessage(remainingSeconds int, nextDisplayName string) string {
-	return fmt.Sprintf("  還剩 %d 秒後啟動下一個帳號：%s", remainingSeconds, nextDisplayName)
+	return fmt.Sprintf("  "+lang.Launch.BatchDelayRemaining, remainingSeconds, nextDisplayName)
 }
 
 func waitForNextBatchLaunch(delaySeconds int, nextDisplayName string) {

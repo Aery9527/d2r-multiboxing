@@ -136,6 +136,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
   f       設定帳號啟動 flag
   p       選擇 D2R.exe 路徑
   s       視窗切換設定
+  l       語言設定 / Language
   r       重新整理狀態
   q       退出
 --------------------------------------------

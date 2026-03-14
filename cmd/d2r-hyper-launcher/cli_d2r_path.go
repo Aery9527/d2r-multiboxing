@@ -17,12 +17,12 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, setup func(*config.Co
 			return true
 		}
 
-		ui.headf("啟動前檢查 D2R 路徑")
-		ui.warningf("找不到可啟動的 D2R.exe：%s", cfg.D2RPath)
-		ui.warningf("原因：%v", err)
-		ui.promptf("請先設定正確的 D2R.exe 路徑，完成後再繼續啟動。")
+		ui.headf("%s", lang.D2RPath.PreCheckTitle)
+		ui.warningf(lang.D2RPath.PathNotFound, cfg.D2RPath)
+		ui.warningf(lang.D2RPath.PathError, err)
+		ui.promptf("%s", lang.D2RPath.PromptFix)
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
-			options.option("p", "立即設定 D2R.exe 路徑", "")
+			options.option("p", lang.D2RPath.OptSetPath, "")
 		})
 		ui.menuBlock(func() {
 			options.render()
@@ -42,34 +42,34 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, setup func(*config.Co
 			continue
 		}
 
-		showInputErrorAndPause("無效輸入，請輸入 p / b / h / q。")
+		showInputErrorAndPause(lang.D2RPath.PreCheckInvalidInput)
 	}
 }
 
 func setupD2RPath(cfg *config.Config) bool {
-	ui.headf("設定 D2R 路徑")
-	ui.promptf("即將開啟 Windows 檔案選擇視窗，請選擇 D2R.exe。")
+	ui.headf("%s", lang.D2RPath.SetTitle)
+	ui.promptf("%s", lang.D2RPath.SetPrompt)
 
-	selectedPath, err := PickD2RPath(cfg.D2RPath)
+	selectedPath, err := PickD2RPath(cfg.D2RPath, lang.D2RPath.PickerDialogTitle)
 	if err != nil {
-		ui.warningf("D2R 路徑設定失敗：%v", err)
+		ui.warningf(lang.D2RPath.SetFailed, err)
 		ui.blankLine()
 		return false
 	}
 	if selectedPath == "" {
-		ui.infof("已取消。")
+		ui.infof("%s", lang.Common.Cancelled)
 		ui.blankLine()
 		return false
 	}
 
 	cfg.D2RPath = selectedPath
 	if err := config.Save(cfg); err != nil {
-		ui.warningf("設定儲存失敗：%v", err)
+		ui.warningf(lang.Common.SaveFailed, err)
 		ui.blankLine()
 		return false
 	}
 
-	ui.successf("已更新 D2R 路徑：%s", cfg.D2RPath)
+	ui.successf(lang.D2RPath.SetOK, cfg.D2RPath)
 	ui.blankLine()
 	return true
 }
