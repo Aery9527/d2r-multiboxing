@@ -54,7 +54,8 @@
 - 新功能優先使用 Go 標準庫與 `golang.org/x/sys/windows`，避免擴張高風險低階 Windows 手法。
 
 ## 文件入口
-- `README.md`：專案簡介與快速上手。
+- `README.md`：專案簡介與快速上手（繁體中文）。
+- `README.en.md`：專案簡介與快速上手（English）；與 `README.md` 保持同步。
 - `docs/multiboxing-usage-guide.md`、`docs/switcher-usage-guide.md`：玩家操作導覽。
 - `docs/multiboxing-technical-guide.md`、`docs/switcher-technical-guide.md`：技術導覽。
 - `docs/D2R_PARAMS.md`：D2R 啟動參數與旗標參考。
@@ -62,6 +63,7 @@
 ## 變更收尾原則
 - 測試通過後，檢查受影響範圍的文件是否需要同步更新。
 - 若修改影響使用者可見流程、設定或限制，需同步更新 `README.md` 與 `docs/` 對應文件。
+- **`README.md` 與所有語系版本（`README.en.md` 等）必須同步維護**；任何對 `README.md` 的修改，一律同步修改其他語系版本，保持內容一致。
 - 目標是讓文件描述與目前程式碼邏輯保持一致，避免過期說明。
 
 ## 新代理建議閱讀順序

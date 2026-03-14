@@ -1,5 +1,7 @@
 # d2r-hyper-launcher
 
+> 語言 / Language：**繁體中文** | [English](README.en.md)
+
 Windows 上給 D2R（Diablo II: Resurrected）玩家使用的 CLI 工具，目前提供兩個主要功能：
 
 - **multiboxing**：多帳號啟動、單實例鎖處理、視窗辨識
