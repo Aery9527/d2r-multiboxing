@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
@@ -10,9 +11,8 @@ import (
 )
 
 func setupSwitcher(cfg *config.Config, accounts []account.Account, accountsFile string) {
-	for {
+	showUI := func() {
 		ui.headf("%s", lang.Switcher.Title)
-
 		if display, ok := switcherSavedDisplay(cfg); ok {
 			if cfg.Switcher.Enabled {
 				ui.infof(lang.Switcher.StatusLabel, lang.Switcher.StatusEnabled)
@@ -24,7 +24,6 @@ func setupSwitcher(cfg *config.Config, accounts []account.Account, accountsFile 
 		} else {
 			ui.infof(lang.Switcher.StatusLabel, lang.Switcher.StatusNotSet)
 		}
-
 		ui.blankLine()
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("1", lang.Switcher.OptSetKey, "")
@@ -34,14 +33,9 @@ func setupSwitcher(cfg *config.Config, accounts []account.Account, accountsFile 
 		ui.menuBlock(func() {
 			options.render()
 		})
-		choice, ok := ui.readInput()
-		if !ok {
-			return
-		}
-		if isMenuNav(choice) != "" {
-			return
-		}
+	}
 
+	_ = runMenu(showUI, func(choice string) error {
 		switch choice {
 		case "1":
 			wasRunning := switcher.IsRunning()
@@ -57,25 +51,25 @@ func setupSwitcher(cfg *config.Config, accounts []account.Account, accountsFile 
 			if err != nil {
 				ui.warningf(lang.Switcher.DetectFailed, err)
 				restartSwitcherIfNeeded(cfg, wasRunning)
-				return
+				return errNavDone
 			}
 			if key == "" {
 				ui.infof("%s", lang.Switcher.DetectCancelled)
 				restartSwitcherIfNeeded(cfg, wasRunning)
-				return
+				return errNavDone
 			}
 
 			display := switcher.FormatSwitcherDisplay(modifiers, key, gamepadIndex)
 			ui.infof(lang.Switcher.DetectedKey, display)
 			answer, ok := ui.readInputf("%s", lang.Switcher.DetectConfirmPrompt)
 			if !ok {
-				return
+				return errNavDone
 			}
 			answer = strings.ToLower(answer)
 			if answer != "" && answer != "y" {
 				ui.infof("%s", lang.Switcher.DetectCancelled)
 				restartSwitcherIfNeeded(cfg, wasRunning)
-				return
+				return errNavDone
 			}
 
 			cfg.Switcher = &config.SwitcherConfig{
@@ -86,60 +80,60 @@ func setupSwitcher(cfg *config.Config, accounts []account.Account, accountsFile 
 			}
 			if err := config.Save(cfg); err != nil {
 				ui.warningf(lang.Common.SaveFailed, err)
-				return
+				return errNavDone
 			}
 
 			if err := switcher.Start(cfg.Switcher); err != nil {
 				ui.warningf(lang.Switcher.StartFailed, err)
-				return
+				return errNavDone
 			}
 
 			ui.successf(lang.Switcher.KeySet, display)
 			ui.blankLine()
-			return
+			return errNavDone
 
 		case "2":
-			setupSwitcherAccounts(cfg, accountsFile)
-			// Refresh in-memory accounts for subsequent iterations in case
-			// the caller reuses them; a full reload happens at the menu level.
+			if err := setupSwitcherAccounts(cfg, accountsFile); errors.Is(err, ErrNavHome) {
+				return ErrNavHome
+			}
 			if reloaded, err := account.LoadAccounts(accountsFile); err == nil {
 				accounts = reloaded
 			}
 
 		case "0":
 			if !toggleSwitcherEnabled(cfg) {
-				continue
+				return nil
 			}
 			ui.blankLine()
-			return
+			return errNavDone
+
 		default:
 			showInvalidInputAndPause()
 		}
-	}
+		return nil
+	})
 }
 
-func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
+func setupSwitcherAccounts(cfg *config.Config, accountsFile string) error {
 	accounts, err := account.LoadAccounts(accountsFile)
 	if err != nil || len(accounts) == 0 {
 		ui.warningf("%s", lang.Switcher.AccountFilterNoAccounts)
 		ui.blankLine()
-		return
+		return nil
 	}
 
-	for {
+	showUI := func() {
 		ui.headf("%s", lang.Switcher.AccountFilterTitle)
 		ui.infoLines(
 			lang.Switcher.AccountFilterDescIncluded,
 			lang.Switcher.AccountFilterDescExcluded,
 		)
-
 		printAccountList(accounts, func(acc account.Account) string {
 			if account.SkipSwitcher(acc.ToolFlags) {
 				return lang.Switcher.AccountExcluded
 			}
 			return lang.Switcher.AccountIncluded
 		})
-
 		ui.blankLine()
 		toggleKey := "1~" + strconv.Itoa(len(accounts))
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
@@ -150,15 +144,9 @@ func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
 		ui.menuBlock(func() {
 			options.render()
 		})
+	}
 
-		choice, ok := ui.readInput()
-		if !ok {
-			return
-		}
-		if isMenuNav(choice) != "" {
-			return
-		}
-
+	return runMenu(showUI, func(choice string) error {
 		switch choice {
 		case "a":
 			for i := range accounts {
@@ -172,7 +160,7 @@ func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
 			idx, parseErr := strconv.Atoi(choice)
 			if parseErr != nil || idx < 1 || idx > len(accounts) {
 				showInvalidInputAndPause()
-				continue
+				return nil
 			}
 			i := idx - 1
 			if account.SkipSwitcher(accounts[i].ToolFlags) {
@@ -187,7 +175,7 @@ func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
 			if reloaded, loadErr := account.LoadAccounts(accountsFile); loadErr == nil {
 				accounts = reloaded
 			}
-			continue
+			return nil
 		}
 
 		switcher.UpdateExcludedAccounts(account.ExcludedFromSwitcher(accounts))
@@ -207,7 +195,8 @@ func setupSwitcherAccounts(cfg *config.Config, accountsFile string) {
 		default:
 			ui.blankLine()
 		}
-	}
+		return nil
+	})
 }
 
 func restartSwitcherIfNeeded(cfg *config.Config, wasRunning bool) {

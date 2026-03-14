@@ -34,7 +34,9 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 		return nil, true
 	}
 
-	for {
+	var result []string
+	chosen := false
+	_ = runMenu(func() {
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
 			options.option("0", lang.Launch.ModOptNone, "")
 			for i, modName := range installedMods {
@@ -44,27 +46,22 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 		ui.menuBlock(func() {
 			options.render()
 		})
-		input, ok := ui.readInput()
-		if !ok {
-			return nil, false
-		}
-		if nav := isMenuNav(input); nav != "" {
-			return nil, false
-		}
-
+	}, func(input string) error {
 		selected, err := strconv.Atoi(input)
 		if err != nil || selected < 0 || selected > len(installedMods) {
 			showInvalidInputAndPause()
-			continue
+			return nil
 		}
-
 		if selected == 0 {
 			ui.infof("%s", lang.Launch.ModNoneChosen)
-			return nil, true
+			result = nil
+		} else {
+			modName := installedMods[selected-1]
+			ui.infof(lang.Launch.ModUsing, modName)
+			result = mods.BuildLaunchArgs(modName)
 		}
-
-		modName := installedMods[selected-1]
-		ui.infof(lang.Launch.ModUsing, modName)
-		return mods.BuildLaunchArgs(modName), true
-	}
+		chosen = true
+		return errNavDone
+	})
+	return result, chosen
 }

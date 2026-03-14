@@ -32,7 +32,8 @@ func ensureLaunchReadyD2RPathWithSetup(cfg *config.Config, setup func(*config.Co
 			return false
 		}
 
-		if nav := isMenuNav(input); nav != "" {
+		switch isMenuNav(input) {
+		case "back", "home":
 			return false
 		}
 		if strings.EqualFold(input, "p") {

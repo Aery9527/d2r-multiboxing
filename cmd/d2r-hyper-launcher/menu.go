@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -98,5 +99,53 @@ func isMenuNav(input string) string {
 		return ""
 	default:
 		return ""
+	}
+}
+
+// ErrNavHome is returned by runMenu when the player presses h.
+// Nested submenu callers must propagate this to ensure h reaches the main menu.
+var ErrNavHome = errors.New("nav:home")
+
+// errNavDone signals that a runMenu handler has completed its action.
+// runMenu exits the current loop and returns nil to the caller (equivalent to pressing b).
+var errNavDone = errors.New("nav:done")
+
+// runMenu is the canonical submenu input loop. It handles b/h/q navigation
+// centrally. All submenu loops MUST use runMenu (or runMenuRead) so that h
+// always propagates correctly to the main menu regardless of nesting depth.
+//
+// display is called before each input read (pass nil if not needed).
+// handle receives non-nav input. Return values:
+//   - nil        → continue loop
+//   - errNavDone → exit loop, returning nil to caller
+//   - ErrNavHome → exit loop and propagate ErrNavHome to caller
+func runMenu(display func(), handle func(input string) error) error {
+	return runMenuRead(display, ui.readInput, handle)
+}
+
+// runMenuRead is like runMenu but accepts a custom read function.
+// Use when a non-standard input prompt is needed (e.g. ui.readInputf).
+func runMenuRead(display func(), readFn func() (string, bool), handle func(input string) error) error {
+	for {
+		if display != nil {
+			display()
+		}
+		input, ok := readFn()
+		if !ok {
+			return nil
+		}
+		switch isMenuNav(input) {
+		case "back":
+			return nil
+		case "home":
+			return ErrNavHome
+		}
+		err := handle(input)
+		if errors.Is(err, ErrNavHome) {
+			return ErrNavHome
+		}
+		if errors.Is(err, errNavDone) {
+			return nil
+		}
 	}
 }

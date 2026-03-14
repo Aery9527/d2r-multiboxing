@@ -626,7 +626,7 @@ func TestConfigureAllFlagsForAllAccountsSetsEveryCompatibleFlag(t *testing.T) {
 
 	result := captureStdout(t, func() {
 		withTestInput(t, "\n", func() {
-			assert.Equal(t, "", configureAllFlagsForAllAccounts(accounts, accountsFile, true))
+			assert.ErrorIs(t, configureAllFlagsForAllAccounts(accounts, accountsFile, true), errNavDone)
 		})
 	})
 

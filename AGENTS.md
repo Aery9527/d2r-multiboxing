@@ -27,6 +27,7 @@
 - 玩家可見輸出請走 UI layer：`ui.infof`、`ui.warningLines`、`ui.menuBlock`、`ui.mainMenuOptions`、`ui.subMenuOptions`（`cmd/d2r-hyper-launcher/feedback.go`）。
 - 外部命令顯示也走 `ui.commandf(...)`，不要在 domain 層手動拼 `> ` 前綴。
 - 所有子選單導航契約固定：`b` 返回、`h` 主選單、`q` 離開（`cmd/d2r-hyper-launcher/menu.go`）。
+- **所有子選單 input loop 必須使用 `runMenu` 或 `runMenuRead`**，由 `menu.go` 統一處理 b/h/q；不得手動 check `isMenuNav`。自訂 read prompt（如 `readInputf`）改用 `runMenuRead` 並傳入 `readFn`。handler 返回 `errNavDone` 表示完成退出當層；若需退出後傳播「回首頁」，直接返回 `ErrNavHome`；巢狀選單需 `errors.Is(err, ErrNavHome)` 後轉傳，確保 h 不論幾層都能回到主選單。
 - 輸入錯誤使用 pause helper：`showInputErrorAndPause`、`showInvalidInputAndPause`，讓玩家確認後回流程。
 - **警告訊息後緊接著繼續流程時，必須使用 `showWarningAndPause` 而非單純 `ui.warningf`**，確保玩家有機會閱讀警告內容再繼續；若直接用 `ui.warningf` 後流程馬上刷新畫面，訊息會被清掉玩家看不到。
 - 需要對齊選單時，優先用 `newMenuOptions()` 收集再 `render()`；主選單用 `mainMenuOptions(...)`，子選單用 `subMenuOptions(...)`。

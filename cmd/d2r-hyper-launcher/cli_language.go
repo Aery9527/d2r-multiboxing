@@ -48,34 +48,36 @@ func setupLanguage(cfg *config.Config) {
 }
 
 // showLanguagePicker renders a selection menu for all known locales and
-// returns the chosen Locale.  Falls back to the current lang's locale on EOF.
+// returns the chosen Locale.  Falls back to the current lang's locale on EOF or nav.
 func showLanguagePicker(cat *locale.Catalog) locale.Locale {
 	knownLocales := locale.KnownLocales()
-	for {
-		ui.headf("%s", cat.Language.PickerTitle)
-		options := ui.subMenuOptions(func(o *cliMenuOptions) {
-			for i, l := range knownLocales {
-				c := locale.Get(l)
-				key := string(rune('1' + i))
-				o.option(key, localeName(c, l), "")
+	result := cat.Locale
+	_ = runMenuRead(
+		func() {
+			ui.headf("%s", cat.Language.PickerTitle)
+			options := ui.subMenuOptions(func(o *cliMenuOptions) {
+				for i, l := range knownLocales {
+					c := locale.Get(l)
+					key := string(rune('1' + i))
+					o.option(key, localeName(c, l), "")
+				}
+			})
+			ui.menuBlock(func() { options.render() })
+		},
+		func() (string, bool) {
+			return ui.readInputf("%s", cat.Language.PromptSelect)
+		},
+		func(input string) error {
+			idx := int(input[0] - '1')
+			if len(input) == 1 && idx >= 0 && idx < len(knownLocales) {
+				result = knownLocales[idx]
+				return errNavDone
 			}
-		})
-		ui.menuBlock(func() { options.render() })
-
-		input, ok := ui.readInputf("%s", cat.Language.PromptSelect)
-		if !ok {
-			return cat.Locale
-		}
-		if isMenuNav(input) != "" {
-			return cat.Locale
-		}
-
-		idx := int(input[0] - '1')
-		if len(input) == 1 && idx >= 0 && idx < len(knownLocales) {
-			return knownLocales[idx]
-		}
-		showInvalidInputAndPause()
-	}
+			showInvalidInputAndPause()
+			return nil
+		},
+	)
+	return result
 }
 
 // saveLanguage writes the chosen locale to cfg and persists the config file.

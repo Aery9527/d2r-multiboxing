@@ -148,7 +148,8 @@ func launchOffline(cfg *config.Config) {
 }
 
 func promptLaunchRegion(title string, accounts []*account.Account) (*d2r.Region, bool) {
-	for {
+	var result *d2r.Region
+	_ = runMenu(func() {
 		ui.headf("%s", title)
 		ui.infof("%s", lang.Launch.RegionTargetLabel)
 		for _, line := range launchTargetAccountLines(accounts) {
@@ -162,20 +163,16 @@ func promptLaunchRegion(title string, accounts []*account.Account) (*d2r.Region,
 		ui.menuBlock(func() {
 			options.render()
 		})
-		input, ok := ui.readInput()
-		if !ok {
-			return nil, false
-		}
-		if nav := isMenuNav(input); nav != "" {
-			return nil, false
-		}
+	}, func(input string) error {
 		region := parseRegionInput(input)
 		if region == nil {
 			showInputErrorAndPause(lang.Launch.RegionInvalid)
-			continue
+			return nil
 		}
-		return region, true
-	}
+		result = region
+		return errNavDone
+	})
+	return result, result != nil
 }
 
 func launchTargetAccountLines(accounts []*account.Account) []string {

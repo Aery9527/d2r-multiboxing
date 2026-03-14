@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -15,8 +16,8 @@ func setupAccountLaunchFlags(accounts []account.Account, accountsFile string) {
 		return
 	}
 
-menuLoop:
-	for {
+	// Outer loop: set/clear mode selection.
+	_ = runMenu(func() {
 		ui.headf("%s", lang.Flags.Title)
 		printAccountList(accounts, runningStatusLabel)
 		ui.blankLine()
@@ -29,29 +30,21 @@ menuLoop:
 		ui.menuBlock(func() {
 			options.render()
 		})
-		choice, ok := ui.readInput()
-		if !ok {
-			return
-		}
-		if isMenuNav(choice) != "" {
-			return
-		}
-
+	}, func(choice string) error {
 		var setMode bool
-		var actionLabel string
 		switch choice {
 		case "1":
 			setMode = true
-			actionLabel = lang.Flags.ActionSet
 		case "2":
 			setMode = false
-			actionLabel = lang.Flags.ActionClear
 		default:
 			showInvalidInputAndPause()
-			continue
+			return nil
 		}
 
-		for {
+		// Inner loop: configure method selection.
+		return runMenu(func() {
+			actionLabel := flagActionLabel(setMode)
 			ui.headf(lang.Flags.ModeTitle, actionLabel)
 			ui.infof(lang.Flags.ModeQuestion, actionLabel)
 			modeOptions := ui.subMenuOptions(func(options *cliMenuOptions) {
@@ -62,53 +55,26 @@ menuLoop:
 			ui.menuBlock(func() {
 				modeOptions.render()
 			})
-			modeChoice, ok := ui.readInput()
-			if !ok {
-				return
-			}
-			switch isMenuNav(modeChoice) {
-			case "back":
-				continue menuLoop
-			case "home":
-				return
-			}
-
+		}, func(modeChoice string) error {
 			switch modeChoice {
 			case "1":
-				switch configureFlagsByFlag(accounts, accountsFile, setMode) {
-				case "back":
-					continue
-				case "home":
-					return
-				default:
-					continue menuLoop
-				}
+				return configureFlagsByFlag(accounts, accountsFile, setMode)
 			case "2":
-				switch configureFlagsByAccount(accounts, accountsFile, setMode) {
-				case "back":
-					continue
-				case "home":
-					return
-				default:
-					continue menuLoop
-				}
+				return configureFlagsByAccount(accounts, accountsFile, setMode)
 			case "3":
-				switch configureAllFlagsForAllAccounts(accounts, accountsFile, setMode) {
-				case "back":
-					continue
-				case "home":
-					return
-				default:
-					continue menuLoop
-				}
+				return configureAllFlagsForAllAccounts(accounts, accountsFile, setMode)
 			default:
 				showInvalidInputAndPause()
 			}
-		}
-	}
+			return nil
+		})
+	})
 }
 
-func configureAllFlagsForAllAccounts(accounts []account.Account, accountsFile string, setMode bool) string {
+// configureAllFlagsForAllAccounts applies or clears every known launch flag for
+// all accounts.  Returns errNavDone on any completion (success, cancel, or error)
+// so the caller (mode-selection loop) exits back to the set/clear selection.
+func configureAllFlagsForAllAccounts(accounts []account.Account, accountsFile string, setMode bool) error {
 	options := account.LaunchFlagOptions()
 	actionLabel := flagActionLabel(setMode)
 	accountIndexes := make([]int, 0, len(accounts))
@@ -128,217 +94,235 @@ func configureAllFlagsForAllAccounts(accounts []account.Account, accountsFile st
 	if !confirmChanges() {
 		ui.infof("%s", lang.Common.Cancelled)
 		ui.blankLine()
-		return ""
+		return errNavDone
 	}
 
 	if err := applyLaunchFlagChanges(accounts, accountsFile, accountIndexes, mask, setMode); err != nil {
 		showInputErrorAndPause(fmt.Sprintf(lang.Flags.SaveFailed, err))
-		return ""
+		return errNavDone
 	}
 
 	ui.successf(lang.Flags.Done, actionLabel)
 	ui.blankLine()
-	return ""
+	return errNavDone
 }
 
-func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMode bool) string {
+// configureFlagsByFlag lets the player pick a flag then select which accounts to apply it to.
+// Returns nil when the player pressed b at flag selection (stay in mode-select),
+// errNavDone on successful apply (exit mode-select, back to set/clear),
+// or ErrNavHome when h is pressed anywhere.
+func configureFlagsByFlag(accounts []account.Account, accountsFile string, setMode bool) error {
 	options := account.LaunchFlagOptions()
-	var option account.LaunchFlagOption
+	var completed bool
 
-selectFlag:
-	for {
-		ui.headf(lang.Flags.FlagByFlagTitle, flagActionLabel(setMode))
-		flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
-			for i, option := range options {
-				comment := ""
-				if option.Description != "" {
-					comment = fmt.Sprintf(lang.Flags.FlagDescPrefix, option.Description)
-				}
-				if option.Experimental {
-					if comment != "" {
-						comment += "，"
+	err := runMenuRead(
+		func() {
+			ui.headf(lang.Flags.FlagByFlagTitle, flagActionLabel(setMode))
+			flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
+				for i, option := range options {
+					comment := ""
+					if option.Description != "" {
+						comment = fmt.Sprintf(lang.Flags.FlagDescPrefix, option.Description)
 					}
-					comment += lang.Flags.FlagExperimental
+					if option.Experimental {
+						if comment != "" {
+							comment += "，"
+						}
+						comment += lang.Flags.FlagExperimental
+					}
+					menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
 				}
-				menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
+			})
+			ui.menuBlock(func() { flagOptions.render() })
+		},
+		func() (string, bool) {
+			return ui.readInputf("%s", lang.Flags.FlagByFlagSelectPrompt)
+		},
+		func(input string) error {
+			selected, err := strconv.Atoi(input)
+			if err != nil || selected < 1 || selected > len(options) {
+				showInputErrorAndPause(lang.Flags.InvalidFlagID)
+				return nil
 			}
-		})
-		ui.menuBlock(func() {
-			flagOptions.render()
-		})
-		input, ok := ui.readInputf("%s", lang.Flags.FlagByFlagSelectPrompt)
-		if !ok {
-			return ""
-		}
-		switch isMenuNav(input) {
-		case "back":
-			return "back"
-		case "home":
-			return "home"
-		}
+			option := options[selected-1]
 
-		selected, err := strconv.Atoi(input)
-		if err != nil || selected < 1 || selected > len(options) {
-			showInputErrorAndPause(lang.Flags.InvalidFlagID)
-			continue
-		}
-		option = options[selected-1]
-		break
-	}
+			var done bool
+			innerErr := runMenuRead(
+				func() {
+					actionLabel := flagActionLabel(setMode)
+					ui.headf(lang.Flags.FlagByFlagAccountTitle, actionLabel)
+					accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
+						for i, acc := range accounts {
+							menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf(lang.Flags.FlagComment, account.LaunchFlagsSummary(acc.LaunchFlags)))
+						}
+					})
+					ui.menuBlock(func() {
+						ui.promptf(lang.Flags.FlagByFlagAccountPrompt, actionLabel, option.Name)
+						accountOptions.render()
+					})
+				},
+				func() (string, bool) {
+					return ui.readInputf("%s", lang.Flags.FlagInputPrompt)
+				},
+				func(input string) error {
+					accountIndexes, err := parseSelectionInput(input, len(accounts))
+					if err != nil {
+						showInputErrorAndPause(fmt.Sprintf(lang.Common.ParseFailed, err))
+						return nil
+					}
 
-	actionLabel := flagActionLabel(setMode)
-	for {
-		ui.headf(lang.Flags.FlagByFlagAccountTitle, actionLabel)
-		accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
-			for i, acc := range accounts {
-				menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf(lang.Flags.FlagComment, account.LaunchFlagsSummary(acc.LaunchFlags)))
+					actionLabel := flagActionLabel(setMode)
+					ui.blankLine()
+					ui.infof(lang.Flags.FlagByFlagAbout, actionLabel, option.Name)
+					for _, idx := range accountIndexes {
+						acc := accounts[idx]
+						ui.rawlnf(lang.Flags.FlagAccountItemFmt, idx+1, acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags))
+					}
+					if !confirmChanges() {
+						ui.infof("%s", lang.Common.Cancelled)
+						ui.blankLine()
+						return nil
+					}
+
+					if err := applyLaunchFlagChanges(accounts, accountsFile, accountIndexes, option.Bit, setMode); err != nil {
+						showInputErrorAndPause(fmt.Sprintf(lang.Flags.SaveFailed, err))
+						return nil
+					}
+
+					ui.successf(lang.Flags.Done, actionLabel)
+					ui.blankLine()
+					done = true
+					return errNavDone
+				},
+			)
+			if errors.Is(innerErr, ErrNavHome) {
+				return ErrNavHome
 			}
-		})
-		ui.menuBlock(func() {
-			ui.promptf(lang.Flags.FlagByFlagAccountPrompt, actionLabel, option.Name)
-			accountOptions.render()
-		})
-		input, ok := ui.readInputf("%s", lang.Flags.FlagInputPrompt)
-		if !ok {
-			return ""
-		}
-		switch isMenuNav(input) {
-		case "back":
-			goto selectFlag
-		case "home":
-			return "home"
-		}
-
-		accountIndexes, err := parseSelectionInput(input, len(accounts))
-		if err != nil {
-			showInputErrorAndPause(fmt.Sprintf(lang.Common.ParseFailed, err))
-			continue
-		}
-
-		ui.blankLine()
-		ui.infof(lang.Flags.FlagByFlagAbout, actionLabel, option.Name)
-		for _, idx := range accountIndexes {
-			acc := accounts[idx]
-			ui.rawlnf(lang.Flags.FlagAccountItemFmt, idx+1, acc.DisplayName, acc.Email, account.LaunchFlagsSummary(acc.LaunchFlags))
-		}
-		if !confirmChanges() {
-			ui.infof("%s", lang.Common.Cancelled)
-			ui.blankLine()
-			return ""
-		}
-
-		if err := applyLaunchFlagChanges(accounts, accountsFile, accountIndexes, option.Bit, setMode); err != nil {
-			showInputErrorAndPause(fmt.Sprintf(lang.Flags.SaveFailed, err))
-			continue
-		}
-
-		ui.successf(lang.Flags.Done, actionLabel)
-		ui.blankLine()
-		return ""
-	}
-}
-
-func configureFlagsByAccount(accounts []account.Account, accountsFile string, setMode bool) string {
-	options := account.LaunchFlagOptions()
-	var (
-		accountIndex int
-		acc          account.Account
+			if done {
+				completed = true
+				return errNavDone // exit outer flag-selection loop
+			}
+			return nil // b in account-selection → continue outer (pick another flag)
+		},
 	)
-
-selectAccount:
-	for {
-		ui.headf(lang.Flags.FlagByAccountTitle, flagActionLabel(setMode))
-		accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
-			for i, acc := range accounts {
-				menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf(lang.Flags.FlagComment, account.LaunchFlagsSummary(acc.LaunchFlags)))
-			}
-		})
-		ui.menuBlock(func() {
-			accountOptions.render()
-		})
-		input, ok := ui.readInputf("%s", lang.Flags.FlagByAccountSelectPrompt)
-		if !ok {
-			return ""
-		}
-		switch isMenuNav(input) {
-		case "back":
-			return "back"
-		case "home":
-			return "home"
-		}
-
-		selected, err := strconv.Atoi(input)
-		if err != nil || selected < 1 || selected > len(accounts) {
-			showInputErrorAndPause(lang.Flags.InvalidAccountID)
-			continue
-		}
-
-		accountIndex = selected - 1
-		acc = accounts[accountIndex]
-		break
+	if errors.Is(err, ErrNavHome) {
+		return ErrNavHome
 	}
+	if completed {
+		return errNavDone // signal mode-select to exit back to set/clear
+	}
+	return nil // b in flag-selection → stay in mode-select
+}
 
-	actionLabel := flagActionLabel(setMode)
-	for {
-		ui.headf(lang.Flags.FlagByAccountFlagTitle, actionLabel)
-		flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
-			for i, option := range options {
-				comment := ""
-				if option.Description != "" {
-					comment = fmt.Sprintf(lang.Flags.FlagDescPrefix, option.Description)
+// configureFlagsByAccount lets the player pick an account then select which flags to apply.
+// Returns nil when the player pressed b at account selection (stay in mode-select),
+// errNavDone on successful apply (exit mode-select, back to set/clear),
+// or ErrNavHome when h is pressed anywhere.
+func configureFlagsByAccount(accounts []account.Account, accountsFile string, setMode bool) error {
+	options := account.LaunchFlagOptions()
+	var completed bool
+
+	err := runMenuRead(
+		func() {
+			ui.headf(lang.Flags.FlagByAccountTitle, flagActionLabel(setMode))
+			accountOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
+				for i, acc := range accounts {
+					menuOptions.option(strconv.Itoa(i+1), fmt.Sprintf("%s (%s)", acc.DisplayName, acc.Email), fmt.Sprintf(lang.Flags.FlagComment, account.LaunchFlagsSummary(acc.LaunchFlags)))
 				}
-				if option.Experimental {
-					if comment != "" {
-						comment += "，"
+			})
+			ui.menuBlock(func() {
+				accountOptions.render()
+			})
+		},
+		func() (string, bool) {
+			return ui.readInputf("%s", lang.Flags.FlagByAccountSelectPrompt)
+		},
+		func(input string) error {
+			selected, err := strconv.Atoi(input)
+			if err != nil || selected < 1 || selected > len(accounts) {
+				showInputErrorAndPause(lang.Flags.InvalidAccountID)
+				return nil
+			}
+			accountIndex := selected - 1
+			acc := accounts[accountIndex]
+
+			var done bool
+			innerErr := runMenuRead(
+				func() {
+					actionLabel := flagActionLabel(setMode)
+					ui.headf(lang.Flags.FlagByAccountFlagTitle, actionLabel)
+					flagOptions := ui.subMenuOptions(func(menuOptions *cliMenuOptions) {
+						for i, option := range options {
+							comment := ""
+							if option.Description != "" {
+								comment = fmt.Sprintf(lang.Flags.FlagDescPrefix, option.Description)
+							}
+							if option.Experimental {
+								if comment != "" {
+									comment += "，"
+								}
+								comment += lang.Flags.FlagExperimental
+							}
+							menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
+						}
+					})
+					ui.menuBlock(func() {
+						ui.promptf(lang.Flags.FlagByAccountFlagPrompt, acc.DisplayName, actionLabel)
+						flagOptions.render()
+					})
+				},
+				func() (string, bool) {
+					return ui.readInputf("%s", lang.Flags.FlagInputPrompt)
+				},
+				func(input string) error {
+					flagIndexes, err := parseSelectionInput(input, len(options))
+					if err != nil {
+						showInputErrorAndPause(fmt.Sprintf(lang.Common.ParseFailed, err))
+						return nil
 					}
-					comment += lang.Flags.FlagExperimental
-				}
-				menuOptions.option(strconv.Itoa(i+1), option.Name, comment)
+
+					mask := selectedLaunchFlagMask(flagIndexes, options)
+					actionLabel := flagActionLabel(setMode)
+					ui.blankLine()
+					ui.infof(lang.Flags.FlagByAccountAbout, acc.DisplayName, actionLabel)
+					for _, idx := range flagIndexes {
+						option := options[idx]
+						ui.rawlnf("  [%d] %s（%s）", idx+1, option.Name, option.Description)
+					}
+					if !confirmChanges() {
+						ui.infof("%s", lang.Common.Cancelled)
+						ui.blankLine()
+						return nil
+					}
+
+					if err := applyLaunchFlagChanges(accounts, accountsFile, []int{accountIndex}, mask, setMode); err != nil {
+						showInputErrorAndPause(fmt.Sprintf(lang.Flags.SaveFailed, err))
+						return nil
+					}
+
+					ui.successf(lang.Flags.Done, actionLabel)
+					ui.blankLine()
+					done = true
+					return errNavDone
+				},
+			)
+			if errors.Is(innerErr, ErrNavHome) {
+				return ErrNavHome
 			}
-		})
-		ui.menuBlock(func() {
-			ui.promptf(lang.Flags.FlagByAccountFlagPrompt, acc.DisplayName, actionLabel)
-			flagOptions.render()
-		})
-		input, ok := ui.readInputf("%s", lang.Flags.FlagInputPrompt)
-		if !ok {
-			return ""
-		}
-		switch isMenuNav(input) {
-		case "back":
-			goto selectAccount
-		case "home":
-			return "home"
-		}
-
-		flagIndexes, err := parseSelectionInput(input, len(options))
-		if err != nil {
-			showInputErrorAndPause(fmt.Sprintf(lang.Common.ParseFailed, err))
-			continue
-		}
-
-		mask := selectedLaunchFlagMask(flagIndexes, options)
-		ui.blankLine()
-		ui.infof(lang.Flags.FlagByAccountAbout, acc.DisplayName, actionLabel)
-		for _, idx := range flagIndexes {
-			option := options[idx]
-			ui.rawlnf("  [%d] %s（%s）", idx+1, option.Name, option.Description)
-		}
-		if !confirmChanges() {
-			ui.infof("%s", lang.Common.Cancelled)
-			ui.blankLine()
-			return ""
-		}
-
-		if err := applyLaunchFlagChanges(accounts, accountsFile, []int{accountIndex}, mask, setMode); err != nil {
-			showInputErrorAndPause(fmt.Sprintf(lang.Flags.SaveFailed, err))
-			continue
-		}
-
-		ui.successf(lang.Flags.Done, actionLabel)
-		ui.blankLine()
-		return ""
+			if done {
+				completed = true
+				return errNavDone // exit outer account-selection loop
+			}
+			return nil // b in flag-selection → continue outer (pick another account)
+		},
+	)
+	if errors.Is(err, ErrNavHome) {
+		return ErrNavHome
 	}
+	if completed {
+		return errNavDone // signal mode-select to exit back to set/clear
+	}
+	return nil // b in account-selection → stay in mode-select
 }
 
 func applyLaunchFlagChanges(accounts []account.Account, accountsFile string, accountIndexes []int, mask uint32, setMode bool) error {

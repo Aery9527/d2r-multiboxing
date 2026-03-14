@@ -17,7 +17,7 @@ func displayDelay(r config.LaunchDelayRange) string {
 }
 
 func setupLaunchDelay(cfg *config.Config) {
-	for {
+	showUI := func() {
 		ui.headf("%s", lang.Delay.Title)
 		ui.infof(lang.Delay.CurrentSetting, displayDelay(cfg.LaunchDelay))
 		ui.infof("%s", lang.Delay.Description)
@@ -28,30 +28,24 @@ func setupLaunchDelay(cfg *config.Config) {
 			ui.infof("%s", lang.Delay.HintRange)
 			options.render()
 		})
-		input, ok := ui.readInputf("%s", lang.Delay.InputPrompt)
-		if !ok {
-			return
-		}
-		if isMenuNav(input) != "" {
-			return
-		}
-
+	}
+	_ = runMenuRead(showUI, func() (string, bool) {
+		return ui.readInputf("%s", lang.Delay.InputPrompt)
+	}, func(input string) error {
 		delay, err := parseLaunchDelayInput(input)
 		if err != nil {
 			showInputErrorAndPause(err.Error())
-			continue
+			return nil
 		}
-
 		cfg.LaunchDelay = delay
 		if err := config.Save(cfg); err != nil {
 			showInputErrorAndPause(fmt.Sprintf(lang.Common.SaveFailed, err))
-			continue
+			return nil
 		}
-
 		ui.successf(lang.Delay.Updated, displayDelay(delay))
 		ui.blankLine()
-		return
-	}
+		return errNavDone
+	})
 }
 
 func parseLaunchDelayInput(input string) (config.LaunchDelayRange, error) {
