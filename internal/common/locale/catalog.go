@@ -58,6 +58,7 @@ type Catalog struct {
 	Switcher         SwitcherCatalog
 	Flags            FlagsCatalog
 	GraphicsProfiles GraphicsProfilesCatalog
+	DefaultMods      DefaultModsCatalog
 	RegionDefaults   RegionDefaultsCatalog
 	D2RPath          D2RPathCatalog
 	Accounts         AccountsCatalog
@@ -139,6 +140,8 @@ type MainMenuCatalog struct {
 	OptFlagsComment            string
 	OptGraphicsProfiles        string
 	OptGraphicsProfilesComment string
+	OptDefaultMods             string
+	OptDefaultModsComment      string
 	OptDefaultRegions          string
 	OptDefaultRegionsComment   string
 	OptD2RPath                 string // comment is dynamic (cfg.D2RPath)
@@ -194,11 +197,17 @@ type LaunchCatalog struct {
 	RegionMissing     string // fmt("%s")
 
 	// Mod selector
-	ModLoadFailed string // fmt("%v") – mods discovery error
-	ModNoMods     string
-	ModOptNone    string // option label "不使用 mod"
-	ModUsing      string // fmt("%s") – selected mod name
-	ModNoneChosen string // confirmed no-mod info line
+	ModSingleTitle  string
+	ModBatchTitle   string
+	ModOfflineTitle string
+	ModLoadFailed   string // fmt("%v") – mods discovery error
+	ModNoMods       string
+	ModOptNone      string // option label "不使用 mod"
+	ModUsing        string // fmt("%s") – selected mod name
+	ModNoneChosen   string // confirmed no-mod info line
+	ModUseDefaults  string
+	ModOverride     string
+	ModMissing      string // fmt("%s")
 
 	// Account status labels
 	StatusRunning string // "已啟動"
@@ -428,6 +437,52 @@ type GraphicsProfilesCatalog struct {
 	BatchApplyFailed          string // fmt("%s", "%s", "%v")
 	MissingProfileCleared     string // fmt("%s", "%s")
 	MissingProfileClearFailed string // fmt("%v")
+}
+
+// DefaultModsCatalog holds strings for per-account default mod flows.
+type DefaultModsCatalog struct {
+	Title            string
+	NoAccounts       string
+	StatusUnassigned string
+	StatusVanilla    string
+	StatusMissing    string // fmt("%s")
+	Intro1           string
+	Intro2           string
+	Intro3           string
+	ModListHeader    string
+	NoInstalledMods  string
+
+	// Main sub-menu options
+	OptAssign string
+	OptClear  string
+
+	// Assignment flow
+	AssignModeTitle             string
+	AssignModeQuestion          string
+	OptModToAccounts            string
+	OptAccountToMod             string
+	AssignByModTitle            string
+	AssignByModSelectPrompt     string
+	AssignByModAccountTitle     string // fmt("%s")
+	AssignByModAccountPrompt    string // fmt("%s")
+	AssignByModAbout            string // fmt("%s")
+	AssignByAccountTitle        string
+	AssignByAccountSelectPrompt string
+	AssignByAccountModTitle     string // fmt("%s")
+	AssignByAccountModPrompt    string // fmt("%s")
+	AssignByAccountAbout        string // fmt("%s", "%s")
+	AssignDone                  string // fmt("%s")
+
+	// Clear flow
+	ClearTitle         string
+	ClearNoAssignments string
+	ClearPrompt        string
+	ClearAbout         string
+	ClearDone          string
+
+	// Shared account rendering
+	AccountComment string // fmt("%s")
+	AccountItemFmt string // fmt("%d", "%s", "%s", "%s")
 }
 
 // RegionDefaultsCatalog holds strings for per-account default region flows.

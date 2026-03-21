@@ -153,6 +153,8 @@ func main() {
 			setupAccountLaunchFlags(accounts, accountsFile)
 		case "g":
 			setupAccountGraphicsProfiles(accounts, accountsFile)
+		case "m":
+			setupAccountDefaultMods(accounts, accountsFile, cfg)
 		case "v":
 			setupAccountDefaultRegions(accounts, accountsFile)
 		case "l":

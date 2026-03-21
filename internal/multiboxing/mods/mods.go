@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const DefaultModVanilla = "<vanilla>"
+
 // InstalledDir returns the D2R mods directory next to D2R.exe.
 func InstalledDir(d2rPath string) string {
 	return filepath.Join(filepath.Dir(d2rPath), "mods")
@@ -62,4 +64,47 @@ func BuildLaunchArgs(modName string) []string {
 		return nil
 	}
 	return []string{"-mod", modName, "-txt"}
+}
+
+// NormalizeSavedDefaultMod trims a saved DefaultMod value and canonicalises the
+// special "launch vanilla" sentinel. Empty string means "no default assigned".
+func NormalizeSavedDefaultMod(saved string) string {
+	saved = strings.TrimSpace(saved)
+	if saved == "" {
+		return ""
+	}
+	if IsDefaultModVanilla(saved) {
+		return DefaultModVanilla
+	}
+	return saved
+}
+
+// ResolveSavedDefaultMod returns the canonical saved default for the current
+// installed-mod list. Empty string means the saved value is either unassigned
+// or no longer available for this D2R install.
+func ResolveSavedDefaultMod(saved string, installedMods []string) string {
+	saved = NormalizeSavedDefaultMod(saved)
+	if saved == "" {
+		return ""
+	}
+	if saved == DefaultModVanilla {
+		return DefaultModVanilla
+	}
+	for _, modName := range installedMods {
+		if strings.EqualFold(strings.TrimSpace(modName), saved) {
+			return modName
+		}
+	}
+	return ""
+}
+
+// IsDefaultModVanilla checks whether a saved DefaultMod value means "launch
+// the vanilla game without any mod".
+func IsDefaultModVanilla(saved string) bool {
+	switch strings.ToLower(strings.TrimSpace(saved)) {
+	case strings.ToLower(DefaultModVanilla), "vanilla", "none", "no mod", "no-mod", "nomod", "0":
+		return true
+	default:
+		return false
+	}
 }

@@ -14,6 +14,7 @@ import (
 	"d2rhl/internal/common/d2r"
 	"d2rhl/internal/common/locale"
 	"d2rhl/internal/multiboxing/account"
+	"d2rhl/internal/multiboxing/mods"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -216,7 +217,7 @@ func TestPrintMenuKeepsChoicePromptInsideOptionGroup(t *testing.T) {
 		printMenu(nil, cfg)
 	})
 
-	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{lang.MainMenu.OptByNumberKey, "0", "a", "d", "f", "g", "v", "p", "s", "r", "l", "q"}))
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{lang.MainMenu.OptByNumberKey, "0", "a", "d", "f", "g", "m", "v", "p", "s", "r", "l", "q"}))
 	assert.Empty(t, linesWithPrefix(output, ui.prefix(uiMessagePrompt)+" "))
 
 	delayLine, ok := findMenuOptionLine(output, "d")
@@ -1039,6 +1040,134 @@ func TestPromptLaunchRegionAllowsManualOverrideWithoutStoredDefaults(t *testing.
 		if assert.NotNil(t, choice.ManualRegion) {
 			assert.Equal(t, "EU", choice.ManualRegion.Name)
 		}
+		assert.False(t, choice.UseDefaults)
+	})
+}
+
+func TestPromptLaunchModKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{{DisplayName: "Alpha", Email: "alpha@example.com"}}
+	output := captureStdout(t, func() {
+		withTestInput(t, "x\n\nb\n", func() {
+			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+	assert.Equal(t, 2, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchModShowsBatchTargetAccounts(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com"},
+		{DisplayName: "Bravo", Email: "bravo@example.com"},
+	}
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "b\n", func() {
+			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Contains(t, output, "Alpha")
+	assert.Contains(t, output, "alpha@example.com")
+	assert.Contains(t, output, "Bravo")
+	assert.Contains(t, output, "bravo@example.com")
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchModEnterUsesStoredDefaultMode(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", DefaultMod: mods.DefaultModVanilla},
+	}
+	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
+	assert.NoError(t, account.SaveAccounts(accountsFile, accounts))
+
+	withTestInput(t, "\n", func() {
+		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, nil)
+		assert.True(t, ok)
+		assert.True(t, choice.UseDefaults)
+		assert.False(t, choice.HasManual)
+	})
+}
+
+func TestPromptLaunchModEnterRequiresDefaultsForAllTargets(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", DefaultMod: mods.DefaultModVanilla},
+		{DisplayName: "Bravo", Email: "bravo@example.com"},
+	}
+	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
+	assert.NoError(t, account.SaveAccounts(accountsFile, accounts))
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "\n\nb\n", func() {
+			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+	assert.Contains(t, output, "Bravo")
+	assert.Equal(t, 2, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchModEnterClearsMissingInstalledDefault(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", DefaultMod: "ghost-mod"},
+	}
+	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
+	assert.NoError(t, account.SaveAccounts(accountsFile, accounts))
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "\n\nb\n", func() {
+			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, []string{"sample-mod"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, "", accounts[0].DefaultMod)
+	reloaded, err := account.LoadAccounts(accountsFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "", reloaded[0].DefaultMod)
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+}
+
+func TestPromptLaunchModAllowsManualOverrideWithoutStoredDefaults(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com"},
+	}
+	withTestInput(t, "0\n", func() {
+		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"})
+		assert.True(t, ok)
+		assert.True(t, choice.HasManual)
+		assert.Equal(t, mods.DefaultModVanilla, choice.ManualMod)
 		assert.False(t, choice.UseDefaults)
 	})
 }

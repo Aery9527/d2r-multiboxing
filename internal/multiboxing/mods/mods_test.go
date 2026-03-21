@@ -57,3 +57,20 @@ func TestBuildLaunchArgs(t *testing.T) {
 	assert.Nil(t, BuildLaunchArgs("   "))
 	assert.Equal(t, []string{"-mod", "sample-mod", "-txt"}, BuildLaunchArgs("sample-mod"))
 }
+
+func TestNormalizeSavedDefaultMod(t *testing.T) {
+	assert.Equal(t, "", NormalizeSavedDefaultMod(""))
+	assert.Equal(t, "", NormalizeSavedDefaultMod("   "))
+	assert.Equal(t, DefaultModVanilla, NormalizeSavedDefaultMod("vanilla"))
+	assert.Equal(t, DefaultModVanilla, NormalizeSavedDefaultMod("0"))
+	assert.Equal(t, "SampleMod", NormalizeSavedDefaultMod(" SampleMod "))
+}
+
+func TestResolveSavedDefaultMod(t *testing.T) {
+	installedMods := []string{"BTDiablo", "SampleMod"}
+
+	assert.Equal(t, "", ResolveSavedDefaultMod("", installedMods))
+	assert.Equal(t, DefaultModVanilla, ResolveSavedDefaultMod(DefaultModVanilla, installedMods))
+	assert.Equal(t, "SampleMod", ResolveSavedDefaultMod("samplemod", installedMods))
+	assert.Equal(t, "", ResolveSavedDefaultMod("missing-mod", installedMods))
+}

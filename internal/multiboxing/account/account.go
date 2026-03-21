@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"d2rhl/internal/common/d2r"
+	"d2rhl/internal/multiboxing/mods"
 )
 
 var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
@@ -26,6 +27,7 @@ type Account struct {
 	ToolFlags       uint32 // 工具內部設定 bitmask
 	GraphicsProfile string // 玩家指定的畫質設定檔名稱；空字串表示未指派
 	DefaultRegion   string // 玩家指定的預設登入區域；空字串表示未指派
+	DefaultMod      string // 玩家指定的預設 mod；空字串表示未指派，<vanilla> 表示預設原版
 }
 
 // IsPasswordEncrypted checks if the password is already encrypted.
@@ -34,7 +36,7 @@ func IsPasswordEncrypted(password string) bool {
 }
 
 // LoadAccounts reads accounts from a CSV file.
-// CSV format: Email,Password,DisplayName[,LaunchFlags[,ToolFlags[,GraphicsProfile[,DefaultRegion]]]] (first row is header).
+// CSV format: Email,Password,DisplayName[,LaunchFlags[,ToolFlags[,GraphicsProfile[,DefaultRegion[,DefaultMod]]]]] (first row is header).
 func LoadAccounts(path string) ([]Account, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -113,6 +115,15 @@ func LoadAccounts(path string) ([]Account, error) {
 			}
 		}
 
+		var defaultMod string
+		if len(record) >= 8 {
+			rawDefaultMod := strings.TrimSpace(record[7])
+			defaultMod = mods.NormalizeSavedDefaultMod(rawDefaultMod)
+			if defaultMod != rawDefaultMod {
+				sanitizedInvalid = true
+			}
+		}
+
 		accounts = append(accounts, Account{
 			Email:           strings.TrimSpace(record[0]),
 			Password:        strings.TrimSpace(record[1]),
@@ -121,6 +132,7 @@ func LoadAccounts(path string) ([]Account, error) {
 			ToolFlags:       toolFlags,
 			GraphicsProfile: graphicsProfile,
 			DefaultRegion:   defaultRegion,
+			DefaultMod:      defaultMod,
 		})
 	}
 
@@ -153,7 +165,7 @@ func SaveAccounts(path string, accounts []Account) error {
 	defer writer.Flush()
 
 	// header
-	if err := writer.Write([]string{"Email", "Password", "DisplayName", "LaunchFlags", "ToolFlags", "GraphicsProfile", "DefaultRegion"}); err != nil {
+	if err := writer.Write([]string{"Email", "Password", "DisplayName", "LaunchFlags", "ToolFlags", "GraphicsProfile", "DefaultRegion", "DefaultMod"}); err != nil {
 		return fmt.Errorf("failed to write header: %w", err)
 	}
 
@@ -166,6 +178,7 @@ func SaveAccounts(path string, accounts []Account) error {
 			strconv.FormatUint(uint64(acc.ToolFlags), 10),
 			strings.TrimSpace(acc.GraphicsProfile),
 			strings.TrimSpace(acc.DefaultRegion),
+			mods.NormalizeSavedDefaultMod(acc.DefaultMod),
 		}
 		if err := writer.Write(record); err != nil {
 			return fmt.Errorf("failed to write account #%d: %w", i+1, err)

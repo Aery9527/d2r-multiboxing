@@ -22,13 +22,37 @@ func parseRegionInput(input string) *d2r.Region {
 	}
 }
 
-func selectLaunchMod(d2rPath string) ([]string, bool) {
+func discoverInstalledMods(d2rPath string) ([]string, bool) {
 	installedMods, err := mods.DiscoverInstalled(d2rPath)
 	if err != nil {
 		ui.errorf(lang.Launch.ModLoadFailed, err)
 		return nil, false
 	}
+	return installedMods, true
+}
 
+func parseLaunchModInput(input string, installedMods []string) (string, bool) {
+	selected, err := strconv.Atoi(strings.TrimSpace(input))
+	if err != nil || selected < 0 || selected > len(installedMods) {
+		return "", false
+	}
+	if selected == 0 {
+		return mods.DefaultModVanilla, true
+	}
+	return installedMods[selected-1], true
+}
+
+func renderLaunchModOptions(installedMods []string) {
+	options := ui.subMenuOptions(func(options *cliMenuOptions) {
+		options.option("0", lang.Launch.ModOptNone, "")
+		for i, modName := range installedMods {
+			options.option(strconv.Itoa(i+1), modName, "")
+		}
+	})
+	options.render()
+}
+
+func selectOfflineLaunchMod(installedMods []string) ([]string, bool) {
 	if len(installedMods) == 0 {
 		ui.infof("%s", lang.Launch.ModNoMods)
 		return nil, true
@@ -37,28 +61,22 @@ func selectLaunchMod(d2rPath string) ([]string, bool) {
 	var result []string
 	chosen := false
 	_ = runMenu(func() {
-		options := ui.subMenuOptions(func(options *cliMenuOptions) {
-			options.option("0", lang.Launch.ModOptNone, "")
-			for i, modName := range installedMods {
-				options.option(strconv.Itoa(i+1), modName, "")
-			}
-		})
+		ui.headf("%s", lang.Launch.ModOfflineTitle)
 		ui.menuBlock(func() {
-			options.render()
+			renderLaunchModOptions(installedMods)
 		})
 	}, func(input string) error {
-		selected, err := strconv.Atoi(input)
-		if err != nil || selected < 0 || selected > len(installedMods) {
+		selectedMod, ok := parseLaunchModInput(input, installedMods)
+		if !ok {
 			showInvalidInputAndPause()
 			return nil
 		}
-		if selected == 0 {
+		if selectedMod == mods.DefaultModVanilla {
 			ui.infof("%s", lang.Launch.ModNoneChosen)
 			result = nil
 		} else {
-			modName := installedMods[selected-1]
-			ui.infof(lang.Launch.ModUsing, modName)
-			result = mods.BuildLaunchArgs(modName)
+			ui.infof(lang.Launch.ModUsing, selectedMod)
+			result = mods.BuildLaunchArgs(selectedMod)
 		}
 		chosen = true
 		return errNavDone

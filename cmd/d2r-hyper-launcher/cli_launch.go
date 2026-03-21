@@ -13,6 +13,7 @@ import (
 	"d2rhl/internal/multiboxing/account"
 	"d2rhl/internal/multiboxing/graphicsprofile"
 	"d2rhl/internal/multiboxing/launcher"
+	"d2rhl/internal/multiboxing/mods"
 )
 
 var launchDelayRandIntN = rand.Intn
@@ -24,6 +25,12 @@ const launchSuccessPauseDuration = 3 * time.Second
 type launchRegionChoice struct {
 	ManualRegion *d2r.Region
 	UseDefaults  bool
+}
+
+type launchModChoice struct {
+	ManualMod   string
+	HasManual   bool
+	UseDefaults bool
 }
 
 func launchAccount(acc *account.Account, accounts []account.Account, accountsFile string, cfg *config.Config) {
@@ -40,7 +47,12 @@ func launchAccount(acc *account.Account, accounts []account.Account, accountsFil
 		return
 	}
 
-	modArgs, ok := selectLaunchMod(cfg.D2RPath)
+	installedMods, ok := discoverInstalledMods(cfg.D2RPath)
+	if !ok {
+		return
+	}
+
+	modChoice, ok := promptLaunchMod(lang.Launch.ModSingleTitle, accounts, accountsFile, []*account.Account{acc}, installedMods)
 	if !ok {
 		return
 	}
@@ -60,6 +72,12 @@ func launchAccount(acc *account.Account, accounts []account.Account, accountsFil
 	region := resolveLaunchRegionChoice(regionChoice, *acc)
 	if region == nil {
 		showInputErrorAndPause(fmt.Sprintf(lang.Launch.RegionMissing, launchTargetAccountLabel(acc)))
+		return
+	}
+
+	modArgs, modOK := resolveLaunchModChoice(modChoice, *acc, installedMods)
+	if !modOK {
+		showInputErrorAndPause(fmt.Sprintf(lang.Launch.ModMissing, launchTargetAccountLabel(acc)))
 		return
 	}
 
@@ -105,7 +123,12 @@ func launchAll(accounts []account.Account, accountsFile string, cfg *config.Conf
 		return
 	}
 
-	modArgs, ok := selectLaunchMod(cfg.D2RPath)
+	installedMods, ok := discoverInstalledMods(cfg.D2RPath)
+	if !ok {
+		return
+	}
+
+	modChoice, ok := promptLaunchMod(lang.Launch.ModBatchTitle, accounts, accountsFile, pendingAccounts, installedMods)
 	if !ok {
 		return
 	}
@@ -128,6 +151,12 @@ func launchAll(accounts []account.Account, accountsFile string, cfg *config.Conf
 		region := resolveLaunchRegionChoice(regionChoice, *acc)
 		if region == nil {
 			ui.warningf(lang.Launch.RegionMissing, launchTargetAccountLabel(acc))
+			continue
+		}
+
+		modArgs, modOK := resolveLaunchModChoice(modChoice, *acc, installedMods)
+		if !modOK {
+			ui.warningf(lang.Launch.ModMissing, launchTargetAccountLabel(acc))
 			continue
 		}
 
@@ -190,7 +219,12 @@ func launchOffline(cfg *config.Config) {
 
 	ui.headf("%s", lang.Launch.OfflineTitle)
 
-	modArgs, ok := selectLaunchMod(cfg.D2RPath)
+	installedMods, ok := discoverInstalledMods(cfg.D2RPath)
+	if !ok {
+		return
+	}
+
+	modArgs, ok := selectOfflineLaunchMod(installedMods)
 	if !ok {
 		return
 	}
@@ -246,6 +280,54 @@ func promptLaunchRegion(title string, accounts []*account.Account) (launchRegion
 	return result, result.UseDefaults || result.ManualRegion != nil
 }
 
+func promptLaunchMod(title string, accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string) (launchModChoice, bool) {
+	var result launchModChoice
+	_ = runMenu(func() {
+		ui.headf("%s", title)
+		ui.infof("%s", lang.Launch.RegionTargetLabel)
+		for _, line := range launchTargetAccountLines(targets) {
+			ui.rawln(line)
+		}
+		ui.infof("%s", lang.Launch.ModUseDefaults)
+		ui.infof("%s", lang.Launch.ModOverride)
+		if len(installedMods) == 0 {
+			ui.infof("%s", lang.Launch.ModNoMods)
+		}
+		ui.menuBlock(func() {
+			renderLaunchModOptions(installedMods)
+		})
+	}, func(input string) error {
+		if strings.TrimSpace(input) == "" {
+			if err := reconcileDefaultModAssignmentsForLaunch(accounts, accountsFile, targets, installedMods); err != nil {
+				showInputErrorAndPause(fmt.Sprintf(lang.Common.SaveFailed, err))
+				return nil
+			}
+			missing := missingDefaultModAccountLabels(targets, installedMods)
+			if len(missing) > 0 {
+				showInputErrorAndPause(fmt.Sprintf(lang.Launch.ModMissing, strings.Join(missing, ", ")))
+				return nil
+			}
+			result.UseDefaults = true
+			return errNavDone
+		}
+
+		selectedMod, ok := parseLaunchModInput(input, installedMods)
+		if !ok {
+			showInvalidInputAndPause()
+			return nil
+		}
+		if selectedMod == mods.DefaultModVanilla {
+			ui.infof("%s", lang.Launch.ModNoneChosen)
+		} else {
+			ui.infof(lang.Launch.ModUsing, selectedMod)
+		}
+		result.ManualMod = selectedMod
+		result.HasManual = true
+		return errNavDone
+	})
+	return result, result.UseDefaults || result.HasManual
+}
+
 func launchTargetAccountLines(accounts []*account.Account) []string {
 	lines := make([]string, 0, len(accounts))
 	for _, acc := range accounts {
@@ -279,6 +361,85 @@ func resolveLaunchRegionChoice(choice launchRegionChoice, acc account.Account) *
 		return nil
 	}
 	return d2r.FindRegion(acc.DefaultRegion)
+}
+
+func reconcileDefaultModAssignmentsForLaunch(accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string) error {
+	previous := make(map[int]string, len(targets))
+	changed := false
+
+	for _, target := range targets {
+		accountIndex := graphicsProfileAccountIndex(accounts, target)
+		if accountIndex < 0 {
+			return errors.New("target account was not found in current account list")
+		}
+
+		current := accounts[accountIndex].DefaultMod
+		resolved := mods.ResolveSavedDefaultMod(current, installedMods)
+		normalized := mods.NormalizeSavedDefaultMod(current)
+
+		desired := resolved
+		if normalized == "" || resolved == "" {
+			desired = resolved
+			if normalized != "" && resolved == "" {
+				desired = ""
+			}
+		}
+
+		if current == desired {
+			continue
+		}
+		if _, exists := previous[accountIndex]; !exists {
+			previous[accountIndex] = current
+		}
+		accounts[accountIndex].DefaultMod = desired
+		changed = true
+	}
+
+	if !changed {
+		return nil
+	}
+	if err := account.SaveAccounts(accountsFile, accounts); err != nil {
+		for idx, previousMod := range previous {
+			accounts[idx].DefaultMod = previousMod
+		}
+		return err
+	}
+	return nil
+}
+
+func missingDefaultModAccountLabels(accounts []*account.Account, installedMods []string) []string {
+	labels := make([]string, 0, len(accounts))
+	for _, acc := range accounts {
+		if acc == nil {
+			continue
+		}
+		if mods.ResolveSavedDefaultMod(acc.DefaultMod, installedMods) != "" {
+			continue
+		}
+		labels = append(labels, launchTargetAccountLabel(acc))
+	}
+	return labels
+}
+
+func resolveLaunchModChoice(choice launchModChoice, acc account.Account, installedMods []string) ([]string, bool) {
+	selectedMod := ""
+	switch {
+	case choice.HasManual:
+		selectedMod = choice.ManualMod
+	case choice.UseDefaults:
+		selectedMod = mods.ResolveSavedDefaultMod(acc.DefaultMod, installedMods)
+	default:
+		return nil, false
+	}
+
+	switch selectedMod {
+	case "":
+		return nil, false
+	case mods.DefaultModVanilla:
+		return nil, true
+	default:
+		return mods.BuildLaunchArgs(selectedMod), true
+	}
 }
 
 func launchTargetAccountLabel(acc *account.Account) string {

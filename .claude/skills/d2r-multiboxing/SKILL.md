@@ -33,7 +33,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 4. 視窗標題需維持 `D2R-<DisplayName>` 格式，這也是 switcher 用來找視窗的依據。
 5. 背景 monitor 會每 2 秒掃描 D2R 行程，替新 PID 再做一次 handle 關閉。
 6. `0` 與 `a` 啟動流程會先掃描 `D2R.exe` 同層 `mods\` 目錄；只要 mod 資料夾內有 `modinfo.json`，或有同名 `<mod>.mpq`，就會出現在選單中，並轉成 `-mod <name> -txt` 參數。
-7. `accounts.csv` 現在共 7 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile,DefaultRegion`。`LaunchFlags` 是 D2R 啟動參數 bitmask，但目前內建只保留 `-ns`；每帳號畫質差異改由 `GraphicsProfile` 在啟動前套用具名 `Settings.json` profile。`ToolFlags` 是工具內部設定 bitmask。`DefaultRegion` 則是帳號預設登入區域；當單帳號或 `a` 批次啟動進入 region 選單時，直接按 Enter 會使用這裡的設定。若本次目標裡有任何帳號尚未設定 `DefaultRegion`，工具必須擋下 Enter 並列出缺少設定的帳號。舊 4 / 5 / 6 欄 CSV 載入時缺少欄位要自動視為 0 / 空字串並保持向後相容。
+7. `accounts.csv` 現在共 8 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile,DefaultRegion,DefaultMod`。`LaunchFlags` 是 D2R 啟動參數 bitmask，但目前內建只保留 `-ns`；每帳號畫質差異改由 `GraphicsProfile` 在啟動前套用具名 `Settings.json` profile。`ToolFlags` 是工具內部設定 bitmask。`DefaultRegion` 是帳號預設登入區域；當單帳號或 `a` 批次啟動進入 region 選單時，直接按 Enter 會使用這裡的設定。`DefaultMod` 是帳號預設載入的 mod；當單帳號或 `a` 批次啟動進入 mod 選單時，直接按 Enter 會使用這裡的設定。`DefaultMod` 若設成 `<vanilla>` 代表預設原版（不使用 mod）。若本次目標裡有任何帳號尚未設定 `DefaultRegion` 或有效的 `DefaultMod`，工具必須擋下 Enter 並列出缺少設定的帳號；若某個保存的 `DefaultMod` 已不在目前安裝的 mods 清單裡，launcher 會先自動清空該帳號的 `DefaultMod` 再擋下 Enter。舊 4 / 5 / 6 / 7 欄 CSV 載入時缺少欄位要自動視為 0 / 空字串並保持向後相容。
 
 ## 修改時要守住的規則
 

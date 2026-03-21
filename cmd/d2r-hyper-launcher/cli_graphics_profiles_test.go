@@ -186,7 +186,7 @@ func TestPrintMenuShowsGraphicsProfilesOption(t *testing.T) {
 		printMenu(nil, cfg)
 	})
 
-	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"數字", "0", "a", "d", "f", "g", "v", "p", "s", "r", "l", "q"}))
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"數字", "0", "a", "d", "f", "g", "m", "v", "p", "s", "r", "l", "q"}))
 	graphicsOptionLine, ok := findMenuOptionLine(output, "g")
 	assert.True(t, ok)
 	assert.NotEmpty(t, graphicsOptionLine)

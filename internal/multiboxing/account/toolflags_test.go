@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"d2rhl/internal/multiboxing/mods"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,7 +61,7 @@ func TestLoadAccounts_ToolFlagsColumn(t *testing.T) {
 	csvPath := filepath.Join(dir, "accounts.csv")
 
 	accounts := []Account{
-		{Email: "a@b.com", Password: "pass", DisplayName: "AccA", LaunchFlags: 0, ToolFlags: ToolFlagSkipSwitcher, GraphicsProfile: "boss-run", DefaultRegion: "NA"},
+		{Email: "a@b.com", Password: "pass", DisplayName: "AccA", LaunchFlags: 0, ToolFlags: ToolFlagSkipSwitcher, GraphicsProfile: "boss-run", DefaultRegion: "NA", DefaultMod: mods.DefaultModVanilla},
 		{Email: "c@d.com", Password: "pass", DisplayName: "AccB", LaunchFlags: 0, ToolFlags: 0},
 	}
 
@@ -73,8 +75,10 @@ func TestLoadAccounts_ToolFlagsColumn(t *testing.T) {
 	assert.Equal(t, uint32(0), loaded[1].ToolFlags)
 	assert.Equal(t, "boss-run", loaded[0].GraphicsProfile)
 	assert.Equal(t, "NA", loaded[0].DefaultRegion)
+	assert.Equal(t, mods.DefaultModVanilla, loaded[0].DefaultMod)
 	assert.Equal(t, "", loaded[1].GraphicsProfile)
 	assert.Equal(t, "", loaded[1].DefaultRegion)
+	assert.Equal(t, "", loaded[1].DefaultMod)
 }
 
 func TestLoadAccounts_BackwardCompatWithoutToolFlagsColumn(t *testing.T) {
