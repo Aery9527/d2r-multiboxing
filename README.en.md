@@ -7,7 +7,7 @@ A Windows CLI toolkit for D2R (Diablo II: Resurrected) players, currently provid
 - **multiboxing**: multi-account launch, single-instance lock handling, window identification
 - **switcher**: switch D2R windows via keyboard / mouse side-buttons / gamepad
 
-**Latest release: [v1.2.0](docs/releases/v1.2.0.md)**
+**Latest release: [v1.3.0](docs/releases/v1.3.0.md)**
 
 ## Multiboxing Documentation Index
 
