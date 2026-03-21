@@ -33,6 +33,7 @@ func printStartupAnnouncement(cfgDir string) {
 		lang.Startup.WarnNoteDelay,
 		lang.Startup.WarnNoteConfig,
 		lang.Startup.WarnNoteBattleNet,
+		lang.Startup.WarnNoteRegionLock,
 		lang.Startup.WarnNoteNoModify,
 		lang.Startup.WarnNoteCommunity,
 	)

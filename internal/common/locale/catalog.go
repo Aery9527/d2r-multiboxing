@@ -109,18 +109,19 @@ type StartupCatalog struct {
 	PasswordEncrypted string
 
 	// Announcement warning lines (each is a standalone line)
-	WarnStatusDetect1 string
-	WarnStatusDetect2 string
-	WarnStatusDetect3 string
-	WarnNote          string
-	WarnNoteWindowed  string
-	WarnNoteGamepad   string
-	WarnNoteSwitcher  string
-	WarnNoteDelay     string
-	WarnNoteConfig    string
-	WarnNoteBattleNet string
-	WarnNoteNoModify  string
-	WarnNoteCommunity string
+	WarnStatusDetect1  string
+	WarnStatusDetect2  string
+	WarnStatusDetect3  string
+	WarnNote           string
+	WarnNoteWindowed   string
+	WarnNoteGamepad    string
+	WarnNoteSwitcher   string
+	WarnNoteDelay      string
+	WarnNoteConfig     string
+	WarnNoteBattleNet  string
+	WarnNoteRegionLock string
+	WarnNoteNoModify   string
+	WarnNoteCommunity  string
 }
 
 // MainMenuCatalog holds the main menu title, option labels, and account-list header.

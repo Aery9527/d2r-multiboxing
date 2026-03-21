@@ -78,8 +78,8 @@ flowchart LR
     Gamepad[gamepad.go]
     Detect[detect.go]
     Keymap[keymap.go]
-    Window[internal/process/window.go]
-    Config[internal/config/config.go]
+    Window[internal/common/process/window.go]
+    Config[internal/common/config/config.go]
 
     Main --> Config
     Main --> Detect
@@ -103,7 +103,7 @@ flowchart LR
 | [`internal/switcher/gamepad.go`](../internal/switcher/gamepad.go) | XInput 搖桿輪詢與觸發 |
 | [`internal/switcher/detect.go`](../internal/switcher/detect.go) | CLI 設定時的按鍵偵測 |
 | [`internal/switcher/keymap.go`](../internal/switcher/keymap.go) | 鍵名、修飾鍵與顯示格式轉換 |
-| [`internal/process/window.go`](../internal/process/window.go) | 列舉與切換 D2R 視窗 |
+| [`internal/common/process/window.go`](../internal/common/process/window.go) | 列舉與切換 D2R 視窗 |
 
 ---
 
