@@ -34,7 +34,7 @@
 - 中文字寬對齊沿用 display-width-aware 邏輯，不要退回單純 rune 計數。
 - 不要引導玩家手動改 `config.json`；優先提供 CLI 內可操作流程（例如 `d2r_path_picker.go`）。
 - 設定載入需保留向後相容：舊版 `launch_delay: 5` 會在 load 時接受並正規化為 `10`（`internal/common/config/config.go`）。
-- `accounts.csv` 行為是刻意設計：UTF-8 BOM、載入時 `LaunchFlags` 清洗、密碼以 `ENC:` + DPAPI 加密（`internal/multiboxing/account/account.go`）。
+- `accounts.csv` 行為是刻意設計：UTF-8 BOM、載入時 `LaunchFlags` / `ToolFlags` 清洗、目前內建 `LaunchFlags` 只保留 `-ns`（每帳號畫質改用 `GraphicsProfile`）、密碼以 `ENC:` + DPAPI 加密（`internal/multiboxing/account/account.go`）。
 
 ## 整合點 / 風險點
 - 命令列紀錄僅透過 `launcher.SetCommandLogger` 接一次；線上啟動日誌必須遮罩 `-password`（`internal/multiboxing/launcher/launcher.go`）。

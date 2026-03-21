@@ -66,7 +66,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 | `Email` | ✅ | Battle.net 登入信箱 |
 | `Password` | ✅ | 帳號密碼；第一次啟動後會自動改寫成加密字串 |
 | `DisplayName` | ✅ | 主選單顯示名稱，也是視窗標題後綴 |
-| `LaunchFlags` | 可先留空 | 這個帳號額外要帶的啟動旗標 bitflag；一般玩家可先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定 |
+| `LaunchFlags` | 可先留空 | 這個帳號額外要帶的啟動旗標 bitflag；一般玩家可先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定。目前只保留 `-ns`；每帳號不同畫質請改用 `GraphicsProfile` |
 | `ToolFlags` | 可先留空 | 工具內部的帳號功能設定 bitflag；可先留空，預設 `0`。目前支援：`1` = 把此帳號排除在 switcher 切換循環外（可在主選單 `s → [2]` 設定） |
 | `GraphicsProfile` | 可先留空 | 這個帳號要套用的具名畫質設定檔；建議用主選單 `g` 產生與指派。若留空，啟動時工具不會碰 `Settings.json` |
 
@@ -75,9 +75,10 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 | 旗標 | 用途 |
 |------|------|
 | `-ns` | 關閉聲音 |
-| `-lq` | 低畫質 / Large Font Mode（術士版本似乎已失效） |
 
 更完整的參數說明、來源與不確定性標註，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)。
+
+若你是舊版留下的 `-lq` 設定，launcher 讀取帳號時會自動清掉並回寫；若你想讓不同帳號用不同畫質，請改用主選單 `g` 的畫質設定檔。
 
 ### 密碼加密會發生什麼事
 
@@ -178,7 +179,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 
 - `5-3` 這種反向區間會直接被視為錯誤，不會套用
 - 這個功能只會改 `LaunchFlags`；帳號、密碼、DisplayName 仍建議先手動在 `accounts.csv` 裡建立
-- `-lq` 在術士版本似乎已失效，因此本文與工具介面都會直接標註這點
+- 舊版若還留有 `-lq`，launcher 讀取帳號時會自動清掉並回寫；每帳號畫質請改用 `g` 的畫質設定檔
 - 如果你手動把 `LaunchFlags` 填成亂數、負數或文字，工具會在讀取時自動 fallback 成 `0`，並把 CSV 回寫成乾淨值
 - 如果你輸入的編號範圍或格式有誤，工具會先顯示錯誤訊息，接著提示你按鍵確認後再回到上一層，避免訊息瞬間被主選單蓋掉
 - 如果你想知道某個 flag 對應的 D2R 參數實際是什麼，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)

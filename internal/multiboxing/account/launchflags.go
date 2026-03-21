@@ -4,10 +4,6 @@ import "strings"
 
 const (
 	LaunchFlagNoSound uint32 = 1 << iota
-	_
-	LaunchFlagLowQuality
-	_
-	_
 )
 
 type LaunchFlagOption struct {
@@ -24,12 +20,6 @@ var launchFlagOptions = []LaunchFlagOption{
 		Name:        "關閉聲音",
 		Description: "-ns / -nosound",
 		Args:        []string{"-ns"},
-	},
-	{
-		Bit:         LaunchFlagLowQuality,
-		Name:        "低畫質 / Large Font Mode",
-		Description: "-lq（術士版本似乎已失效）",
-		Args:        []string{"-lq"},
 	},
 }
 

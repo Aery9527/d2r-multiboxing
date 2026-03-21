@@ -59,7 +59,7 @@ Field descriptions:
 - `Email`: Battle.net login email
 - `Password`: Battle.net password
 - `DisplayName`: the name shown in the tool and used for window switching; after launch the window title is set to `D2R-<DisplayName>`
-- `LaunchFlags`: extra **D2R launch flags** per account; can be left blank (the tool defaults to `0`); configure later via `f` in the main menu. The tool currently offers two flag options; based on testing, "disable sound" has a clear effect, but `-lq` does not appear to have any practical impact. See [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for parameter details.
+- `LaunchFlags`: extra **D2R launch flags** per account; can be left blank (the tool defaults to `0`); configure later via `f` in the main menu. The tool now keeps only `-ns` (disable sound). If you want different graphics settings per account, use `GraphicsProfile` via main-menu `g` instead. If an old CSV still contains `-lq`, the launcher automatically strips it and rewrites the sanitized value. See [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for parameter details.
 - `ToolFlags`: per-account **tool-internal settings** (bitmask); can be left blank (defaults to `0`). Currently supported: `1` = exclude this account from the switcher cycle. Configure via `s → [2]` in the main menu — no need to edit manually.
 - `GraphicsProfile`: the **named graphics profile** to apply for this account; can be left blank. If it is blank, launching that account will **not touch** `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json` at all. The recommended workflow is to use `g` in the main menu to save the current game settings as a named profile and then assign it to accounts.
 
@@ -81,7 +81,7 @@ Once launched, you will see the following options:
 - `a`: the tool pre-scans which accounts are already running; if there are pending accounts, it asks for region and mod once, then launches each not-yet-running account in sequence
 - `0`: select an installed mod (if any), then launch in offline mode
 - `d`: set the launch delay used by `a` batch launch; enter `30` or a range like `30-60` (random wait within that interval each time); minimum is fixed at 10 seconds
-- `f`: display the account list and a centered two-line flag reference table, then set or clear extra launch flags per account; currently two flag options are available; configure per account, per flag, or all at once; see [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for flag details
+- `f`: display the account list and a centered two-line flag reference table, then set or clear extra launch flags per account; currently only the "disable sound" flag remains. For per-account graphics differences, use `g` graphics profiles instead. You can still configure flags per account, per flag, or all at once; see [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for details
 - `g`: manage account graphics profiles. First adjust graphics / window / resolution in-game, then return to the CLI and save the current `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json` as a named profile; after that you can assign it to accounts with a flag-like flow, clear account assignments, or delete saved profiles you no longer need. Unassigned accounts leave `Settings.json` untouched at launch time
 - `p`: open a Windows file picker to set the `D2R.exe` path
 - `s`: configure window-switch hotkey / mouse side-button / gamepad button

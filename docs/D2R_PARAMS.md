@@ -37,7 +37,8 @@
 目前 launcher 直接 expose 給多開玩家的，主要是：
 
 - Battle.net 連線相關的 `-username`、`-password`、`-address`
-- 每帳號 `LaunchFlags` 會用到的 `-ns`、`-lq`
+- 每帳號 `LaunchFlags` 目前只會用到的 `-ns`
+- 每帳號畫質差異改由 `GraphicsProfile` 在啟動前切換 `Settings.json`
 - mod 啟動會用到的 `-mod <name> -txt`
 
 ---
@@ -59,7 +60,7 @@
 | `-w` / `-window` / `-windowed` | 視窗模式啟動。社群回報不完全一致，但至少有多個來源仍列為可用；若要穩定切換視窗 / 全螢幕，仍建議以遊戲內設定或 `Settings.json` 為準 | 全螢幕 |
 | `-gamma <num>` | 覆蓋 Gamma 值 | `0` |
 | `-vsync <num>` | 覆蓋 VSync | `255` |
-| `-lq` | 低畫質模式（Large Font Mode）；術士版本似乎已失效 | 關閉 |
+| `-lq` | 低畫質模式（Large Font Mode）；術士版本似乎已失效。本專案目前也不再 expose 這個 flag，改由 `GraphicsProfile` / `Settings.json` 流程處理每帳號畫質 | 關閉 |
 
 ---
 
@@ -149,9 +150,9 @@
 | 參數 | 用途 |
 |------|------|
 | `-ns` | 副帳號靜音，避免多個遊戲音效互相干擾 |
-| `-lq` | 副帳號低畫質；術士版本似乎已失效 |
 | `-mod <name> -txt` | 讓 `0` 與 `a` 啟動流程可套用已安裝 mod |
 
 > ⚠️ 即使 `-w` 在部分社群回報中仍可用，本專案仍建議先手動進入遊戲 **選項 → 畫面 → 視窗模式** 設定為「視窗化」。
 > D2R 會把相關設定寫入 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`。
 > 若你有在主選單 `g` 建立並指派畫質設定檔，launcher 會在啟動該帳號前先把對應 profile 覆蓋回 `Settings.json`；若帳號沒有指派 profile，launcher 就完全不會動這份檔案。
+> 若你想讓副帳號使用不同畫質，請優先用主選單 `g` 的畫質設定檔流程，而不是依賴 `-lq`。

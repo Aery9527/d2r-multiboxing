@@ -21,12 +21,12 @@
 ## 已確認的關鍵技術事實
 
 - D2R 的顯示 / 畫質 / 視窗設定目前仍以 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json` 為核心，而不是 Windows 顯示控制台。
-- 目前帳號資料模型在 [account.go](..\..\internal\multiboxing\account\account.go)；`accounts.csv` 目前只有 `Email,Password,DisplayName,LaunchFlags,ToolFlags` 五欄。
+- 目前帳號資料模型在 [account.go](..\..\internal\multiboxing\account\account.go)；`accounts.csv` 現在是 `Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile` 六欄。
 - 現有 per-account 設定 UI 範本在 [cli_flags.go](..\..\cmd\d2r-hyper-launcher\cli_flags.go)；它已經有成熟的 `runMenu` / `runMenuRead`、`b` / `h` / `q` 契約可沿用。
 - 啟動切點在 [cli_launch.go](..\..\cmd\d2r-hyper-launcher\cli_launch.go) 很清楚：
   - 單帳號：`launchAccount()` 在 `selectLaunchMod()` 之後、`LaunchD2R()` 之前可插入 profile apply
   - 批次：`launchAll()` 在每個帳號呼叫 `LaunchD2R()` 前可逐帳號套用 profile
-- repo 既有 `LaunchFlags` 只涵蓋 `-ns` / `-lq`；`-lq` 也已被文件標成可能失效，因此不能把它當作完整畫質方案。
+- repo 目前的 `LaunchFlags` 只保留 `-ns`；每帳號畫質差異已改由 `GraphicsProfile` / `Settings.json` 流程處理，因此不能再把 `-lq` 當作方案。
 
 ## 這次規劃鎖定的產品決策
 
