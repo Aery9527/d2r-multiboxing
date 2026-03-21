@@ -104,49 +104,7 @@ func TestApplyGraphicsProfileForLaunchAppliesAssignedProfile(t *testing.T) {
 	assert.JSONEq(t, `{"quality":"low"}`, string(data))
 }
 
-func TestPrepareGraphicsProfileForLaunchClearsMissingAssignmentAndLeavesSettingsUntouched(t *testing.T) {
-	originalFactory := newGraphicsProfileStore
-	t.Cleanup(func() {
-		newGraphicsProfileStore = originalFactory
-	})
-
-	store := newTestGraphicsProfileStore(t)
-	err := os.WriteFile(store.SettingsPath(), []byte(`{"quality":"existing"}`), 0o600)
-	assert.NoError(t, err)
-
-	accounts := []account.Account{
-		{Email: "alpha@example.com", Password: "pass", DisplayName: "Alpha", GraphicsProfile: "missing"},
-	}
-	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
-	err = account.SaveAccounts(accountsFile, accounts)
-	assert.NoError(t, err)
-
-	newGraphicsProfileStore = func() (*graphicsprofile.Store, error) {
-		return store, nil
-	}
-
-	_ = captureStdout(t, func() {
-		returnedStore, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, &accounts[0], nil)
-		assert.NoError(t, err)
-		assert.Same(t, store, returnedStore)
-	})
-
-	data, err := os.ReadFile(store.SettingsPath())
-	assert.NoError(t, err)
-	assert.JSONEq(t, `{"quality":"existing"}`, string(data))
-	assert.Equal(t, "", accounts[0].GraphicsProfile)
-
-	reloaded, err := account.LoadAccounts(accountsFile)
-	assert.NoError(t, err)
-	assert.Equal(t, "", reloaded[0].GraphicsProfile)
-}
-
-func TestPrepareGraphicsProfileForLaunchPreservesNonMissingProfileErrors(t *testing.T) {
-	originalFactory := newGraphicsProfileStore
-	t.Cleanup(func() {
-		newGraphicsProfileStore = originalFactory
-	})
-
+func TestApplyNamedGraphicsProfileForLaunchPreservesNonMissingProfileErrors(t *testing.T) {
 	store := newTestGraphicsProfileStore(t)
 	err := os.WriteFile(store.SettingsPath(), []byte(`{"quality":"existing"}`), 0o600)
 	assert.NoError(t, err)
@@ -155,25 +113,9 @@ func TestPrepareGraphicsProfileForLaunchPreservesNonMissingProfileErrors(t *test
 	err = os.WriteFile(filepath.Join(store.ProfilesDir(), "broken.json"), []byte(`{"quality":`), 0o600)
 	assert.NoError(t, err)
 
-	accounts := []account.Account{
-		{Email: "alpha@example.com", Password: "pass", DisplayName: "Alpha", GraphicsProfile: "broken"},
-	}
-	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
-	err = account.SaveAccounts(accountsFile, accounts)
-	assert.NoError(t, err)
-
-	newGraphicsProfileStore = func() (*graphicsprofile.Store, error) {
-		return store, nil
-	}
-
-	returnedStore, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, &accounts[0], nil)
+	returnedStore, err := applyNamedGraphicsProfileForLaunch("broken", store)
 	assert.Error(t, err)
 	assert.Same(t, store, returnedStore)
-	assert.Equal(t, "broken", accounts[0].GraphicsProfile)
-
-	reloaded, loadErr := account.LoadAccounts(accountsFile)
-	assert.NoError(t, loadErr)
-	assert.Equal(t, "broken", reloaded[0].GraphicsProfile)
 }
 
 func TestPrintMenuShowsGraphicsProfilesOption(t *testing.T) {

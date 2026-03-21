@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +34,17 @@ type launchModChoice struct {
 	UseDefaults bool
 }
 
+type launchGraphicsChoice struct {
+	ManualProfile string
+	HasManual     bool
+	UseDefaults   bool
+}
+
+type launchGraphicsResolution struct {
+	ProfileName string
+	Apply       bool
+}
+
 func launchAccount(acc *account.Account, accounts []account.Account, accountsFile string, cfg *config.Config) {
 	if !ensureLaunchReadyD2RPath(cfg) {
 		return
@@ -47,19 +59,36 @@ func launchAccount(acc *account.Account, accounts []account.Account, accountsFil
 		return
 	}
 
-	regionChoice, ok := promptLaunchRegion(lang.Launch.RegionSingleTitle, []*account.Account{acc}, installedMods)
+	availableGraphicsProfiles, ok := loadLaunchGraphicsProfiles()
 	if !ok {
 		return
 	}
 
-	modChoice, ok := promptLaunchMod(lang.Launch.ModSingleTitle, accounts, accountsFile, []*account.Account{acc}, installedMods)
+	regionChoice, ok := promptLaunchRegion(lang.Launch.RegionSingleTitle, []*account.Account{acc}, installedMods, availableGraphicsProfiles)
 	if !ok {
 		return
 	}
 
-	_, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, acc, nil)
-	if err != nil {
-		showInputErrorAndPause(fmt.Sprintf(lang.GraphicsProfiles.ApplyFailed, acc.GraphicsProfile, err))
+	modChoice, ok := promptLaunchMod(lang.Launch.ModSingleTitle, accounts, accountsFile, []*account.Account{acc}, installedMods, availableGraphicsProfiles)
+	if !ok {
+		return
+	}
+
+	graphicsChoice, ok := promptLaunchGraphics(
+		lang.Launch.GraphicsSingleTitle,
+		accounts,
+		accountsFile,
+		[]*account.Account{acc},
+		installedMods,
+		availableGraphicsProfiles,
+	)
+	if !ok {
+		return
+	}
+
+	graphicsResolution, graphicsOK := resolveLaunchGraphicsChoice(graphicsChoice, *acc, availableGraphicsProfiles)
+	if !graphicsOK {
+		showInputErrorAndPause(formatLaunchMissingAccountsMessage(lang.Launch.GraphicsMissing, []string{launchTargetAccountLabel(acc)}))
 		return
 	}
 
@@ -78,6 +107,12 @@ func launchAccount(acc *account.Account, accounts []account.Account, accountsFil
 	modArgs, modOK := resolveLaunchModChoice(modChoice, *acc, installedMods)
 	if !modOK {
 		showInputErrorAndPause(formatLaunchMissingAccountsMessage(lang.Launch.ModMissing, []string{launchTargetAccountLabel(acc)}))
+		return
+	}
+
+	_, err = applyResolvedLaunchGraphics(graphicsResolution, nil)
+	if err != nil {
+		showInputErrorAndPause(fmt.Sprintf(lang.GraphicsProfiles.ApplyFailed, graphicsResolution.ProfileName, err))
 		return
 	}
 
@@ -123,25 +158,35 @@ func launchAll(accounts []account.Account, accountsFile string, cfg *config.Conf
 		return
 	}
 
-	regionChoice, ok := promptLaunchRegion(lang.Launch.RegionBatchTitle, pendingAccounts, installedMods)
+	availableGraphicsProfiles, ok := loadLaunchGraphicsProfiles()
 	if !ok {
 		return
 	}
 
-	modChoice, ok := promptLaunchMod(lang.Launch.ModBatchTitle, accounts, accountsFile, pendingAccounts, installedMods)
+	regionChoice, ok := promptLaunchRegion(lang.Launch.RegionBatchTitle, pendingAccounts, installedMods, availableGraphicsProfiles)
+	if !ok {
+		return
+	}
+
+	modChoice, ok := promptLaunchMod(lang.Launch.ModBatchTitle, accounts, accountsFile, pendingAccounts, installedMods, availableGraphicsProfiles)
+	if !ok {
+		return
+	}
+
+	graphicsChoice, ok := promptLaunchGraphics(
+		lang.Launch.GraphicsBatchTitle,
+		accounts,
+		accountsFile,
+		pendingAccounts,
+		installedMods,
+		availableGraphicsProfiles,
+	)
 	if !ok {
 		return
 	}
 
 	var graphicsStore *graphicsprofile.Store
 	for i, acc := range pendingAccounts {
-		var applyErr error
-		graphicsStore, applyErr = prepareGraphicsProfileForLaunch(accounts, accountsFile, acc, graphicsStore)
-		if applyErr != nil {
-			ui.warningf(lang.GraphicsProfiles.BatchApplyFailed, acc.DisplayName, acc.GraphicsProfile, applyErr)
-			continue
-		}
-
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
 			ui.warningf(lang.Launch.BatchDecryptFailed, acc.DisplayName, err)
@@ -157,6 +202,19 @@ func launchAll(accounts []account.Account, accountsFile string, cfg *config.Conf
 		modArgs, modOK := resolveLaunchModChoice(modChoice, *acc, installedMods)
 		if !modOK {
 			ui.warningf("%s", formatLaunchMissingAccountsMessage(lang.Launch.ModMissing, []string{launchTargetAccountLabel(acc)}))
+			continue
+		}
+
+		graphicsResolution, graphicsOK := resolveLaunchGraphicsChoice(graphicsChoice, *acc, availableGraphicsProfiles)
+		if !graphicsOK {
+			ui.warningf("%s", formatLaunchMissingAccountsMessage(lang.Launch.GraphicsMissing, []string{launchTargetAccountLabel(acc)}))
+			continue
+		}
+
+		var applyErr error
+		graphicsStore, applyErr = applyResolvedLaunchGraphics(graphicsResolution, graphicsStore)
+		if applyErr != nil {
+			ui.warningf(lang.GraphicsProfiles.BatchApplyFailed, acc.DisplayName, graphicsResolution.ProfileName, applyErr)
 			continue
 		}
 
@@ -186,30 +244,16 @@ func launchAll(accounts []account.Account, accountsFile string, cfg *config.Conf
 	ui.blankLine()
 }
 
-func prepareGraphicsProfileForLaunch(accounts []account.Account, accountsFile string, acc *account.Account, store *graphicsprofile.Store) (*graphicsprofile.Store, error) {
-	profileName := strings.TrimSpace(acc.GraphicsProfile)
-	store, err := applyGraphicsProfileForLaunch(*acc, store)
-	if err == nil {
-		return store, nil
+func loadLaunchGraphicsProfiles() ([]string, bool) {
+	profiles, err := listGraphicsProfiles()
+	if err != nil {
+		showInputErrorAndPause(fmt.Sprintf(lang.GraphicsProfiles.StoreOpenFailed, err))
+		return nil, false
 	}
-	if !errors.Is(err, graphicsprofile.ErrProfileNotFound) {
-		return store, err
+	if profiles == nil {
+		profiles = []string{}
 	}
-
-	if clearErr := clearMissingGraphicsProfileAssignment(accounts, accountsFile, acc); clearErr != nil {
-		return store, fmt.Errorf(lang.GraphicsProfiles.MissingProfileClearFailed, clearErr)
-	}
-
-	ui.warningf(lang.GraphicsProfiles.MissingProfileCleared, graphicsProfileAccountLabel(*acc), profileName)
-	return store, nil
-}
-
-func clearMissingGraphicsProfileAssignment(accounts []account.Account, accountsFile string, acc *account.Account) error {
-	accountIndex := graphicsProfileAccountIndex(accounts, acc)
-	if accountIndex < 0 {
-		return errors.New("target account was not found in current account list")
-	}
-	return clearGraphicsProfileAssignments(accounts, accountsFile, []int{accountIndex})
+	return profiles, true
 }
 
 func launchOffline(cfg *config.Config) {
@@ -240,14 +284,14 @@ func launchOffline(cfg *config.Config) {
 	ui.blankLine()
 }
 
-func promptLaunchRegion(title string, accounts []*account.Account, installedMods []string) (launchRegionChoice, bool) {
+func promptLaunchRegion(title string, accounts []*account.Account, installedMods []string, availableGraphicsProfiles []string) (launchRegionChoice, bool) {
 	var result launchRegionChoice
 	_ = runMenu(func() {
 		ui.headf("%s", title)
 		ui.infof("%s", lang.Launch.RegionUseDefaults)
 		ui.infof("%s", lang.Launch.RegionOverride)
 		ui.infof("%s", lang.Launch.RegionTargetLabel)
-		for _, line := range launchTargetAccountLines(accounts, installedMods) {
+		for _, line := range launchTargetAccountLines(accounts, installedMods, availableGraphicsProfiles) {
 			ui.rawln(line)
 		}
 		options := ui.subMenuOptions(func(options *cliMenuOptions) {
@@ -280,12 +324,12 @@ func promptLaunchRegion(title string, accounts []*account.Account, installedMods
 	return result, result.UseDefaults || result.ManualRegion != nil
 }
 
-func promptLaunchMod(title string, accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string) (launchModChoice, bool) {
+func promptLaunchMod(title string, accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string, availableGraphicsProfiles []string) (launchModChoice, bool) {
 	var result launchModChoice
 	_ = runMenu(func() {
 		ui.headf("%s", title)
 		ui.infof("%s", lang.Launch.RegionTargetLabel)
-		for _, line := range launchTargetAccountLines(targets, installedMods) {
+		for _, line := range launchTargetAccountLines(targets, installedMods, availableGraphicsProfiles) {
 			ui.rawln(line)
 		}
 		ui.infof("%s", lang.Launch.ModUseDefaults)
@@ -328,7 +372,55 @@ func promptLaunchMod(title string, accounts []account.Account, accountsFile stri
 	return result, result.UseDefaults || result.HasManual
 }
 
-func launchTargetAccountLines(accounts []*account.Account, installedMods []string) []string {
+func promptLaunchGraphics(title string, accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string, availableGraphicsProfiles []string) (launchGraphicsChoice, bool) {
+	var result launchGraphicsChoice
+	_ = runMenu(func() {
+		ui.headf("%s", title)
+		ui.infof("%s", lang.Launch.RegionTargetLabel)
+		for _, line := range launchTargetAccountLines(targets, installedMods, availableGraphicsProfiles) {
+			ui.rawln(line)
+		}
+		ui.infof("%s", lang.Launch.GraphicsUseDefaults)
+		ui.infof("%s", lang.Launch.GraphicsOverride)
+		if len(availableGraphicsProfiles) == 0 {
+			ui.infof("%s", lang.Launch.GraphicsNoProfiles)
+		}
+		ui.menuBlock(func() {
+			renderLaunchGraphicsOptions(availableGraphicsProfiles)
+		})
+	}, func(input string) error {
+		if strings.TrimSpace(input) == "" {
+			if err := reconcileDefaultGraphicsProfileAssignmentsForLaunch(accounts, accountsFile, targets, availableGraphicsProfiles); err != nil {
+				showInputErrorAndPause(fmt.Sprintf(lang.Common.SaveFailed, err))
+				return nil
+			}
+			missing := missingDefaultGraphicsProfileAccountLabels(targets, availableGraphicsProfiles)
+			if len(missing) > 0 {
+				showInputErrorAndPause(formatLaunchMissingAccountsMessage(lang.Launch.GraphicsMissing, missing))
+				return nil
+			}
+			result.UseDefaults = true
+			return errNavDone
+		}
+
+		selectedProfile, ok := parseLaunchGraphicsInput(input, availableGraphicsProfiles)
+		if !ok {
+			showInvalidInputAndPause()
+			return nil
+		}
+		if strings.TrimSpace(selectedProfile) == "" {
+			ui.infof("%s", lang.Launch.GraphicsNoneChosen)
+		} else {
+			ui.infof(lang.Launch.GraphicsUsing, selectedProfile)
+		}
+		result.ManualProfile = selectedProfile
+		result.HasManual = true
+		return errNavDone
+	})
+	return result, result.UseDefaults || result.HasManual
+}
+
+func launchTargetAccountLines(accounts []*account.Account, installedMods []string, availableGraphicsProfiles []string) []string {
 	lines := make([]string, 0, len(accounts))
 	for _, acc := range accounts {
 		if acc == nil {
@@ -339,7 +431,7 @@ func launchTargetAccountLines(accounts []*account.Account, installedMods []strin
 			launchTargetAccountLabel(acc),
 			defaultRegionStatusLabel(*acc),
 			defaultModStatusLabel(*acc, installedMods),
-			graphicsProfileStatusLabel(*acc),
+			defaultGraphicsProfileStatusLabel(*acc, availableGraphicsProfiles),
 		))
 	}
 	return lines
@@ -383,6 +475,33 @@ func resolveLaunchRegionChoice(choice launchRegionChoice, acc account.Account) *
 		return nil
 	}
 	return d2r.FindRegion(acc.DefaultRegion)
+}
+
+func resolveSavedGraphicsProfile(profileName string, availableGraphicsProfiles []string) string {
+	normalizedProfile := strings.TrimSpace(profileName)
+	if normalizedProfile == "" {
+		return ""
+	}
+	for _, availableProfile := range availableGraphicsProfiles {
+		trimmedAvailableProfile := strings.TrimSpace(availableProfile)
+		if !strings.EqualFold(trimmedAvailableProfile, normalizedProfile) {
+			continue
+		}
+		return trimmedAvailableProfile
+	}
+	return ""
+}
+
+func defaultGraphicsProfileStatusLabel(acc account.Account, availableGraphicsProfiles []string) string {
+	profileName := strings.TrimSpace(acc.GraphicsProfile)
+	if profileName == "" {
+		return lang.GraphicsProfiles.StatusUnassigned
+	}
+	resolvedProfile := resolveSavedGraphicsProfile(profileName, availableGraphicsProfiles)
+	if resolvedProfile == "" {
+		return fmt.Sprintf(lang.GraphicsProfiles.StatusMissing, profileName)
+	}
+	return resolvedProfile
 }
 
 func reconcileDefaultModAssignmentsForLaunch(accounts []account.Account, accountsFile string, targets []*account.Account, installedMods []string) error {
@@ -429,6 +548,60 @@ func reconcileDefaultModAssignmentsForLaunch(accounts []account.Account, account
 	return nil
 }
 
+func reconcileDefaultGraphicsProfileAssignmentsForLaunch(accounts []account.Account, accountsFile string, targets []*account.Account, availableGraphicsProfiles []string) error {
+	previous := make(map[int]string, len(targets))
+	cleared := make([]struct {
+		label       string
+		profileName string
+	}, 0)
+	changed := false
+
+	for _, target := range targets {
+		accountIndex := graphicsProfileAccountIndex(accounts, target)
+		if accountIndex < 0 {
+			return errors.New("target account was not found in current account list")
+		}
+
+		current := accounts[accountIndex].GraphicsProfile
+		normalizedProfile := strings.TrimSpace(current)
+		desiredProfile := ""
+		if normalizedProfile != "" {
+			desiredProfile = resolveSavedGraphicsProfile(normalizedProfile, availableGraphicsProfiles)
+		}
+
+		if current == desiredProfile {
+			continue
+		}
+		if _, exists := previous[accountIndex]; !exists {
+			previous[accountIndex] = current
+		}
+		accounts[accountIndex].GraphicsProfile = desiredProfile
+		changed = true
+		if normalizedProfile != "" && desiredProfile == "" {
+			cleared = append(cleared, struct {
+				label       string
+				profileName string
+			}{
+				label:       graphicsProfileAccountLabel(accounts[accountIndex]),
+				profileName: normalizedProfile,
+			})
+		}
+	}
+	if !changed {
+		return nil
+	}
+	if err := account.SaveAccounts(accountsFile, accounts); err != nil {
+		for idx, previousProfile := range previous {
+			accounts[idx].GraphicsProfile = previousProfile
+		}
+		return err
+	}
+	for _, item := range cleared {
+		ui.warningf(lang.GraphicsProfiles.MissingProfileCleared, item.label, item.profileName)
+	}
+	return nil
+}
+
 func missingDefaultModAccountLabels(accounts []*account.Account, installedMods []string) []string {
 	labels := make([]string, 0, len(accounts))
 	for _, acc := range accounts {
@@ -436,6 +609,20 @@ func missingDefaultModAccountLabels(accounts []*account.Account, installedMods [
 			continue
 		}
 		if mods.ResolveSavedDefaultMod(acc.DefaultMod, installedMods) != "" {
+			continue
+		}
+		labels = append(labels, launchTargetAccountLabel(acc))
+	}
+	return labels
+}
+
+func missingDefaultGraphicsProfileAccountLabels(accounts []*account.Account, availableGraphicsProfiles []string) []string {
+	labels := make([]string, 0, len(accounts))
+	for _, acc := range accounts {
+		if acc == nil {
+			continue
+		}
+		if resolveSavedGraphicsProfile(acc.GraphicsProfile, availableGraphicsProfiles) != "" {
 			continue
 		}
 		labels = append(labels, launchTargetAccountLabel(acc))
@@ -464,6 +651,29 @@ func resolveLaunchModChoice(choice launchModChoice, acc account.Account, install
 	}
 }
 
+func resolveLaunchGraphicsChoice(choice launchGraphicsChoice, acc account.Account, availableGraphicsProfiles []string) (launchGraphicsResolution, bool) {
+	switch {
+	case choice.HasManual:
+		selectedProfile := strings.TrimSpace(choice.ManualProfile)
+		return launchGraphicsResolution{ProfileName: selectedProfile, Apply: selectedProfile != ""}, true
+	case choice.UseDefaults:
+		selectedProfile := resolveSavedGraphicsProfile(acc.GraphicsProfile, availableGraphicsProfiles)
+		if selectedProfile == "" {
+			return launchGraphicsResolution{}, false
+		}
+		return launchGraphicsResolution{ProfileName: selectedProfile, Apply: true}, true
+	default:
+		return launchGraphicsResolution{}, false
+	}
+}
+
+func applyResolvedLaunchGraphics(resolution launchGraphicsResolution, store *graphicsprofile.Store) (*graphicsprofile.Store, error) {
+	if !resolution.Apply {
+		return store, nil
+	}
+	return applyNamedGraphicsProfileForLaunch(resolution.ProfileName, store)
+}
+
 func launchTargetAccountLabel(acc *account.Account) string {
 	if acc == nil {
 		return ""
@@ -482,6 +692,30 @@ func launchTargetAccountLabel(acc *account.Account) string {
 
 func pauseAfterSuccessfulLaunch() {
 	launchSuccessPauseSleep(launchSuccessPauseDuration)
+}
+
+func renderLaunchGraphicsOptions(availableGraphicsProfiles []string) {
+	options := ui.subMenuOptions(func(options *cliMenuOptions) {
+		options.option("0", lang.Launch.GraphicsOptNone, "")
+		for i, profileName := range availableGraphicsProfiles {
+			options.option(strconv.Itoa(i+1), profileName, "")
+		}
+	})
+	options.render()
+}
+
+func parseLaunchGraphicsInput(input string, availableGraphicsProfiles []string) (string, bool) {
+	selected, err := strconv.Atoi(strings.TrimSpace(input))
+	if err != nil {
+		return "", false
+	}
+	if selected == 0 {
+		return "", true
+	}
+	if selected < 1 || selected > len(availableGraphicsProfiles) {
+		return "", false
+	}
+	return availableGraphicsProfiles[selected-1], true
 }
 
 func accountLaunchArgs(acc account.Account, modArgs []string) []string {

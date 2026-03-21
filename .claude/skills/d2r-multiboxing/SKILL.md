@@ -12,7 +12,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 - [cmd/d2r-hyper-launcher/main.go](../../../cmd/d2r-hyper-launcher/main.go) - 薄 CLI bootstrap、主選單 dispatch、背景 monitor 啟動
 - [cmd/d2r-hyper-launcher/cli_launch.go](../../../cmd/d2r-hyper-launcher/cli_launch.go) - 單帳號 / 批次 / 離線啟動 flow
 - [cmd/d2r-hyper-launcher/cli_accounts_file.go](../../../cmd/d2r-hyper-launcher/cli_accounts_file.go) 與 [cmd/d2r-hyper-launcher/cli_d2r_path.go](../../../cmd/d2r-hyper-launcher/cli_d2r_path.go) - `accounts.csv` 建立與 `D2R.exe` 路徑修復流程
-- [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go) 與 [cmd/d2r-hyper-launcher/cli_flags.go](../../../cmd/d2r-hyper-launcher/cli_flags.go) - account / mod / launch flags 選擇流程
+- [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go)、[cmd/d2r-hyper-launcher/cli_flags.go](../../../cmd/d2r-hyper-launcher/cli_flags.go) 與 [cmd/d2r-hyper-launcher/cli_graphics_profiles.go](../../../cmd/d2r-hyper-launcher/cli_graphics_profiles.go) - account / mod / graphics profile / launch flags 選擇流程
 - [internal/multiboxing/launcher/launcher.go](../../../internal/multiboxing/launcher/launcher.go) - D2R 啟動參數組裝
 - [internal/multiboxing/launcher/closer.go](../../../internal/multiboxing/launcher/closer.go) - 關閉目標 handle 的公開 API
 - [internal/multiboxing/launcher/enumerator.go](../../../internal/multiboxing/launcher/enumerator.go) - 列舉系統 handle 並篩選目標 Event
@@ -33,7 +33,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 4. 視窗標題需維持 `D2R-<DisplayName>` 格式，這也是 switcher 用來找視窗的依據。
 5. 背景 monitor 會每 2 秒掃描 D2R 行程，替新 PID 再做一次 handle 關閉。
 6. `0` 與 `a` 啟動流程會先掃描 `D2R.exe` 同層 `mods\` 目錄；只要 mod 資料夾內有 `modinfo.json`，或有同名 `<mod>.mpq`，就會出現在選單中，並轉成 `-mod <name> -txt` 參數。
-7. `accounts.csv` 現在共 8 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile,DefaultRegion,DefaultMod`。`LaunchFlags` 是 D2R 啟動參數 bitmask，但目前內建只保留 `-ns`；每帳號畫質差異改由 `GraphicsProfile` 在啟動前套用具名 `Settings.json` profile。`ToolFlags` 是工具內部設定 bitmask。`DefaultRegion` 是帳號預設登入區域；當單帳號或 `a` 批次啟動進入 region 選單時，直接按 Enter 會使用這裡的設定。`DefaultMod` 是帳號預設載入的 mod；當單帳號或 `a` 批次啟動進入 mod 選單時，直接按 Enter 會使用這裡的設定。`DefaultMod` 若設成 `<vanilla>` 代表預設原版（不使用 mod）。若本次目標裡有任何帳號尚未設定 `DefaultRegion` 或有效的 `DefaultMod`，工具必須擋下 Enter 並列出缺少設定的帳號；若某個保存的 `DefaultMod` 已不在目前安裝的 mods 清單裡，launcher 會先自動清空該帳號的 `DefaultMod` 再擋下 Enter。舊 4 / 5 / 6 / 7 欄 CSV 載入時缺少欄位要自動視為 0 / 空字串並保持向後相容。
+7. `accounts.csv` 現在共 8 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile,DefaultRegion,DefaultMod`。`LaunchFlags` 是 D2R 啟動參數 bitmask，但目前內建只保留 `-ns`；每帳號畫質差異改由 `GraphicsProfile` 在啟動前套用具名 `Settings.json` profile。`ToolFlags` 是工具內部設定 bitmask。`DefaultRegion` 是帳號預設登入區域；當單帳號或 `a` 批次啟動進入 region 選單時，直接按 Enter 會使用這裡的設定。`DefaultMod` 是帳號預設載入的 mod；當單帳號或 `a` 批次啟動進入 mod 選單時，直接按 Enter 會使用這裡的設定。`GraphicsProfile` 也同時是單帳號與 `a` 批次啟動進入畫質選單時的預設值；直接按 Enter 會使用帳號保存的畫質設定檔，手動輸入 `0` 代表這次不套用畫質設定檔。`DefaultMod` 若設成 `<vanilla>` 代表預設原版（不使用 mod）。若本次目標裡有任何帳號尚未設定 `DefaultRegion`、有效的 `DefaultMod` 或有效的 `GraphicsProfile`，工具必須擋下 Enter 並列出缺少設定的帳號；若某個保存的 `DefaultMod` 已不在目前安裝的 mods 清單裡，launcher 會先自動清空該帳號的 `DefaultMod` 再擋下 Enter；若某個保存的 `GraphicsProfile` 已不存在，launcher 也會先自動清空該帳號的 `GraphicsProfile` 再擋下 Enter。舊 4 / 5 / 6 / 7 欄 CSV 載入時缺少欄位要自動視為 0 / 空字串並保持向後相容。
 
 ## 修改時要守住的規則
 
@@ -52,7 +52,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 
 1. 先看 [cmd/d2r-hyper-launcher/cli_launch.go](../../../cmd/d2r-hyper-launcher/cli_launch.go) 的 `launchAccount()`、`launchAll()`、`launchOffline()`
 2. 再看 [internal/multiboxing/launcher/launcher.go](../../../internal/multiboxing/launcher/launcher.go) 是否需要新增或調整參數
-3. 若有 mod 選擇流程，再檢查 [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go) 與 [internal/multiboxing/mods/](../../../internal/multiboxing/mods/) 是否仍正確串接 `-mod <name> -txt`
+3. 若有 mod / 畫質選擇流程，再檢查 [cmd/d2r-hyper-launcher/cli_selectors.go](../../../cmd/d2r-hyper-launcher/cli_selectors.go)、[cmd/d2r-hyper-launcher/cli_graphics_profiles.go](../../../cmd/d2r-hyper-launcher/cli_graphics_profiles.go) 與 [internal/multiboxing/mods/](../../../internal/multiboxing/mods/) 是否仍正確串接 `-mod <name> -txt` 與 `Settings.json` profile 套用
 4. 檢查密碼是否仍經過 `redactArgs()` 遮罩
 
 ### 修正多開失敗

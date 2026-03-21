@@ -210,6 +210,17 @@ type LaunchCatalog struct {
 	ModOverride     string
 	ModMissing      string // fmt("%s")
 
+	// Graphics selector
+	GraphicsSingleTitle string
+	GraphicsBatchTitle  string
+	GraphicsNoProfiles  string
+	GraphicsOptNone     string
+	GraphicsUsing       string // fmt("%s")
+	GraphicsNoneChosen  string
+	GraphicsUseDefaults string
+	GraphicsOverride    string
+	GraphicsMissing     string // fmt("%s")
+
 	// Account status labels
 	StatusRunning string // "已啟動"
 	StatusStopped string // "未啟動"
@@ -366,6 +377,7 @@ type GraphicsProfilesCatalog struct {
 	ProfileListHeader string
 	NoProfiles        string
 	StatusUnassigned  string
+	StatusMissing     string // fmt("%s")
 	Intro1            string
 	Intro2            string
 	Intro3            string

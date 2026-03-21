@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -195,7 +196,7 @@ func TestLaunchTargetAccountLinesShowsAccountsToLaunch(t *testing.T) {
 		{DisplayName: "Bravo", Email: "bravo@example.com", DefaultMod: "sample-mod"},
 	}
 
-	lines := launchTargetAccountLines(accounts, []string{"sample-mod"})
+	lines := launchTargetAccountLines(accounts, []string{"sample-mod"}, []string{"1080p-low"})
 
 	assert.Len(t, lines, 2)
 	assert.Contains(t, lines[0], "Alpha")
@@ -954,7 +955,7 @@ func TestPromptLaunchRegionKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
 		withTestInput(t, "x\n\nb\n", func() {
 			choice, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
 				{DisplayName: "Alpha", Email: "alpha@example.com"},
-			}, nil)
+			}, nil, nil)
 			assert.False(t, ok)
 			assert.Nil(t, choice.ManualRegion)
 			assert.False(t, choice.UseDefaults)
@@ -970,7 +971,7 @@ func TestPromptLaunchRegionShowsSingleTargetAccount(t *testing.T) {
 		withTestInput(t, "b\n", func() {
 			choice, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
 				{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "1080p-low", DefaultRegion: "EU", DefaultMod: mods.DefaultModVanilla},
-			}, []string{"sample-mod"})
+			}, []string{"sample-mod"}, []string{"1080p-low"})
 			assert.False(t, ok)
 			assert.Nil(t, choice.ManualRegion)
 			assert.False(t, choice.UseDefaults)
@@ -991,7 +992,7 @@ func TestPromptLaunchRegionShowsBatchTargetAccounts(t *testing.T) {
 			choice, ok := promptLaunchRegion("啟動所有帳號：選擇區域", []*account.Account{
 				{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "1080p-low", DefaultRegion: "NA", DefaultMod: mods.DefaultModVanilla},
 				{DisplayName: "Bravo", Email: "bravo@example.com", GraphicsProfile: "1440p-high", DefaultRegion: "EU", DefaultMod: "sample-mod"},
-			}, []string{"sample-mod"})
+			}, []string{"sample-mod"}, []string{"1080p-low", "1440p-high"})
 			assert.False(t, ok)
 			assert.Nil(t, choice.ManualRegion)
 			assert.False(t, choice.UseDefaults)
@@ -1015,7 +1016,7 @@ func TestPromptLaunchRegionEnterUsesStoredDefaultMode(t *testing.T) {
 	withTestInput(t, "\n", func() {
 		choice, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
 			{DisplayName: "Alpha", Email: "alpha@example.com", DefaultRegion: "EU"},
-		}, nil)
+		}, nil, nil)
 		assert.True(t, ok)
 		assert.True(t, choice.UseDefaults)
 		assert.Nil(t, choice.ManualRegion)
@@ -1035,7 +1036,7 @@ func TestPromptLaunchRegionEnterRequiresDefaultsForAllTargets(t *testing.T) {
 				{DisplayName: "Alpha", Email: "alpha@example.com", DefaultRegion: "NA"},
 				{DisplayName: "Bravo", Email: "bravo@example.com"},
 				{DisplayName: "Charlie", Email: "charlie@example.com"},
-			}, nil)
+			}, nil, nil)
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.Nil(t, choice.ManualRegion)
@@ -1053,7 +1054,7 @@ func TestPromptLaunchRegionAllowsManualOverrideWithoutStoredDefaults(t *testing.
 	withTestInput(t, "2\n", func() {
 		choice, ok := promptLaunchRegion("啟動指定帳號：選擇區域", []*account.Account{
 			{DisplayName: "Alpha", Email: "alpha@example.com"},
-		}, nil)
+		}, nil, nil)
 		assert.True(t, ok)
 		if assert.NotNil(t, choice.ManualRegion) {
 			assert.Equal(t, "EU", choice.ManualRegion.Name)
@@ -1072,7 +1073,7 @@ func TestPromptLaunchModKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
 	accounts := []account.Account{{DisplayName: "Alpha", Email: "alpha@example.com"}}
 	output := captureStdout(t, func() {
 		withTestInput(t, "x\n\nb\n", func() {
-			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"})
+			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"}, nil)
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.False(t, choice.HasManual)
@@ -1091,7 +1092,7 @@ func TestPromptLaunchModShowsBatchTargetAccounts(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		withTestInput(t, "b\n", func() {
-			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"})
+			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"}, nil)
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.False(t, choice.HasManual)
@@ -1116,7 +1117,7 @@ func TestPromptLaunchModShowsPreparedDefaultsForTargets(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		withTestInput(t, "b\n", func() {
-			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"})
+			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"}, []string{"1080p-low", "1440p-high"})
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.False(t, choice.HasManual)
@@ -1139,7 +1140,7 @@ func TestPromptLaunchModEnterUsesStoredDefaultMode(t *testing.T) {
 	assert.NoError(t, account.SaveAccounts(accountsFile, accounts))
 
 	withTestInput(t, "\n", func() {
-		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, nil)
+		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, nil, nil)
 		assert.True(t, ok)
 		assert.True(t, choice.UseDefaults)
 		assert.False(t, choice.HasManual)
@@ -1163,7 +1164,7 @@ func TestPromptLaunchModEnterRequiresDefaultsForAllTargets(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		withTestInput(t, "\n\nb\n", func() {
-			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0], &accounts[1], &accounts[2]}, []string{"sample-mod"})
+			choice, ok := promptLaunchMod("啟動所有帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0], &accounts[1], &accounts[2]}, []string{"sample-mod"}, nil)
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.False(t, choice.HasManual)
@@ -1192,7 +1193,7 @@ func TestPromptLaunchModEnterClearsMissingInstalledDefault(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		withTestInput(t, "\n\nb\n", func() {
-			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, []string{"sample-mod"})
+			choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, accountsFile, []*account.Account{&accounts[0]}, []string{"sample-mod"}, nil)
 			assert.False(t, ok)
 			assert.False(t, choice.UseDefaults)
 			assert.False(t, choice.HasManual)
@@ -1211,10 +1212,135 @@ func TestPromptLaunchModAllowsManualOverrideWithoutStoredDefaults(t *testing.T) 
 		{DisplayName: "Alpha", Email: "alpha@example.com"},
 	}
 	withTestInput(t, "0\n", func() {
-		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"})
+		choice, ok := promptLaunchMod("啟動指定帳號：選擇 mod", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, []string{"sample-mod"}, nil)
 		assert.True(t, ok)
 		assert.True(t, choice.HasManual)
 		assert.Equal(t, mods.DefaultModVanilla, choice.ManualMod)
+		assert.False(t, choice.UseDefaults)
+	})
+}
+
+func TestPromptLaunchGraphicsKeepsCurrentMenuAfterInvalidInput(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{{DisplayName: "Alpha", Email: "alpha@example.com"}}
+	output := captureStdout(t, func() {
+		withTestInput(t, "x\n\nb\n", func() {
+			choice, ok := promptLaunchGraphics("啟動指定帳號：選擇畫質", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, nil, []string{"boss-low"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+	assert.Equal(t, 2, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchGraphicsShowsPreparedDefaultsForTargets(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "1080p-low", DefaultRegion: "NA", DefaultMod: mods.DefaultModVanilla},
+		{DisplayName: "Bravo", Email: "bravo@example.com", GraphicsProfile: "missing-profile", DefaultRegion: "EU", DefaultMod: "sample-mod"},
+	}
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "b\n", func() {
+			choice, ok := promptLaunchGraphics("啟動所有帳號：選擇畫質", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1]}, []string{"sample-mod"}, []string{"1080p-low"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Contains(t, output, "NA")
+	assert.Contains(t, output, "EU")
+	assert.Contains(t, output, lang.DefaultMods.StatusVanilla)
+	assert.Contains(t, output, "sample-mod")
+	assert.Contains(t, output, "1080p-low")
+	assert.Contains(t, output, fmt.Sprintf(lang.GraphicsProfiles.StatusMissing, "missing-profile"))
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchGraphicsEnterUsesStoredDefaults(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "boss-low"},
+	}
+
+	withTestInput(t, "\n", func() {
+		choice, ok := promptLaunchGraphics("啟動指定帳號：選擇畫質", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, nil, []string{"boss-low"})
+		assert.True(t, ok)
+		assert.True(t, choice.UseDefaults)
+		assert.False(t, choice.HasManual)
+	})
+}
+
+func TestPromptLaunchGraphicsEnterRequiresDefaultsForAllTargets(t *testing.T) {
+	originalCanSingleKeyContinue := ui.canSingleKeyContinue
+	t.Cleanup(func() {
+		ui.canSingleKeyContinue = originalCanSingleKeyContinue
+	})
+	ui.canSingleKeyContinue = func() bool { return false }
+
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "boss-low"},
+		{DisplayName: "Bravo", Email: "bravo@example.com"},
+		{DisplayName: "Charlie", Email: "charlie@example.com"},
+	}
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "\n\nb\n", func() {
+			choice, ok := promptLaunchGraphics("啟動所有帳號：選擇畫質", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0], &accounts[1], &accounts[2]}, nil, []string{"boss-low"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+	assert.Contains(t, output, "- Bravo")
+	assert.Contains(t, output, "- Charlie")
+	assert.NotContains(t, output, "Bravo, Charlie")
+	assert.Equal(t, 2, countMenuBlocksWithKeys(output, []string{"0", "1", "b", "h", "q"}))
+}
+
+func TestPromptLaunchGraphicsEnterClearsMissingSavedDefault(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com", GraphicsProfile: "ghost-profile"},
+	}
+	accountsFile := filepath.Join(t.TempDir(), "accounts.csv")
+	assert.NoError(t, account.SaveAccounts(accountsFile, accounts))
+
+	output := captureStdout(t, func() {
+		withTestInput(t, "\n\nb\n", func() {
+			choice, ok := promptLaunchGraphics("啟動指定帳號：選擇畫質", accounts, accountsFile, []*account.Account{&accounts[0]}, nil, []string{"boss-low"})
+			assert.False(t, ok)
+			assert.False(t, choice.UseDefaults)
+			assert.False(t, choice.HasManual)
+		})
+	})
+
+	assert.Equal(t, "", accounts[0].GraphicsProfile)
+	reloaded, err := account.LoadAccounts(accountsFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "", reloaded[0].GraphicsProfile)
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageWarning)+" "))
+	assert.Equal(t, 1, strings.Count(output, ui.prefix(uiMessageError)+" "))
+}
+
+func TestPromptLaunchGraphicsAllowsManualOverrideWithoutStoredDefaults(t *testing.T) {
+	accounts := []account.Account{
+		{DisplayName: "Alpha", Email: "alpha@example.com"},
+	}
+
+	withTestInput(t, "0\n", func() {
+		choice, ok := promptLaunchGraphics("啟動指定帳號：選擇畫質", accounts, filepath.Join(t.TempDir(), "accounts.csv"), []*account.Account{&accounts[0]}, nil, []string{"boss-low"})
+		assert.True(t, ok)
+		assert.True(t, choice.HasManual)
+		assert.Equal(t, "", choice.ManualProfile)
 		assert.False(t, choice.UseDefaults)
 	})
 }

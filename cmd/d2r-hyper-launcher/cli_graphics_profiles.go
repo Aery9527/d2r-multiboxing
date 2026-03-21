@@ -633,7 +633,12 @@ func assignedGraphicsProfileAccountIndexes(accounts []account.Account) []int {
 }
 
 func applyGraphicsProfileForLaunch(acc account.Account, store *graphicsprofile.Store) (*graphicsprofile.Store, error) {
-	if strings.TrimSpace(acc.GraphicsProfile) == "" {
+	return applyNamedGraphicsProfileForLaunch(acc.GraphicsProfile, store)
+}
+
+func applyNamedGraphicsProfileForLaunch(profileName string, store *graphicsprofile.Store) (*graphicsprofile.Store, error) {
+	normalizedProfile := strings.TrimSpace(profileName)
+	if normalizedProfile == "" {
 		return store, nil
 	}
 	if store == nil {
@@ -644,8 +649,8 @@ func applyGraphicsProfileForLaunch(acc account.Account, store *graphicsprofile.S
 		}
 	}
 
-	ui.infof(lang.GraphicsProfiles.ApplyingDuringLaunch, acc.GraphicsProfile)
-	if err := store.Apply(acc.GraphicsProfile); err != nil {
+	ui.infof(lang.GraphicsProfiles.ApplyingDuringLaunch, normalizedProfile)
+	if err := store.Apply(normalizedProfile); err != nil {
 		return store, err
 	}
 	return store, nil

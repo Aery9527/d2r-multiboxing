@@ -14,7 +14,7 @@
 - 多開領域在 `internal/multiboxing/`（帳號、啟動器、mods、背景 handle monitor）。
 - 視窗切換在 `internal/switcher/`（熱鍵/滑鼠 hook/搖桿偵測與輪詢）。
 - `main.go` 啟動流程：載入設定 -> 確保/載入 `accounts.csv` -> 自動加密明文密碼 ->（可選）啟動 switcher -> 啟動 handle monitor -> 進入主選單迴圈。
-- `multiboxing` 啟動流程（`cli_launch.go`）：驗證 D2R 路徑 -> 選區域 -> 選 mod -> 啟動程序 -> 關閉單實例 Event handle -> 將視窗改名為 `D2R-<DisplayName>`。若帳號已設定 `DefaultRegion` / `DefaultMod`，兩個選單都可直接按 Enter 吃帳號預設；`DefaultMod` 若設成 `<vanilla>` 代表預設走原版（不使用 mod）。
+- `multiboxing` 啟動流程（`cli_launch.go`）：驗證 D2R 路徑 -> 選區域 -> 選 mod -> 選畫質 -> 啟動程序 -> 關閉單實例 Event handle -> 將視窗改名為 `D2R-<DisplayName>`。若帳號已設定 `DefaultRegion` / `DefaultMod` / `GraphicsProfile`，三個選單都可直接按 Enter 吃帳號預設；`DefaultMod` 若設成 `<vanilla>` 代表預設走原版（不使用 mod），畫質選單手動輸入 `0` 代表這次不套用畫質設定檔。
 
 ## 專案特有開發流程
 - 本機執行優先使用：`./scripts/go-run.ps1`。
@@ -34,7 +34,7 @@
 - 中文字寬對齊沿用 display-width-aware 邏輯，不要退回單純 rune 計數。
 - 不要引導玩家手動改 `config.json`；優先提供 CLI 內可操作流程（例如 `d2r_path_picker.go`）。
 - 設定載入需保留向後相容：舊版 `launch_delay: 5` 會在 load 時接受並正規化為 `10`（`internal/common/config/config.go`）。
-- `accounts.csv` 行為是刻意設計：UTF-8 BOM、載入時 `LaunchFlags` / `ToolFlags` 清洗、`DefaultRegion` 要正規化成 `NA` / `EU` / `Asia`、`DefaultMod` 會把「預設原版」正規化成 `<vanilla>` sentinel、目前內建 `LaunchFlags` 只保留 `-ns`（每帳號畫質改用 `GraphicsProfile`）、密碼以 `ENC:` + DPAPI 加密（`internal/multiboxing/account/account.go`）。若玩家按 Enter 想使用預設 mod，而某帳號保存的 `DefaultMod` 已不在目前安裝的 mods 清單裡，launcher 會先自動清空該帳號的 `DefaultMod` 再擋下 Enter。
+- `accounts.csv` 行為是刻意設計：UTF-8 BOM、載入時 `LaunchFlags` / `ToolFlags` 清洗、`DefaultRegion` 要正規化成 `NA` / `EU` / `Asia`、`DefaultMod` 會把「預設原版」正規化成 `<vanilla>` sentinel、目前內建 `LaunchFlags` 只保留 `-ns`（每帳號畫質改用 `GraphicsProfile`）、密碼以 `ENC:` + DPAPI 加密（`internal/multiboxing/account/account.go`）。若玩家按 Enter 想使用預設 mod，而某帳號保存的 `DefaultMod` 已不在目前安裝的 mods 清單裡，launcher 會先自動清空該帳號的 `DefaultMod` 再擋下 Enter；若玩家按 Enter 想使用預設畫質，而某帳號保存的 `GraphicsProfile` 已不存在，launcher 也會先自動清空該帳號的 `GraphicsProfile` 再擋下 Enter。
 
 ## 整合點 / 風險點
 - 命令列紀錄僅透過 `launcher.SetCommandLogger` 接一次；線上啟動日誌必須遮罩 `-password`（`internal/multiboxing/launcher/launcher.go`）。
