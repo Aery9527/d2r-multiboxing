@@ -3,8 +3,6 @@
 > 這份文件專門說明玩家實際怎麼用多開啟動器。  
 > 如果你只想快速上手，先看 [README.md](../README.md)；如果你想先看整份多開文件怎麼分工，讀 [multiboxing-index.md](multiboxing-index.md)；如果你想看底層原理，再看 [multiboxing-technical-guide.md](multiboxing-technical-guide.md)。
 
-> 補充：CLI 各選單若遇到玩家輸入格式、範圍或選項錯誤，會先顯示錯誤訊息，再提示玩家按鍵確認後回到原流程；在可直接讀取單鍵的終端會顯示「按任意鍵繼續」，其他終端則會自動改成「按 Enter 繼續」。
-
 ## 文件導覽
 
 - 新手快速開始：[README.md](../README.md)

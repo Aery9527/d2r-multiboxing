@@ -9,8 +9,6 @@ A Windows CLI toolkit for D2R (Diablo II: Resurrected) players, currently provid
 
 **Latest release: [v1.2.0](docs/releases/v1.2.0.md)**
 
-> If you enter an invalid format, out-of-range value, or unsupported option in any CLI menu, the tool displays an error message and waits for you to press a key before returning to the current flow. On terminals that support raw single-key input it shows "press any key to continue"; otherwise it falls back to "press Enter to continue".
-
 ## Multiboxing Documentation Index
 
 | What you want to do | Where to look |
