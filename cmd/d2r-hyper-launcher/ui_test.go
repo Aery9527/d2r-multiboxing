@@ -10,32 +10,51 @@ import (
 func TestCLIUIPrefixesAreConfiguredByMessageKind(t *testing.T) {
 	testUI := newCLIUI()
 
-	assert.Equal(t, "•", testUI.prefix(uiMessageInfo))
-	assert.Equal(t, ">", testUI.prefix(uiMessageCommand))
-	assert.Equal(t, "?", testUI.prefix(uiMessagePrompt))
-	assert.Equal(t, "✔", testUI.prefix(uiMessageSuccess))
-	assert.Equal(t, "✘", testUI.prefix(uiMessageError))
-	assert.Equal(t, "⚠", testUI.prefix(uiMessageWarning))
+	kinds := []uiMessageKind{
+		uiMessageInfo,
+		uiMessageCommand,
+		uiMessagePrompt,
+		uiMessageSuccess,
+		uiMessageError,
+		uiMessageWarning,
+	}
+
+	seen := make(map[string]bool, len(kinds))
+	for _, kind := range kinds {
+		prefix := testUI.prefix(kind)
+		assert.NotEmpty(t, prefix)
+		assert.False(t, seen[prefix])
+		seen[prefix] = true
+	}
 }
 
 func TestCLIUIOptionRendersBracketedChoice(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.option("a", "啟動所有帳號", "")
+		testUI.option("a", "launch-all", "")
 	})
 
-	assert.Equal(t, "[a] 啟動所有帳號\n", output)
+	assert.Equal(t, []string{"[a] launch-all"}, nonEmptyOutputLines(output))
 }
 
 func TestCLIUIHeadRendersTitleBetweenDividers(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.headf("主選單")
+		testUI.headf("Main Menu")
 	})
 
-	assert.Equal(t, "\n========================================================\n"+strings.Repeat(" ", 25)+"主選單"+strings.Repeat(" ", 25)+"\n========================================================\n\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 3)
+	assert.Equal(t, testUI.style.headerDivider, lines[0])
+	assert.Equal(t, testUI.style.headerDivider, lines[2])
+	assert.Equal(t, "Main Menu", strings.TrimSpace(lines[1]))
+	assert.Equal(t, displayWidth(testUI.style.headerDivider), displayWidth(lines[1]))
+
+	leftPadding := displayWidth(lines[1]) - displayWidth(strings.TrimLeft(lines[1], " "))
+	rightPadding := displayWidth(lines[1]) - displayWidth(strings.TrimRight(lines[1], " "))
+	assert.LessOrEqual(t, absInt(leftPadding-rightPadding), 1)
 }
 
 func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {
@@ -45,7 +64,7 @@ func TestCLIUIMenuDividerUsesMenuStyle(t *testing.T) {
 		testUI.menuDividerLine()
 	})
 
-	assert.Equal(t, "--------------------------------------------------------\n", output)
+	assert.Equal(t, []string{testUI.style.menuDivider}, nonEmptyOutputLines(output))
 }
 
 func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
@@ -53,25 +72,40 @@ func TestCLIUIMenuBlockWrapsCallbackContentInMenuDividers(t *testing.T) {
 
 	output := captureStdout(t, func() {
 		testUI.menuBlock(func() {
-			testUI.option("1", "測試選項", "")
+			testUI.option("1", "option", "")
 		})
 	})
 
-	assert.Equal(t, "--------------------------------------------------------\n[1] 測試選項\n--------------------------------------------------------\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 3)
+	assert.Equal(t, testUI.style.menuDivider, lines[0])
+	assert.Equal(t, testUI.style.menuDivider, lines[2])
+
+	option, ok := parseMenuOptionLine(lines[1])
+	assert.True(t, ok)
+	assert.Equal(t, "1", option.key)
+	assert.Contains(t, option.line, "option")
 }
 
 func TestCLIMenuOptionsRenderAlignsPrefixesToLongestKey(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.newMenuOptions()
-	options.option("數字", "啟動指定帳號", "")
-	options.option("a", "啟動所有帳號", "")
-	options.option("0", "離線遊玩", "")
+	options.option("digits", "Launch target", "")
+	options.option("a", "Launch all", "")
+	options.option("0", "Offline", "")
 
 	output := captureStdout(t, func() {
 		options.render()
 	})
 
-	assert.Equal(t, "[數字] 啟動指定帳號\n[a]    啟動所有帳號\n[0]    離線遊玩\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 3)
+
+	targetPrefixWidth := displayWidth(lines[0][:strings.Index(lines[0], "Launch target")])
+	allPrefixWidth := displayWidth(lines[1][:strings.Index(lines[1], "Launch all")])
+	offlinePrefixWidth := displayWidth(lines[2][:strings.Index(lines[2], "Offline")])
+	assert.Equal(t, targetPrefixWidth, allPrefixWidth)
+	assert.Equal(t, targetPrefixWidth, offlinePrefixWidth)
 }
 
 func TestDisplayWidthTreatsCJKAsDoubleWidth(t *testing.T) {
@@ -82,50 +116,89 @@ func TestDisplayWidthTreatsCJKAsDoubleWidth(t *testing.T) {
 func TestCLIUISubMenuOptionsAppendsCommonNavAfterBlankLine(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.subMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "測試選項", "")
+		options.option("1", "option", "")
 	})
 
 	output := captureStdout(t, func() {
 		options.render()
 	})
 
-	assert.Equal(t, "[1] 測試選項\n\n[b] 回上一層\n[h] 回主選單\n[q] 離開程式\n", output)
+	lines := normalizedOutputLines(output)
+	keys := make([]string, 0, 4)
+	for _, line := range lines {
+		option, ok := parseMenuOptionLine(line)
+		if !ok {
+			continue
+		}
+		keys = append(keys, option.key)
+	}
+
+	assert.Equal(t, []string{"1", "b", "h", "q"}, keys)
+	navIndex := firstLineIndex(lines, func(line string) bool {
+		option, ok := parseMenuOptionLine(line)
+		return ok && option.key == "b"
+	})
+	assert.Greater(t, navIndex, 0)
+	assert.Equal(t, "", lines[navIndex-1])
 }
 
 func TestCLIUIMainMenuOptionsAppendsQuitAfterBlankLine(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.mainMenuOptions(func(options *cliMenuOptions) {
-		options.option("1", "測試選項", "")
+		options.option("1", "option", "")
 	})
 
 	output := captureStdout(t, func() {
 		options.render()
 	})
 
-	assert.Equal(t, "[1] 測試選項\n\n[q] 退出\n", output)
+	lines := normalizedOutputLines(output)
+	keys := make([]string, 0, 2)
+	for _, line := range lines {
+		option, ok := parseMenuOptionLine(line)
+		if !ok {
+			continue
+		}
+		keys = append(keys, option.key)
+	}
+
+	assert.Equal(t, []string{"1", "q"}, keys)
+	quitIndex := firstLineIndex(lines, func(line string) bool {
+		option, ok := parseMenuOptionLine(line)
+		return ok && option.key == "q"
+	})
+	assert.Greater(t, quitIndex, 0)
+	assert.Equal(t, "", lines[quitIndex-1])
 }
 
 func TestCLIMenuOptionsRenderAlignsCommentColumn(t *testing.T) {
 	testUI := newCLIUI()
 	options := testUI.newMenuOptions()
-	options.option("0", "離線遊玩", "可選 mod，不需帳密")
-	options.option("d", "設定啟動間隔", "目前：30-60 秒（隨機）")
+	options.option("0", "Offline", "No login")
+	options.option("d", "Delay", "30-60 sec")
 
 	output := captureStdout(t, func() {
 		options.render()
 	})
 
-	assert.Equal(t, "[0] 離線遊玩      可選 mod，不需帳密\n[d] 設定啟動間隔  目前：30-60 秒（隨機）\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 2)
+
+	firstCommentColumn := displayWidth(lines[0][:strings.Index(lines[0], "No login")])
+	secondCommentColumn := displayWidth(lines[1][:strings.Index(lines[1], "30-60 sec")])
+	assert.Equal(t, firstCommentColumn, secondCommentColumn)
 }
 
 func TestCLIUIInputPromptUsesPromptRenderer(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.inputf("請選擇：")
+		testUI.inputf("Select:")
 	})
 
-	assert.Equal(t, "? 請選擇：", output)
+	assert.True(t, strings.HasPrefix(output, testUI.prefix(uiMessagePrompt)+" "))
+	assert.True(t, strings.HasSuffix(output, "Select:"))
+	assert.NotContains(t, output, "\n")
 }
 
 func TestCLIUICommandUsesCommandRenderer(t *testing.T) {
@@ -135,17 +208,25 @@ func TestCLIUICommandUsesCommandRenderer(t *testing.T) {
 		testUI.commandf("%s %s", `C:\Games\D2R\D2R.exe`, "-uid osi")
 	})
 
-	assert.Equal(t, "> C:\\Games\\D2R\\D2R.exe -uid osi\n", output)
+	assert.True(t, strings.HasPrefix(output, testUI.prefix(uiMessageCommand)+" "))
+	assert.True(t, strings.Contains(output, `C:\Games\D2R\D2R.exe`))
+	assert.True(t, strings.HasSuffix(output, "-uid osi\n"))
 }
 
 func TestCLIUIWarningLinesRendersGroupedMessageWithSinglePrefix(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.warningLines("第一行", "第二行", "", "第三行")
+		testUI.warningLines("line 1", "line 2", "", "line 3")
 	})
 
-	assert.Equal(t, "⚠ 第一行\n  第二行\n  第三行\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 3)
+	assert.True(t, strings.HasPrefix(lines[0], testUI.prefix(uiMessageWarning)+" "))
+
+	continuationIndent := strings.Repeat(" ", displayWidth(testUI.prefix(uiMessageWarning)+" "))
+	assert.True(t, strings.HasPrefix(lines[1], continuationIndent))
+	assert.True(t, strings.HasPrefix(lines[2], continuationIndent))
 }
 
 func TestCLIUIReadInputUsesDefaultPrompt(t *testing.T) {
@@ -164,25 +245,36 @@ func TestCLIUIReadInputUsesDefaultPrompt(t *testing.T) {
 
 	assert.True(t, ok)
 	assert.Equal(t, "a", input)
-	assert.Equal(t, "? 請選擇：", output)
+	assert.True(t, strings.HasPrefix(output, testUI.prefix(uiMessagePrompt)+" "))
+	assert.NotContains(t, output, "\n")
 }
 
 func TestCLIUILineIndentsMultilineMessagesAfterIcon(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.warningf("第一行\n第二行")
+		testUI.warningf("line 1\nline 2")
 	})
 
-	assert.Equal(t, "⚠ 第一行\n  第二行\n", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 2)
+	assert.True(t, strings.HasPrefix(lines[0], testUI.prefix(uiMessageWarning)+" "))
+
+	continuationIndent := strings.Repeat(" ", displayWidth(testUI.prefix(uiMessageWarning)+" "))
+	assert.True(t, strings.HasPrefix(lines[1], continuationIndent))
 }
 
 func TestCLIUIInputIndentsMultilinePromptAfterIcon(t *testing.T) {
 	testUI := newCLIUI()
 
 	output := captureStdout(t, func() {
-		testUI.inputf("第一行\n第二行：")
+		testUI.inputf("line 1\nline 2:")
 	})
 
-	assert.Equal(t, "? 第一行\n  第二行：", output)
+	lines := nonEmptyOutputLines(output)
+	assert.Len(t, lines, 2)
+	assert.True(t, strings.HasPrefix(lines[0], testUI.prefix(uiMessagePrompt)+" "))
+
+	continuationIndent := strings.Repeat(" ", displayWidth(testUI.prefix(uiMessagePrompt)+" "))
+	assert.True(t, strings.HasPrefix(lines[1], continuationIndent))
 }

@@ -12,8 +12,14 @@ func TestLaunchArgs(t *testing.T) {
 }
 
 func TestLaunchFlagsSummary(t *testing.T) {
-	assert.Equal(t, "無", LaunchFlagsSummary(0))
-	assert.Equal(t, "關閉聲音", LaunchFlagsSummary(LaunchFlagNoSound|(1<<2)))
+	emptySummary := LaunchFlagsSummary(0)
+	supportedSummary := LaunchFlagsSummary(LaunchFlagNoSound)
+	legacySummary := LaunchFlagsSummary(LaunchFlagNoSound | (1 << 2))
+
+	assert.NotEmpty(t, emptySummary)
+	assert.NotEmpty(t, supportedSummary)
+	assert.NotEqual(t, emptySummary, supportedSummary)
+	assert.Equal(t, supportedSummary, legacySummary)
 }
 
 func TestSupportedLaunchFlagsMask(t *testing.T) {

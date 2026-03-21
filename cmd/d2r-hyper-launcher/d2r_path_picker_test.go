@@ -34,7 +34,7 @@ func TestValidateSelectedD2RPathRejectsNonD2RExecutable(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = config.ValidateD2RPath(exePath)
-	assert.EqualError(t, err, "selected file must be D2R.exe")
+	assert.Error(t, err)
 }
 
 func TestDialogInitialDirUsesExistingParent(t *testing.T) {

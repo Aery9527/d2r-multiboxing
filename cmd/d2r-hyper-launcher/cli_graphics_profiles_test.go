@@ -25,7 +25,9 @@ func newTestGraphicsProfileStore(t *testing.T) *graphicsprofile.Store {
 }
 
 func TestGraphicsProfileStatusLabel(t *testing.T) {
-	assert.Equal(t, lang.GraphicsProfiles.StatusUnassigned, graphicsProfileStatusLabel(account.Account{}))
+	unassigned := graphicsProfileStatusLabel(account.Account{})
+	assert.NotEmpty(t, unassigned)
+	assert.NotEqual(t, "boss-low", unassigned)
 	assert.Equal(t, "boss-low", graphicsProfileStatusLabel(account.Account{GraphicsProfile: "boss-low"}))
 }
 
@@ -123,7 +125,7 @@ func TestPrepareGraphicsProfileForLaunchClearsMissingAssignmentAndLeavesSettings
 		return store, nil
 	}
 
-	output := captureStdout(t, func() {
+	_ = captureStdout(t, func() {
 		returnedStore, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, &accounts[0], nil)
 		assert.NoError(t, err)
 		assert.Same(t, store, returnedStore)
@@ -137,7 +139,6 @@ func TestPrepareGraphicsProfileForLaunchClearsMissingAssignmentAndLeavesSettings
 	reloaded, err := account.LoadAccounts(accountsFile)
 	assert.NoError(t, err)
 	assert.Equal(t, "", reloaded[0].GraphicsProfile)
-	assert.Contains(t, output, `帳號 Alpha (alpha@example.com) 指派的畫質設定檔「missing」不存在；已自動清空該帳號的畫質設定，這次啟動不會改動 Settings.json。`)
 }
 
 func TestPrepareGraphicsProfileForLaunchPreservesNonMissingProfileErrors(t *testing.T) {
@@ -168,7 +169,6 @@ func TestPrepareGraphicsProfileForLaunchPreservesNonMissingProfileErrors(t *test
 	returnedStore, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, &accounts[0], nil)
 	assert.Error(t, err)
 	assert.Same(t, store, returnedStore)
-	assert.Contains(t, err.Error(), "invalid")
 	assert.Equal(t, "broken", accounts[0].GraphicsProfile)
 
 	reloaded, loadErr := account.LoadAccounts(accountsFile)
@@ -186,8 +186,10 @@ func TestPrintMenuShowsGraphicsProfilesOption(t *testing.T) {
 		printMenu(nil, cfg)
 	})
 
-	assert.Contains(t, output, "[g]    帳號畫質設定檔")
-	assert.Contains(t, output, "儲存目前 Settings.json 並指派給帳號")
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"數字", "0", "a", "d", "f", "g", "p", "s", "r", "l", "q"}))
+	graphicsOptionLine, ok := findMenuOptionLine(output, "g")
+	assert.True(t, ok)
+	assert.NotEmpty(t, graphicsOptionLine)
 }
 
 func TestSetupAccountGraphicsProfilesShowsUsageGuidanceAboveAccountList(t *testing.T) {
@@ -214,17 +216,20 @@ func TestSetupAccountGraphicsProfilesShowsUsageGuidanceAboveAccountList(t *testi
 		})
 	})
 
-	assert.Contains(t, output, "• "+lang.GraphicsProfiles.Intro1)
-	assert.Contains(t, output, "• "+lang.GraphicsProfiles.Intro2)
-	assert.Contains(t, output, "• "+lang.GraphicsProfiles.Intro3)
-	assert.Contains(t, output, "• "+lang.GraphicsProfiles.Intro4)
-	assert.Contains(t, output, lang.GraphicsProfiles.OptDeleteSaved)
-
-	introIndex := strings.Index(output, lang.GraphicsProfiles.Intro1)
-	accountListIndex := strings.Index(output, lang.MainMenu.AccountListHeader)
-	assert.NotEqual(t, -1, introIndex)
+	lines := nonEmptyOutputLines(output)
+	accountListIndex := firstLineIndex(lines, func(line string) bool {
+		return strings.HasPrefix(line, "[1] <") && strings.Contains(line, "alpha@example.com")
+	})
 	assert.NotEqual(t, -1, accountListIndex)
-	assert.Less(t, introIndex, accountListIndex)
+
+	infoLinesBeforeAccount := 0
+	for _, line := range lines[:accountListIndex] {
+		if strings.HasPrefix(line, ui.prefix(uiMessageInfo)+" ") {
+			infoLinesBeforeAccount++
+		}
+	}
+	assert.Equal(t, 5, infoLinesBeforeAccount)
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"1", "2", "3", "4", "b", "h", "q"}))
 }
 
 func TestSaveCurrentGraphicsProfileShowsExistingProfilesAsOverwriteOptions(t *testing.T) {
@@ -250,10 +255,10 @@ func TestSaveCurrentGraphicsProfileShowsExistingProfilesAsOverwriteOptions(t *te
 		})
 	})
 
-	assert.Contains(t, output, "已保存的畫質設定檔：")
-	assert.Contains(t, output, "[1] boss-low")
-	assert.Contains(t, output, "覆蓋既有設定")
-	assert.Contains(t, output, "請輸入設定檔編號以覆蓋既有設定，或輸入新名稱另存：")
+	assert.Equal(t, 1, countMenuBlocksWithKeys(output, []string{"1", "b", "h", "q"}))
+	overwriteOptionLine, ok := findMenuOptionLine(output, "1")
+	assert.True(t, ok)
+	assert.Contains(t, overwriteOptionLine, "boss-low")
 }
 
 func TestSaveCurrentGraphicsProfileOverwritesByNumber(t *testing.T) {
@@ -274,7 +279,7 @@ func TestSaveCurrentGraphicsProfileOverwritesByNumber(t *testing.T) {
 		return store, nil
 	}
 
-	output := captureStdout(t, func() {
+	_ = captureStdout(t, func() {
 		withTestInput(t, "1\n", func() {
 			err := saveCurrentGraphicsProfile()
 			assert.NoError(t, err)
@@ -284,7 +289,6 @@ func TestSaveCurrentGraphicsProfileOverwritesByNumber(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(store.ProfilesDir(), "boss-low.json"))
 	assert.NoError(t, err)
 	assert.JSONEq(t, `{"quality":"high"}`, string(data))
-	assert.Contains(t, output, "已儲存畫質設定檔：boss-low")
 }
 
 func TestSaveCurrentGraphicsProfileCreatesNewProfileFromTypedName(t *testing.T) {
@@ -305,7 +309,7 @@ func TestSaveCurrentGraphicsProfileCreatesNewProfileFromTypedName(t *testing.T) 
 		return store, nil
 	}
 
-	output := captureStdout(t, func() {
+	_ = captureStdout(t, func() {
 		withTestInput(t, "fresh-high\n", func() {
 			err := saveCurrentGraphicsProfile()
 			assert.NoError(t, err)
@@ -315,7 +319,6 @@ func TestSaveCurrentGraphicsProfileCreatesNewProfileFromTypedName(t *testing.T) 
 	data, err := os.ReadFile(filepath.Join(store.ProfilesDir(), "fresh-high.json"))
 	assert.NoError(t, err)
 	assert.JSONEq(t, `{"quality":"high"}`, string(data))
-	assert.Contains(t, output, "已儲存畫質設定檔：fresh-high")
 }
 
 func TestDeleteSavedGraphicsProfilesRemovesSelectedProfiles(t *testing.T) {
@@ -336,7 +339,7 @@ func TestDeleteSavedGraphicsProfilesRemovesSelectedProfiles(t *testing.T) {
 		return store, nil
 	}
 
-	output := captureStdout(t, func() {
+	_ = captureStdout(t, func() {
 		withTestInput(t, "1,2\ny\n", func() {
 			err := deleteSavedGraphicsProfiles(nil)
 			assert.NoError(t, err)
@@ -347,7 +350,6 @@ func TestDeleteSavedGraphicsProfilesRemovesSelectedProfiles(t *testing.T) {
 	assert.ErrorIs(t, err, os.ErrNotExist)
 	_, err = os.Stat(filepath.Join(store.ProfilesDir(), "boss-high.json"))
 	assert.ErrorIs(t, err, os.ErrNotExist)
-	assert.Contains(t, output, lang.GraphicsProfiles.DeleteDone)
 }
 
 func TestDeleteSavedGraphicsProfilesBlocksAssignedProfiles(t *testing.T) {
@@ -370,7 +372,7 @@ func TestDeleteSavedGraphicsProfilesBlocksAssignedProfiles(t *testing.T) {
 		{Email: "alpha@example.com", Password: "pass", DisplayName: "Alpha", GraphicsProfile: "boss-low"},
 	}
 
-	output := captureStdout(t, func() {
+	_ = captureStdout(t, func() {
 		withTestInput(t, "1\n\nb\n", func() {
 			err := deleteSavedGraphicsProfiles(accounts)
 			assert.NoError(t, err)
@@ -379,5 +381,5 @@ func TestDeleteSavedGraphicsProfilesBlocksAssignedProfiles(t *testing.T) {
 
 	_, err = os.Stat(filepath.Join(store.ProfilesDir(), "boss-low.json"))
 	assert.NoError(t, err)
-	assert.Contains(t, output, `畫質設定檔「boss-low」仍被以下帳號使用：Alpha (alpha@example.com)。請先清除或改派後再刪除。`)
+	assert.Equal(t, "boss-low", accounts[0].GraphicsProfile)
 }

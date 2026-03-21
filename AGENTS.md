@@ -51,6 +51,7 @@
 - 若 struct 明確實作介面，請在宣告上方加入 `var _ InterfaceName = (*StructName)(nil)` 做靜態驗證。
 - 使用 `any`，不要使用 `interface{}`。
 - 測試優先使用 `github.com/stretchr/testify/assert`；可行時補上或擴充測試覆蓋行為契約。
+- 測試應優先驗證邏輯、狀態轉移、副作用、資料結構與導航契約；除非文案本身就是需求契約，否則不要把玩家可見訊息寫成脆弱的精確字串比對。
 - 新功能優先使用 Go 標準庫與 `golang.org/x/sys/windows`，避免擴張高風險低階 Windows 手法。
 
 ## 文件入口
