@@ -54,9 +54,9 @@
 範例內容：
 
 ```csv
-Email,Password,DisplayName,LaunchFlags,ToolFlags
-your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),,
-your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),,
+Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile
+your-account1@example.com,your-password-here,主帳號-法師(倉庫/武器/飾品),,,boss-low
+your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),,,
 ```
 
 欄位說明：
@@ -68,6 +68,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 | `DisplayName` | ✅ | 主選單顯示名稱，也是視窗標題後綴 |
 | `LaunchFlags` | 可先留空 | 這個帳號額外要帶的啟動旗標 bitflag；一般玩家可先留空，工具會自動 fallback 成 `0`，之後再回到主選單用 `f` 設定 |
 | `ToolFlags` | 可先留空 | 工具內部的帳號功能設定 bitflag；可先留空，預設 `0`。目前支援：`1` = 把此帳號排除在 switcher 切換循環外（可在主選單 `s → [2]` 設定） |
+| `GraphicsProfile` | 可先留空 | 這個帳號要套用的具名畫質設定檔；建議用主選單 `g` 產生與指派。若留空，啟動時工具不會碰 `Settings.json` |
 
 `LaunchFlags` 目前常見對應如下：
 
@@ -135,6 +136,7 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
   a       啟動所有帳號（可選 mod，只啟動未啟動的）
   d       設定啟動間隔
   f       設定帳號啟動 flag
+  g       帳號畫質設定檔
   p       選擇 D2R.exe 路徑
   s       視窗切換設定
   l       語言設定 / Language
@@ -180,6 +182,47 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 - 如果你手動把 `LaunchFlags` 填成亂數、負數或文字，工具會在讀取時自動 fallback 成 `0`，並把 CSV 回寫成乾淨值
 - 如果你輸入的編號範圍或格式有誤，工具會先顯示錯誤訊息，接著提示你按鍵確認後再回到上一層，避免訊息瞬間被主選單蓋掉
 - 如果你想知道某個 flag 對應的 D2R 參數實際是什麼，請再查 [D2R_PARAMS.md](D2R_PARAMS.md)
+
+## 設定帳號畫質設定檔
+
+如果你想讓不同帳號啟動時使用不同畫質，請走這條流程：
+
+1. 先進 D2R，把想要的畫質 / 視窗 / 解析度設定調好
+2. 建議先離開遊戲，讓最新設定確實寫回磁碟
+3. 回到 launcher 主選單輸入 `g`
+4. 選 `1` 儲存目前畫質設定檔
+5. 儲存畫面會先列出已保存的設定檔；如果你要覆蓋其中一個，直接輸入它前面的編號
+6. 如果你想另存新設定，直接輸入新的名稱，例如 `boss-low`、`main-high`
+7. 再用 `2` 指派畫質設定檔，把它綁到指定帳號
+8. 如果某組已保存設定不再需要，可再用 `4` 刪除已保存的畫質設定檔
+
+這個功能的核心是：launcher 會把目前的
+
+```text
+%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json
+```
+
+另存成具名 profile，之後在啟動帳號前再覆蓋回去。
+
+### `g` 內可以做什麼
+
+- `1` 儲存目前畫質設定檔
+- `2` 指派畫質設定檔
+- `3` 清除帳號畫質設定檔
+- `4` 刪除已保存的畫質設定檔
+
+指派時有兩種操作方式：
+
+- 先選設定檔，再一次套給多個帳號
+- 先選帳號，再替它指定一個設定檔
+
+### 重要限制
+
+- 這不是 D2R 原生的 per-account 設定隔離，而是啟動前替換共用的 `Settings.json`
+- 如果某個帳號的 `GraphicsProfile` 留空，launcher 啟動它時就**完全不會改** `Settings.json`
+- 如果你剛在遊戲裡改完畫質，但 D2R 還沒把設定寫回磁碟，CLI 存到的可能還是舊版本；所以最保守做法是先離開遊戲再存
+- 如果某個已保存的畫質設定檔仍被帳號指派，工具會先阻止刪除；請先清除或改派那些帳號
+- 如果某個帳號指派的畫質設定檔在啟動時找不到，launcher 會跳過覆蓋 `Settings.json`，並自動清空該帳號的 `GraphicsProfile` 指派
 
 ## 啟動單一帳號
 
@@ -229,7 +272,8 @@ your-account2@example.com,your-password-here,副帳號-野蠻人(廢寶/鑲材),
 5. 如果 `D2R.exe` 同層的 `mods\` 目錄下有已安裝 mod，工具會先讓你選擇這次批次啟動要套用哪一個 mod
 6. 每次啟動時只會處理上面標示為 `[未啟動]` 的帳號，不會把等待時間浪費在已經開啟的帳號上
 7. 每個帳號若已設定自己的 `LaunchFlags`，工具也會在該帳號啟動時一併帶入
-8. 每次啟動之間只會在「下一個真的還沒啟動的帳號」之前等待 `launch_delay`；若你設定的是範圍，工具會在每次等待前重新隨機取一個秒數
+8. 每個帳號若已指派自己的 `GraphicsProfile`，工具會在該帳號 `LaunchD2R()` 前先套用對應的 `Settings.json`；未指派帳號則完全略過，不碰全域設定檔
+9. 每次啟動之間只會在「下一個真的還沒啟動的帳號」之前等待 `launch_delay`；若你設定的是範圍，工具會在每次等待前重新隨機取一個秒數
 
 ## 離線模式
 

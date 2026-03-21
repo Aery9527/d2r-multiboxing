@@ -142,7 +142,7 @@ func main() {
 		case "0":
 			launchOffline(cfg)
 		case "a":
-			launchAll(accounts, cfg)
+			launchAll(accounts, accountsFile, cfg)
 		case "d":
 			setupLaunchDelay(cfg)
 		case "p":
@@ -151,6 +151,8 @@ func main() {
 			setupSwitcher(cfg, accounts, accountsFile)
 		case "f":
 			setupAccountLaunchFlags(accounts, accountsFile)
+		case "g":
+			setupAccountGraphicsProfiles(accounts, accountsFile)
 		case "l":
 			setupLanguage(cfg)
 		default:
@@ -159,7 +161,7 @@ func main() {
 				showInvalidInputAndPause()
 				continue
 			}
-			launchAccount(&accounts[id-1], cfg)
+			launchAccount(&accounts[id-1], accounts, accountsFile, cfg)
 		}
 	}
 }

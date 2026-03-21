@@ -49,9 +49,9 @@ It is strongly recommended to **open the file with Excel** before editing to avo
 Fill in your Battle.net accounts using this format:
 
 ```csv
-Email,Password,DisplayName,LaunchFlags,ToolFlags
-your-account1@example.com,your-password-here,Main-Sorc(stash/weapons/jewelry),,
-your-account2@example.com,your-password-here,Alt-Barb(junk/gems),,
+Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile
+your-account1@example.com,your-password-here,Main-Sorc(stash/weapons/jewelry),,,boss-low
+your-account2@example.com,your-password-here,Alt-Barb(junk/gems),,,
 ```
 
 Field descriptions:
@@ -61,6 +61,7 @@ Field descriptions:
 - `DisplayName`: the name shown in the tool and used for window switching; after launch the window title is set to `D2R-<DisplayName>`
 - `LaunchFlags`: extra **D2R launch flags** per account; can be left blank (the tool defaults to `0`); configure later via `f` in the main menu. The tool currently offers two flag options; based on testing, "disable sound" has a clear effect, but `-lq` does not appear to have any practical impact. See [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for parameter details.
 - `ToolFlags`: per-account **tool-internal settings** (bitmask); can be left blank (defaults to `0`). Currently supported: `1` = exclude this account from the switcher cycle. Configure via `s → [2]` in the main menu — no need to edit manually.
+- `GraphicsProfile`: the **named graphics profile** to apply for this account; can be left blank. If it is blank, launching that account will **not touch** `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json` at all. The recommended workflow is to use `g` in the main menu to save the current game settings as a named profile and then assign it to accounts.
 
 > ⚠️ If you change a `DisplayName` while D2R is still running, the `[Running]` / `[Stopped]` status shown after reopening the launcher may be temporarily inaccurate.  
 > It is recommended to rename accounts only after all game windows are closed, or use `r` in the main menu to refresh status.
@@ -81,6 +82,7 @@ Once launched, you will see the following options:
 - `0`: select an installed mod (if any), then launch in offline mode
 - `d`: set the launch delay used by `a` batch launch; enter `30` or a range like `30-60` (random wait within that interval each time); minimum is fixed at 10 seconds
 - `f`: display the account list and a centered two-line flag reference table, then set or clear extra launch flags per account; currently two flag options are available; configure per account, per flag, or all at once; see [docs/D2R_PARAMS.md](docs/D2R_PARAMS.md) for flag details
+- `g`: manage account graphics profiles. First adjust graphics / window / resolution in-game, then return to the CLI and save the current `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json` as a named profile; after that you can assign it to accounts with a flag-like flow, clear account assignments, or delete saved profiles you no longer need. Unassigned accounts leave `Settings.json` untouched at launch time
 - `p`: open a Windows file picker to set the `D2R.exe` path
 - `s`: configure window-switch hotkey / mouse side-button / gamepad button
 - `l`: switch the tool interface language (繁體中文 / English); takes effect immediately and is saved to `config.json`
@@ -107,6 +109,9 @@ For low-level implementation and technical details:
 - When configuring gamepad switch buttons, run the tool as administrator — testing showed that non-admin permissions may fail to detect gamepad signals
 - `switcher` only works while `d2r-hyper-launcher` is running; closing the tool stops window switching
 - The default `launch_delay` for `a` batch launch is 10 seconds; for backward compatibility, if the tool reads an old default value of `5` seconds, it automatically treats it as 10. Battle.net may still throttle logins if accounts are launched too rapidly, so if you adjust the delay, use `d` in the main menu and note the minimum is fixed at 10 seconds
+- If you want different graphics settings per account, first adjust the settings in-game, then return to main-menu `g` and save the **current** `Settings.json` as a named graphics profile before assigning it. The safest workflow is to exit the game before saving, so D2R has time to flush the latest settings to disk.
+- If a saved graphics profile is still assigned to any account, the launcher will block deletion until you clear or reassign those accounts first.
+- If an account points at a graphics profile that no longer exists at launch time, the launcher skips overwriting `Settings.json` and automatically clears that account's `GraphicsProfile` assignment so future launches do not keep failing on the same stale entry.
 - Avoid manually editing `config.json` to prevent accidentally breaking the JSON structure; use the in-tool menus for most settings
 - The language setting is stored in `config.json` under the `language` field (`"zh-TW"` or `"en"`); if the field is absent, the tool will run the language selection flow again on the next startup
 - Only the Battle.net version of D2R is supported

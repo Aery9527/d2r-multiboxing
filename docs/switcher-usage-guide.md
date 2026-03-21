@@ -68,12 +68,12 @@
 
 ### 設定存放位置
 
-帳號的切換設定儲存在 `accounts.csv` 的 `ToolFlags` 欄位（第 5 欄），與 D2R 啟動參數的 `LaunchFlags`（第 4 欄）各自獨立：
+帳號的切換設定儲存在 `accounts.csv` 的 `ToolFlags` 欄位（第 5 欄），與 D2R 啟動參數的 `LaunchFlags`（第 4 欄）及畫質設定檔的 `GraphicsProfile`（第 6 欄）各自獨立：
 
 ```csv
-Email,Password,DisplayName,LaunchFlags,ToolFlags
-acc@gmail.com,ENC:xxx,主帳號,0,0
-acc2@gmail.com,ENC:yyy,倉庫號,0,1
+Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile
+acc@gmail.com,ENC:xxx,主帳號,0,0,
+acc2@gmail.com,ENC:yyy,倉庫號,0,1,boss-low
 ```
 
 `ToolFlags = 1` 表示「跳過切換循環」。

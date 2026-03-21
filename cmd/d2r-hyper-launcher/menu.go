@@ -59,6 +59,7 @@ func printMenu(accounts []account.Account, cfg *config.Config) {
 		options.option("a", lang.MainMenu.OptLaunchAll, lang.MainMenu.OptLaunchAllComment)
 		options.option("d", lang.MainMenu.OptDelay, displayDelay(cfg.LaunchDelay))
 		options.option("f", lang.MainMenu.OptFlags, lang.MainMenu.OptFlagsComment)
+		options.option("g", lang.MainMenu.OptGraphicsProfiles, lang.MainMenu.OptGraphicsProfilesComment)
 		options.option("p", lang.MainMenu.OptD2RPath, cfg.D2RPath)
 		options.option("s", lang.MainMenu.OptSwitcher, switcherMenuOptionStatus(cfg))
 		options.option("r", lang.MainMenu.OptRefresh, "")

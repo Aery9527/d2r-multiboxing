@@ -49,17 +49,18 @@ func Get(l Locale) *Catalog {
 // Catalog is the root container for all user-visible strings.
 // Sub-catalogs group strings by functional area.
 type Catalog struct {
-	Locale   Locale
-	Common   CommonCatalog
-	Startup  StartupCatalog
-	MainMenu MainMenuCatalog
-	Launch   LaunchCatalog
-	Delay    DelayCatalog
-	Switcher SwitcherCatalog
-	Flags    FlagsCatalog
-	D2RPath  D2RPathCatalog
-	Accounts AccountsCatalog
-	Language LanguageCatalog
+	Locale           Locale
+	Common           CommonCatalog
+	Startup          StartupCatalog
+	MainMenu         MainMenuCatalog
+	Launch           LaunchCatalog
+	Delay            DelayCatalog
+	Switcher         SwitcherCatalog
+	Flags            FlagsCatalog
+	GraphicsProfiles GraphicsProfilesCatalog
+	D2RPath          D2RPathCatalog
+	Accounts         AccountsCatalog
+	Language         LanguageCatalog
 }
 
 // ---------------------------------------------------------------------------
@@ -126,63 +127,65 @@ type MainMenuCatalog struct {
 	AccountListHeader string // "帳號列表：" (also used in flags sub-menu)
 
 	// Menu option keys and labels
-	OptByNumberKey      string // display key "數字" / "1-N"
-	OptByNumber         string // label "啟動指定帳號"
-	OptOffline          string
-	OptOfflineComment   string
-	OptLaunchAll        string
-	OptLaunchAllComment string
-	OptDelay            string // comment is dynamic (displayDelay)
-	OptFlags            string
-	OptFlagsComment     string
-	OptD2RPath          string // comment is dynamic (cfg.D2RPath)
-	OptSwitcher         string // comment is dynamic (switcherMenuOptionStatus)
-	OptRefresh          string
-	OptLanguage         string // new – language settings entry
+	OptByNumberKey             string // display key "數字" / "1-N"
+	OptByNumber                string // label "啟動指定帳號"
+	OptOffline                 string
+	OptOfflineComment          string
+	OptLaunchAll               string
+	OptLaunchAllComment        string
+	OptDelay                   string // comment is dynamic (displayDelay)
+	OptFlags                   string
+	OptFlagsComment            string
+	OptGraphicsProfiles        string
+	OptGraphicsProfilesComment string
+	OptD2RPath                 string // comment is dynamic (cfg.D2RPath)
+	OptSwitcher                string // comment is dynamic (switcherMenuOptionStatus)
+	OptRefresh                 string
+	OptLanguage                string // new – language settings entry
 
 	// Dynamic switcher status strings used as the [s] menu comment
-	SwitcherNotSet    string
-	SwitcherDisabled  string // fmt("%s") – "未啟用設定：%s"
-	SwitcherEnabled   string // fmt("%s") – "已啟用設定：%s"
+	SwitcherNotSet   string
+	SwitcherDisabled string // fmt("%s") – "未啟用設定：%s"
+	SwitcherEnabled  string // fmt("%s") – "已啟用設定：%s"
 }
 
 // LaunchCatalog holds strings for account launch flows.
 type LaunchCatalog struct {
 	// Single-account launch
-	AlreadyRunning    string // fmt("%s") – account display name
-	Starting          string // fmt("%s", "%s") – display name, region name
-	LaunchOK          string // fmt("%d") – PID
-	LaunchFailed      string // fmt("%v")
-	DecryptFailed     string // fmt("%v")
-	CloseHandleFailed string // fmt("%v")
-	HandlesClosed     string // fmt("%d") – event handle count
-	WindowRenaming    string // fmt("%s") – display name
-	WindowRenamed     string // fmt("%s") – window title (quoted)
+	AlreadyRunning     string // fmt("%s") – account display name
+	Starting           string // fmt("%s", "%s") – display name, region name
+	LaunchOK           string // fmt("%d") – PID
+	LaunchFailed       string // fmt("%v")
+	DecryptFailed      string // fmt("%v")
+	CloseHandleFailed  string // fmt("%v")
+	HandlesClosed      string // fmt("%d") – event handle count
+	WindowRenaming     string // fmt("%s") – display name
+	WindowRenamed      string // fmt("%s") – window title (quoted)
 	WindowRenameFailed string // fmt("%s", "%v") – display name, error
 
 	// Batch launch
-	BatchScanHeader    string
-	BatchOnlyPending   string // fmt("%d") – pending count
-	AllRunning         string
-	BatchDecryptFailed string // fmt("%s", "%v") – display name, error
-	BatchLaunchFailed  string // fmt("%s", "%v") – display name, error
-	BatchLaunchOK      string // fmt("%s", "%d") – display name, PID
+	BatchScanHeader        string
+	BatchOnlyPending       string // fmt("%d") – pending count
+	AllRunning             string
+	BatchDecryptFailed     string // fmt("%s", "%v") – display name, error
+	BatchLaunchFailed      string // fmt("%s", "%v") – display name, error
+	BatchLaunchOK          string // fmt("%s", "%d") – display name, PID
 	BatchHandleCloseFailed string // fmt("%s", "%v") – display name, error
-	BatchHandlesClosed string // fmt("%s", "%d") – display name, count
-	BatchDelayMsg      string // fmt("%d", "%s") – seconds, next display name
-	BatchDelayRemaining string // fmt("%d", "%s") – remaining seconds, next display name
+	BatchHandlesClosed     string // fmt("%s", "%d") – display name, count
+	BatchDelayMsg          string // fmt("%d", "%s") – seconds, next display name
+	BatchDelayRemaining    string // fmt("%d", "%s") – remaining seconds, next display name
 
 	// Offline launch
-	OfflineTitle       string
-	OfflineLaunching   string
-	OfflineLaunchOK    string // fmt("%d") – PID
+	OfflineTitle        string
+	OfflineLaunching    string
+	OfflineLaunchOK     string // fmt("%d") – PID
 	OfflineLaunchFailed string // fmt("%v")
 
 	// Region selector
-	RegionSingleTitle  string // heading for single-account region pick
-	RegionBatchTitle   string // heading for batch-launch region pick
-	RegionTargetLabel  string // "準備啟動的帳號："
-	RegionInvalid      string
+	RegionSingleTitle string // heading for single-account region pick
+	RegionBatchTitle  string // heading for batch-launch region pick
+	RegionTargetLabel string // "準備啟動的帳號："
+	RegionInvalid     string
 
 	// Mod selector
 	ModLoadFailed string // fmt("%v") – mods discovery error
@@ -198,14 +201,14 @@ type LaunchCatalog struct {
 
 // DelayCatalog holds strings for launch-delay settings.
 type DelayCatalog struct {
-	Title         string
+	Title          string
 	CurrentSetting string // fmt("%s")
-	Description   string
-	MinLabel      string // fmt("%d") – minimum seconds info
-	HintFixed     string
-	HintRange     string
-	InputPrompt   string
-	Updated       string // fmt("%s")
+	Description    string
+	MinLabel       string // fmt("%d") – minimum seconds info
+	HintFixed      string
+	HintRange      string
+	InputPrompt    string
+	Updated        string // fmt("%s")
 
 	// CLI-layer display format strings (replace domain DisplayString in UI context).
 	// These are used by the displayDelay() helper in the CLI layer.
@@ -231,20 +234,20 @@ type SwitcherCatalog struct {
 	OptDisable string
 
 	// Key detection flow
-	DetectInstruction string
-	DetectSupport     string
-	DetectGamepad     string
-	DetectEscCancel   string
-	DetectFailed      string // fmt("%v")
-	DetectCancelled   string
-	DetectedKey       string // fmt("%s") – display of detected combo
+	DetectInstruction   string
+	DetectSupport       string
+	DetectGamepad       string
+	DetectEscCancel     string
+	DetectFailed        string // fmt("%v")
+	DetectCancelled     string
+	DetectedKey         string // fmt("%s") – display of detected combo
 	DetectConfirmPrompt string
 
 	// Outcomes
-	KeySet          string // fmt("%s") – saved key display
-	StartFailed     string // fmt("%v") – switcher start error
-	RestartFailed   string // fmt("%v")
-	ToggleNotSet    string // no key configured yet
+	KeySet        string // fmt("%s") – saved key display
+	StartFailed   string // fmt("%v") – switcher start error
+	RestartFailed string // fmt("%v")
+	ToggleNotSet  string // no key configured yet
 
 	// Enable/disable outcomes
 	Enabled                     string // fmt("%s") – key display
@@ -252,17 +255,17 @@ type SwitcherCatalog struct {
 	DisableSaveAndRestoreFailed string // fmt("%v", "%v") – save err, restart err
 
 	// Account filter
-	OptSetAccounts              string // [2] menu option label
-	AccountFilterTitle          string // sub-menu header
-	AccountFilterDescIncluded   string // description line: what "included" means
-	AccountFilterDescExcluded   string // description line: what "excluded" means
-	AccountIncluded             string // per-account status label – included
-	AccountExcluded             string // per-account status label – excluded
-	AccountFilterSaved          string // success after save
-	AccountFilterNoAccounts     string // warning when accounts list is empty
-	AccountFilterOptToggle      string // [1~N] toggle single account
-	AccountFilterOptAll         string // [a] include-all option label
-	AccountFilterOptNone        string // [n] exclude-all option label
+	OptSetAccounts                string // [2] menu option label
+	AccountFilterTitle            string // sub-menu header
+	AccountFilterDescIncluded     string // description line: what "included" means
+	AccountFilterDescExcluded     string // description line: what "excluded" means
+	AccountIncluded               string // per-account status label – included
+	AccountExcluded               string // per-account status label – excluded
+	AccountFilterSaved            string // success after save
+	AccountFilterNoAccounts       string // warning when accounts list is empty
+	AccountFilterOptToggle        string // [1~N] toggle single account
+	AccountFilterOptAll           string // [a] include-all option label
+	AccountFilterOptNone          string // [n] exclude-all option label
 	AccountFilterWarnOneIncluded  string // warning: only 1 account in cycle
 	AccountFilterWarnNoneIncluded string // warning: all accounts excluded
 }
@@ -294,10 +297,10 @@ type FlagsCatalog struct {
 	FlagByFlagAccountPrompt string // fmt("%s", "%s") – action, flag name
 
 	// "By account" flow headings and prompts
-	FlagByAccountTitle       string // fmt("%s")
+	FlagByAccountTitle        string // fmt("%s")
 	FlagByAccountSelectPrompt string
-	FlagByAccountFlagTitle   string // fmt("%s")
-	FlagByAccountFlagPrompt  string // fmt("%s", "%s") – account name, action
+	FlagByAccountFlagTitle    string // fmt("%s")
+	FlagByAccountFlagPrompt   string // fmt("%s", "%s") – account name, action
 
 	// "All accounts all flags" flow
 	FlagAllTitle string // fmt("%s") – heading
@@ -340,21 +343,102 @@ type FlagsCatalog struct {
 	FlagTableAccountHeader string // "帳號編號" / "#"
 }
 
+// GraphicsProfilesCatalog holds strings for per-account graphics profile flows.
+type GraphicsProfilesCatalog struct {
+	Title             string
+	NoAccounts        string
+	ProfileListHeader string
+	NoProfiles        string
+	StatusUnassigned  string
+	Intro1            string
+	Intro2            string
+	Intro3            string
+	Intro4            string
+
+	// Main sub-menu options
+	OptSaveCurrent string
+	OptAssign      string
+	OptClear       string
+	OptDeleteSaved string
+
+	// Save-current flow
+	SaveTitle             string
+	SaveIntro1            string
+	SaveIntro2            string
+	CurrentSettingsLabel  string // fmt("%s")
+	SaveOptionComment     string
+	SavePrompt            string
+	SaveInvalidProfileID  string // fmt("%d")
+	SaveExistingUseNumber string // fmt("%s")
+	SaveInvalidName       string // fmt("%v")
+	SaveDone              string // fmt("%s")
+	SaveFailed            string // fmt("%v")
+	StoreOpenFailed       string // fmt("%v")
+
+	// Assignment flow
+	AssignTitle                  string
+	AssignNoProfiles             string
+	AssignModeTitle              string
+	AssignModeQuestion           string
+	OptProfileToAccounts         string
+	OptAccountToProfile          string
+	AssignByProfileTitle         string
+	AssignByProfileSelectPrompt  string
+	AssignByProfileAccountTitle  string // fmt("%s")
+	AssignByProfileAccountPrompt string // fmt("%s")
+	AssignByProfileAbout         string // fmt("%s")
+	AssignByAccountTitle         string
+	AssignByAccountSelectPrompt  string
+	AssignByAccountProfileTitle  string // fmt("%s")
+	AssignByAccountProfilePrompt string // fmt("%s")
+	AssignByAccountAbout         string // fmt("%s", "%s")
+	AssignDone                   string // fmt("%s")
+
+	// Clear flow
+	ClearTitle         string
+	ClearNoAssignments string
+	ClearPrompt        string
+	ClearAbout         string
+	ClearDone          string
+
+	// Delete saved-profile flow
+	DeleteTitle         string
+	DeleteNoProfiles    string
+	DeletePrompt        string
+	DeleteAbout         string
+	DeleteDone          string
+	DeleteFailed        string // fmt("%v")
+	DeleteUnusedComment string
+	DeleteUsedComment   string // fmt("%d")
+	DeleteInUse         string // fmt("%s", "%s")
+
+	// Shared account rendering
+	AccountComment string // fmt("%s")
+	AccountItemFmt string // fmt("%d", "%s", "%s", "%s")
+
+	// Launch-time apply
+	ApplyingDuringLaunch      string // fmt("%s")
+	ApplyFailed               string // fmt("%s", "%v")
+	BatchApplyFailed          string // fmt("%s", "%s", "%v")
+	MissingProfileCleared     string // fmt("%s", "%s")
+	MissingProfileClearFailed string // fmt("%v")
+}
+
 // D2RPathCatalog holds strings for D2R.exe path configuration.
 type D2RPathCatalog struct {
 	// Pre-launch path check (ensureLaunchReadyD2RPath)
-	PreCheckTitle string
-	PathNotFound  string // fmt("%s") – current path
-	PathError     string // fmt("%v")
-	PromptFix     string
-	OptSetPath    string
+	PreCheckTitle        string
+	PathNotFound         string // fmt("%s") – current path
+	PathError            string // fmt("%v")
+	PromptFix            string
+	OptSetPath           string
 	PreCheckInvalidInput string
 
 	// Path setup (setupD2RPath)
-	SetTitle    string
-	SetPrompt   string
-	SetFailed   string // fmt("%v")
-	SetOK       string // fmt("%s")
+	SetTitle  string
+	SetPrompt string
+	SetFailed string // fmt("%v")
+	SetOK     string // fmt("%s")
 
 	// PowerShell file picker dialog title
 	PickerDialogTitle string
@@ -362,23 +446,23 @@ type D2RPathCatalog struct {
 
 // AccountsCatalog holds strings for the first-run accounts-file creation flow.
 type AccountsCatalog struct {
-	CreatedOK       string // fmt("%s") – file path
-	CreatedInfo1    string
-	CreatedInfo2    string
-	CreatedInfo3    string
-	CreatedInfo4    string
-	CreatedPressAny string
+	CreatedOK        string // fmt("%s") – file path
+	CreatedInfo1     string
+	CreatedInfo2     string
+	CreatedInfo3     string
+	CreatedInfo4     string
+	CreatedPressAny  string
 	OpenFolderFailed string // fmt("%v")
 }
 
 // LanguageCatalog holds strings for the language-selection flow.
 type LanguageCatalog struct {
-	MenuLabel   string // main menu option label
-	PickerTitle string
+	MenuLabel    string // main menu option label
+	PickerTitle  string
 	AutoDetected string // fmt("%s") – detected locale display name
-	ConfirmUse  string
+	ConfirmUse   string
 	PromptSelect string
-	Saved       string // fmt("%s") – new locale display name
+	Saved        string // fmt("%s") – new locale display name
 
 	NameZhTW string
 	NameEn   string

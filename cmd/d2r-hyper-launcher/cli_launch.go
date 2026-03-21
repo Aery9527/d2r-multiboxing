@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"d2rhl/internal/common/d2r"
 	"d2rhl/internal/common/process"
 	"d2rhl/internal/multiboxing/account"
+	"d2rhl/internal/multiboxing/graphicsprofile"
 	"d2rhl/internal/multiboxing/launcher"
 )
 
@@ -19,7 +21,7 @@ var launchSuccessPauseSleep = time.Sleep
 
 const launchSuccessPauseDuration = 3 * time.Second
 
-func launchAccount(acc *account.Account, cfg *config.Config) {
+func launchAccount(acc *account.Account, accounts []account.Account, accountsFile string, cfg *config.Config) {
 	if !ensureLaunchReadyD2RPath(cfg) {
 		return
 	}
@@ -35,6 +37,12 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 
 	modArgs, ok := selectLaunchMod(cfg.D2RPath)
 	if !ok {
+		return
+	}
+
+	_, err := prepareGraphicsProfileForLaunch(accounts, accountsFile, acc, nil)
+	if err != nil {
+		showInputErrorAndPause(fmt.Sprintf(lang.GraphicsProfiles.ApplyFailed, acc.GraphicsProfile, err))
 		return
 	}
 
@@ -64,7 +72,7 @@ func launchAccount(acc *account.Account, cfg *config.Config) {
 	ui.blankLine()
 }
 
-func launchAll(accounts []account.Account, cfg *config.Config) {
+func launchAll(accounts []account.Account, accountsFile string, cfg *config.Config) {
 	if !ensureLaunchReadyD2RPath(cfg) {
 		return
 	}
@@ -91,7 +99,15 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 		return
 	}
 
+	var graphicsStore *graphicsprofile.Store
 	for i, acc := range pendingAccounts {
+		var applyErr error
+		graphicsStore, applyErr = prepareGraphicsProfileForLaunch(accounts, accountsFile, acc, graphicsStore)
+		if applyErr != nil {
+			ui.warningf(lang.GraphicsProfiles.BatchApplyFailed, acc.DisplayName, acc.GraphicsProfile, applyErr)
+			continue
+		}
+
 		password, err := account.GetDecryptedPassword(acc)
 		if err != nil {
 			ui.warningf(lang.Launch.BatchDecryptFailed, acc.DisplayName, err)
@@ -122,6 +138,32 @@ func launchAll(accounts []account.Account, cfg *config.Config) {
 		}
 	}
 	ui.blankLine()
+}
+
+func prepareGraphicsProfileForLaunch(accounts []account.Account, accountsFile string, acc *account.Account, store *graphicsprofile.Store) (*graphicsprofile.Store, error) {
+	profileName := strings.TrimSpace(acc.GraphicsProfile)
+	store, err := applyGraphicsProfileForLaunch(*acc, store)
+	if err == nil {
+		return store, nil
+	}
+	if !errors.Is(err, graphicsprofile.ErrProfileNotFound) {
+		return store, err
+	}
+
+	if clearErr := clearMissingGraphicsProfileAssignment(accounts, accountsFile, acc); clearErr != nil {
+		return store, fmt.Errorf(lang.GraphicsProfiles.MissingProfileClearFailed, clearErr)
+	}
+
+	ui.warningf(lang.GraphicsProfiles.MissingProfileCleared, graphicsProfileAccountLabel(*acc), profileName)
+	return store, nil
+}
+
+func clearMissingGraphicsProfileAssignment(accounts []account.Account, accountsFile string, acc *account.Account) error {
+	accountIndex := graphicsProfileAccountIndex(accounts, acc)
+	if accountIndex < 0 {
+		return errors.New("target account was not found in current account list")
+	}
+	return clearGraphicsProfileAssignments(accounts, accountsFile, []int{accountIndex})
 }
 
 func launchOffline(cfg *config.Config) {

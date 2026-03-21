@@ -15,7 +15,7 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 
 	// 建立測試 CSV
 	accounts := []Account{
-		{Email: "test1@email.com", Password: "pass1", DisplayName: "Account1", LaunchFlags: LaunchFlagNoSound},
+		{Email: "test1@email.com", Password: "pass1", DisplayName: "Account1", LaunchFlags: LaunchFlagNoSound, GraphicsProfile: "main-high"},
 		{Email: "test2@email.com", Password: "pass2", DisplayName: "Account2", LaunchFlags: LaunchFlagLowQuality},
 	}
 
@@ -35,10 +35,12 @@ func TestLoadAndSaveAccounts(t *testing.T) {
 	assert.Equal(t, "pass1", loaded[0].Password)
 	assert.Equal(t, "Account1", loaded[0].DisplayName)
 	assert.Equal(t, uint32(LaunchFlagNoSound), loaded[0].LaunchFlags)
+	assert.Equal(t, "main-high", loaded[0].GraphicsProfile)
 
 	assert.Equal(t, "test2@email.com", loaded[1].Email)
 	assert.Equal(t, "Account2", loaded[1].DisplayName)
 	assert.Equal(t, uint32(LaunchFlagLowQuality), loaded[1].LaunchFlags)
+	assert.Equal(t, "", loaded[1].GraphicsProfile)
 }
 
 func TestEnsureAccountsFileCreatesTemplate(t *testing.T) {
@@ -120,6 +122,36 @@ func TestLoadAccounts_InvalidLaunchFlagsFallsBackToZeroAndRewritesFile(t *testin
 	data, err := os.ReadFile(csvPath)
 	assert.NoError(t, err)
 	assert.Contains(t, string(data), "legacy@example.com,plain,Legacy,0")
+}
+
+func TestLoadAccounts_BackwardCompatWithoutGraphicsProfileColumn(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+
+	content := append(utf8BOM, []byte("Email,Password,DisplayName,LaunchFlags,ToolFlags\nlegacy@example.com,plain,Legacy,1,0\n")...)
+	err := os.WriteFile(csvPath, content, 0o644)
+	assert.NoError(t, err)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Len(t, loaded, 1)
+	assert.Equal(t, uint32(LaunchFlagNoSound), loaded[0].LaunchFlags)
+	assert.Equal(t, uint32(0), loaded[0].ToolFlags)
+	assert.Equal(t, "", loaded[0].GraphicsProfile)
+}
+
+func TestLoadAccounts_GraphicsProfileColumn(t *testing.T) {
+	dir := t.TempDir()
+	csvPath := filepath.Join(dir, "accounts.csv")
+
+	content := append(utf8BOM, []byte("Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile\nlegacy@example.com,plain,Legacy,1,0,alt-low\n")...)
+	err := os.WriteFile(csvPath, content, 0o644)
+	assert.NoError(t, err)
+
+	loaded, err := LoadAccounts(csvPath)
+	assert.NoError(t, err)
+	assert.Len(t, loaded, 1)
+	assert.Equal(t, "alt-low", loaded[0].GraphicsProfile)
 }
 
 func TestLoadAccounts_RemovesUnsupportedLaunchFlagBitsAndRewritesFile(t *testing.T) {

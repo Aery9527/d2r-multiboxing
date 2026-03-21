@@ -59,7 +59,7 @@ func TestLoadAccounts_ToolFlagsColumn(t *testing.T) {
 	csvPath := filepath.Join(dir, "accounts.csv")
 
 	accounts := []Account{
-		{Email: "a@b.com", Password: "pass", DisplayName: "AccA", LaunchFlags: 0, ToolFlags: ToolFlagSkipSwitcher},
+		{Email: "a@b.com", Password: "pass", DisplayName: "AccA", LaunchFlags: 0, ToolFlags: ToolFlagSkipSwitcher, GraphicsProfile: "boss-run"},
 		{Email: "c@d.com", Password: "pass", DisplayName: "AccB", LaunchFlags: 0, ToolFlags: 0},
 	}
 
@@ -71,6 +71,8 @@ func TestLoadAccounts_ToolFlagsColumn(t *testing.T) {
 	assert.Len(t, loaded, 2)
 	assert.Equal(t, uint32(ToolFlagSkipSwitcher), loaded[0].ToolFlags)
 	assert.Equal(t, uint32(0), loaded[1].ToolFlags)
+	assert.Equal(t, "boss-run", loaded[0].GraphicsProfile)
+	assert.Equal(t, "", loaded[1].GraphicsProfile)
 }
 
 func TestLoadAccounts_BackwardCompatWithoutToolFlagsColumn(t *testing.T) {

@@ -33,7 +33,7 @@ description: "Handle repository-specific Diablo II: Resurrected multiboxing work
 4. 視窗標題需維持 `D2R-<DisplayName>` 格式，這也是 switcher 用來找視窗的依據。
 5. 背景 monitor 會每 2 秒掃描 D2R 行程，替新 PID 再做一次 handle 關閉。
 6. `0` 與 `a` 啟動流程會先掃描 `D2R.exe` 同層 `mods\` 目錄；只要 mod 資料夾內有 `modinfo.json`，或有同名 `<mod>.mpq`，就會出現在選單中，並轉成 `-mod <name> -txt` 參數。
-7. `accounts.csv` 共 5 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags`。`LaunchFlags` 是 D2R 啟動參數 bitmask；`ToolFlags` 是工具內部設定 bitmask，兩者完全獨立。目前 `ToolFlags` bit 0 = `ToolFlagSkipSwitcher`（從 switcher 切換循環排除）。舊版 4 欄 CSV 載入時 `ToolFlags` 自動為 0，向後相容。
+7. `accounts.csv` 現在共 6 欄：`Email,Password,DisplayName,LaunchFlags,ToolFlags,GraphicsProfile`。`LaunchFlags` 是 D2R 啟動參數 bitmask；`ToolFlags` 是工具內部設定 bitmask；`GraphicsProfile` 是啟動前要套用的具名 `Settings.json` profile 名稱。未指派 `GraphicsProfile` 的帳號啟動時不得碰 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`；舊 4 / 5 欄 CSV 載入時缺少欄位要自動視為 0 / 空字串並保持向後相容。
 
 ## 修改時要守住的規則
 

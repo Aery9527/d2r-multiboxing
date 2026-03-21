@@ -51,7 +51,7 @@
 - 有值：launch 前套用該 profile
 - 空值：完全略過，不碰 `Settings.json`
 
-### 3. V1 以「儲存 / 列表 / 指派 / 清除」為主，不追求完整 profile 管理器
+### 3. V1 以「儲存 / 列表 / 指派 / 清除 / 刪除」為主，不追求完整 profile 管理器
 
 第一版優先完成：
 
@@ -59,11 +59,12 @@
 - 在 CLI 列出既有 profiles
 - 指派 profile 給 account
 - 清除 account 的 profile 指派
+- 刪除未再使用的 saved profile
+- 刪除未再使用的 saved profile
 
 先不把 scope 擴到：
 
 - profile rename
-- profile delete
 - profile 匯出 / 匯入外部檔案
 - 只 patch `Settings.json` 的部分欄位
 
@@ -123,10 +124,11 @@ CSV 目標格式：
 1. 讀取 `%USERPROFILE%\Saved Games\Diablo II Resurrected\Settings.json`
 2. 若檔案不存在或讀取失敗，顯示明確錯誤並 pause
 3. 讓玩家輸入 profile 名稱
-4. 驗證名稱是否合法
-5. 若同名已存在，要求明確確認是否覆蓋
-6. 寫入 `graphics-profiles\<name>.json`
-7. 成功後顯示成功訊息與 profile 名稱
+4. 若上方已列出既有 profiles，玩家可直接輸入編號覆蓋對應 profile
+5. 若輸入的是其他文字，則視為新名稱並驗證是否合法
+6. 若文字名稱剛好已存在，提示玩家改用上方對應編號覆蓋，而不是 silent overwrite
+7. 寫入 `graphics-profiles\<name>.json`
+8. 成功後顯示成功訊息與 profile 名稱
 
 這個流程的重點是：**CLI 只複製目前磁碟上的 `Settings.json`**。
 
@@ -145,8 +147,10 @@ CSV 目標格式：
 
 建議新增一個「帳號畫質設定檔」介面，外層至少提供：
 
-- `1` 指派畫質設定檔
-- `2` 清除畫質設定檔
+- `1` 儲存目前畫質設定檔
+- `2` 指派畫質設定檔
+- `3` 清除畫質設定檔
+- `4` 刪除已保存的畫質設定檔
 
 其中「指派」模式建議提供兩種操作路徑，直接沿用 flags 的心智模型：
 
@@ -205,9 +209,11 @@ CSV 目標格式：
 第一版建議這樣定義：
 
 - 單帳號 launch：
-  - 若 account 指派了 profile，但 profile 檔案不存在 / 讀取失敗 / JSON 無效，直接中止這次 launch，顯示錯誤並 pause
+  - 若 account 指派了 profile，但 profile 檔案不存在，這次 launch 不改 `Settings.json`，並自動清空該帳號的 `GraphicsProfile`
+  - 若 profile 讀取失敗 / JSON 無效，仍直接中止這次 launch，顯示錯誤並 pause
 - 批次 launch：
-  - 該帳號若 profile 套用失敗，顯示 warning，略過該帳號，繼續後面帳號
+  - 該帳號若 profile 檔案不存在，顯示 warning、清空該帳號的 `GraphicsProfile`，並沿用目前 `Settings.json` 繼續啟動
+  - 該帳號若 profile 讀取失敗 / JSON 無效，顯示 warning，略過該帳號，繼續後面帳號
 
 這樣可以避免最危險的情況：
 
@@ -236,7 +242,7 @@ CSV 目標格式：
 - `quality-prelaunch-apply`
   - 在 `launchAccount()` / `launchAll()` 的 `LaunchD2R()` 前插入 conditional apply
   - 明確保證：未指派 account 完全不碰 `Settings.json`
-  - 明確處理 profile 缺失 / 損毀 / 讀寫失敗
+  - 明確處理 profile 缺失 / 損毀 / 讀寫失敗，其中缺失 profile 需自動清空帳號指派
 
 - `quality-cli-management`
   - 新增 player-facing CLI：
