@@ -256,10 +256,10 @@ func startGamepadPoll(controllerIndex int, modifierKeys []string, key string, on
 		stopCh := make(chan struct{})
 
 		mu.Lock()
-		stopFunc = func() {
+		innerStopFn = func() {
 			close(stopCh)
 		}
-		running = true
+		innerRunning = true
 		mu.Unlock()
 		errCh <- nil
 

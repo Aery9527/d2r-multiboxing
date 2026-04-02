@@ -3,6 +3,7 @@ package switcher
 import (
 	"fmt"
 	"sync"
+	"time"
 	"unsafe"
 
 	"d2rhl/internal/common/config"
@@ -70,9 +71,16 @@ type msllHookStruct struct {
 }
 
 var (
-	mu               sync.Mutex
-	stopFunc         func()
-	running          bool
+	mu sync.Mutex
+
+	// Monitor state (outer): whether the switcher service is running.
+	monitorRunning bool
+	monitorStop    chan struct{}
+
+	// Inner state: the active hotkey/hook, set by startHotkey/startMouseHook/startGamepadPoll.
+	innerStopFn  func()
+	innerRunning bool
+
 	excludedAccounts []string // display names excluded from the switch cycle
 )
 
@@ -84,58 +92,116 @@ func UpdateExcludedAccounts(names []string) {
 	mu.Unlock()
 }
 
-// IsRunning returns whether the switcher is currently active.
+// IsRunning returns whether the switcher service is active (i.e., Start has been called).
+// The underlying hotkey/hook may not be registered if no D2R windows are currently open.
 func IsRunning() bool {
 	mu.Lock()
 	defer mu.Unlock()
-	return running
+	return monitorRunning
 }
 
-// Start begins listening for the configured hotkey/mouse button to switch D2R windows.
+// Start begins the switcher service. Instead of registering the hotkey immediately, it
+// launches a background monitor that only registers the hotkey/hook when D2R windows are
+// detected. This prevents the hotkey from consuming keypresses in the CLI when no game
+// windows are open.
 func Start(cfg *config.SwitcherConfig) error {
 	if cfg == nil || !cfg.Enabled || cfg.Key == "" {
 		return nil
 	}
 
 	mu.Lock()
-	if running {
+	if monitorRunning {
 		mu.Unlock()
 		return fmt.Errorf("switcher already running")
 	}
+	stop := make(chan struct{})
+	monitorStop = stop
+	monitorRunning = true
 	mu.Unlock()
 
-	if IsMouseButton(cfg.Key) {
-		buttonID := MouseButtonID(cfg.Key)
-		return startMouseHook(buttonID, switchToNext)
+	go runMonitor(cfg, stop)
+	return nil
+}
+
+// Stop shuts down the switcher service and releases any active hotkey/hook.
+func Stop() {
+	mu.Lock()
+	if !monitorRunning {
+		mu.Unlock()
+		return
+	}
+	close(monitorStop)
+	monitorRunning = false
+	mu.Unlock()
+}
+
+// runMonitor polls for D2R windows every 500 ms and dynamically registers or unregisters
+// the hotkey/hook based on whether any game windows are present.
+func runMonitor(cfg *config.SwitcherConfig, stop <-chan struct{}) {
+	checkAndUpdate := func() {
+		hasWindows := len(process.FindWindowsByTitlePrefix(d2r.WindowTitlePrefix)) > 0
+		mu.Lock()
+		active := innerRunning
+		mu.Unlock()
+
+		if hasWindows && !active {
+			startInner(cfg)
+		} else if !hasWindows && active {
+			stopInner()
+		}
 	}
 
-	if IsGamepadButton(cfg.Key) {
-		// 從 Modifiers 中篩出搖桿修飾鍵
+	// Check immediately so the hotkey is active without waiting for the first tick.
+	checkAndUpdate()
+
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-stop:
+			stopInner()
+			return
+		case <-ticker.C:
+			checkAndUpdate()
+		}
+	}
+}
+
+// startInner registers the configured hotkey/hook. Errors are silently ignored because
+// registration happens asynchronously relative to the caller of Start.
+func startInner(cfg *config.SwitcherConfig) {
+	var err error
+	switch {
+	case IsMouseButton(cfg.Key):
+		err = startMouseHook(MouseButtonID(cfg.Key), switchToNext)
+	case IsGamepadButton(cfg.Key):
 		var gamepadMods []string
 		for _, m := range cfg.Modifiers {
 			if IsGamepadButton(m) {
 				gamepadMods = append(gamepadMods, m)
 			}
 		}
-		return startGamepadPoll(cfg.GamepadIndex, gamepadMods, cfg.Key, switchToNext)
+		err = startGamepadPoll(cfg.GamepadIndex, gamepadMods, cfg.Key, switchToNext)
+	default:
+		vk, ok := KeyToVK(cfg.Key)
+		if !ok {
+			return
+		}
+		modFlags := ModifiersToFlags(cfg.Modifiers)
+		err = startHotkey(modFlags, vk, switchToNext)
 	}
-
-	vk, ok := KeyToVK(cfg.Key)
-	if !ok {
-		return fmt.Errorf("unknown key: %s", cfg.Key)
-	}
-	modFlags := ModifiersToFlags(cfg.Modifiers)
-	return startHotkey(modFlags, vk, switchToNext)
+	_ = err
 }
 
-// Stop stops the switcher and releases resources.
-func Stop() {
+// stopInner stops the active hotkey/hook if one is running.
+func stopInner() {
 	mu.Lock()
 	defer mu.Unlock()
-	if stopFunc != nil {
-		stopFunc()
-		stopFunc = nil
-		running = false
+	if innerStopFn != nil {
+		innerStopFn()
+		innerStopFn = nil
+		innerRunning = false
 	}
 }
 

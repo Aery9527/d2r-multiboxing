@@ -38,10 +38,10 @@ func startMouseHook(targetButton uint16, onTrigger func()) error {
 		}
 
 		mu.Lock()
-		stopFunc = func() {
+		innerStopFn = func() {
 			procPostThreadMessageW.Call(uintptr(threadID), wmQuit, 0, 0)
 		}
-		running = true
+		innerRunning = true
 		mu.Unlock()
 		errCh <- nil
 
